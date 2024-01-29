@@ -1954,9 +1954,9 @@ void rde_setup_initial_info(rde_end_user_mandatory_callbacks _end_user_callbacks
 		size_t _final_value = RDE_UINT_MAX;																											  	\
 		for(unsigned int _i = 0; _i < _number_of_lines; _i++) {																							\
 			errno = 0;																																	\
-			if(rde_util_string_contains_sub_str(_config_file_lines[_i], _key, false)) {																\
+			if(rde_util_string_contains_sub_str(_config_file_lines[_i], _key, false)) {																	\
 				char* _value = strrchr(_config_file_lines[_i], '=');																					\
-				rde_util_string_trim(_value);																											\
+				_value = rde_util_string_trim(_value);																									\
 				char* _end = NULL;																													   	\
 				_final_value = _func(_value + 1, &_end, 10);																							\
 				rde_critical_error(_value + 1 == _end || errno != 0, "Value '%s' could not be converted to "#_type"\n");								\
@@ -2742,19 +2742,20 @@ rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _f
 	return (rde_vec_2I) { _width, _height };
 }
 
-void rde_util_string_trim(char* _s) {
+char* rde_util_string_trim(char* _s) {
 	char* _end;
 
 	while(isspace((unsigned char)*_s)) _s++;
 
 	if(*_s == 0) {
-		return;
+		return _s;
 	}
 
 	_end = _s + strlen(_s) - 1;
 	while(_end > _s && isspace((unsigned char)*_end)) _end--;
 
 	_end[1] = '\0';
+	return _s;
 }
 
 bool rde_util_string_starts_with(const char* _string, const char* _prefix) {

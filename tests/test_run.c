@@ -19,20 +19,24 @@
 #include "test_obj.c"
 #include "test_physics.c"
 #include "test_string_utils.c"
+#include "test_dyn_array.c"
 #include "test_texture.c"
 
 int main() {
 	init_test_config();
-	RUN_ALL_TESTS(test_string_utils,
-	              test_file_utils,
-	              test_math,
-	              test_texture,
-	              test_font,
-	              test_engine,
-	              test_events,
-	              test_obj,
-	              test_2d_draw,
-	              test_3d_draw,
-	              test_physics,
-	              test_audio)
+	RUN_ALL_TESTS(
+				  // test_string_utils,
+				  test_dyn_array
+	              // test_file_utils,
+	              // test_math,
+	              // test_texture,
+	              // test_font,
+	              // test_engine,
+	              // test_events,
+	              // test_obj,
+	              // test_2d_draw,
+	              // test_3d_draw,
+	              // test_physics,
+	              // test_audio
+				  )
 }

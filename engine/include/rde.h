@@ -199,7 +199,7 @@ extern "C" {
 // Default capacity when creating a new dynamic array, by default 50
 #define RDE_ARR_DEFAULT_CAPACITY 50
 
-// Constant: RDE_ARR_DEFAULT_CAPACITY
+// Constant: RDE_HASH_MAP_DEFAULT_CAPACITY
 // Default capacity when creating a new hash map, by default 64. MUST be a power of 2.
 #define RDE_HASH_MAP_DEFAULT_CAPACITY 64
 	
@@ -328,6 +328,13 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 
 /// =================================================================== UTIL ===================================================================
+
+#ifndef typeof
+#ifdef __clang__
+#define typeof(x) __typeof__(x)
+#endif
+#endif
+
 
 #define RDE_STRINGIZE(x) STRINGIZE2(x)
 #define RDE_STRINGIZE2(x) #x
@@ -1105,8 +1112,6 @@ typedef struct {			\
 	_type* memory;			\
 	unsigned long capacity;	\
 	unsigned long used;		\
-	size_t type_size;		\
-	_type default_value;	\
 } rde_arr_##_type
 
 // Macro: rde_arr_init
@@ -1114,20 +1119,16 @@ typedef struct {			\
 //
 // Parameters:
 //	_dyn_arr - the dynamic array.
-//	_default_value - the default value that elements should have when created.
 //
 //	======= C =======
 //	rde_arr_A _arr;
-//	A _a = {0};
-// 	rde_arr_init(_arr, _a);
+// 	rde_arr_init(_arr);
 //	=================
-#define rde_arr_init(_dyn_arr, _default_value) 	\
+#define rde_arr_init(_dyn_arr) 					\
 	do {										\
-		_dyn_arr.memory = NULL;					\
-		_dyn_arr.capacity = 0;					\
-		_dyn_arr.used = 0;						\
-		_dyn_arr.type_size = 0;					\
-		_dyn_arr.default_value = _default_value;\
+		(_dyn_arr)->memory = NULL;				\
+		(_dyn_arr)->capacity = 0;				\
+		(_dyn_arr)->used = 0;					\
 	} while(0)
 
 // Macro: rde_arr_new_with_capacity
@@ -1135,23 +1136,21 @@ typedef struct {			\
 //
 // Parameters:
 //	_dyn_arr - the dynamic array.
-//	_type - the type of data that the array will hold.
 //	_capacity - the initial amount of elements of the array.
 //
 //	======= C =======
-//	rde_arr_new_with_capacity(_arr, A, 10);
+//	rde_arr_new_with_capacity(_arr, 10);
 //	=================
-#define rde_arr_new_with_capacity(_dyn_arr, _type, _capacity) 																			\
-	do {																																\
-		if(_dyn_arr.memory != NULL) {																									\
-			free(_dyn_arr.memory);																										\
-		}																																\
-																																		\
-		_dyn_arr.memory = (_type*)malloc(sizeof(_type) * _capacity);																	\
-		rde_critical_error(_dyn_arr.memory == NULL, "Bytes %d could not be allocated for %s", sizeof(_type) * _capacity, "rde_arr new");\
-		_dyn_arr.used = 0;																												\
-		_dyn_arr.capacity = _capacity;																									\
-		_dyn_arr.type_size = sizeof(_type);																								\
+#define rde_arr_new_with_capacity(_dyn_arr, _capacity) 																												\
+	do {																																							\
+		if((_dyn_arr)->memory != NULL) {																															\
+			free((_dyn_arr)->memory);																																\
+		}																																							\
+																																									\
+		(_dyn_arr)->memory = (typeof((_dyn_arr)->memory))malloc(sizeof(typeof(*(_dyn_arr)->memory)) * _capacity);													\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Bytes %d could not be allocated for %s", sizeof(typeof(*(_dyn_arr)->memory)) * _capacity, "rde_arr new"); 	\
+		(_dyn_arr)->used = 0;																																		\
+		(_dyn_arr)->capacity = _capacity;																															\
 	} while(0)
 
 // Macro: rde_arr_new
@@ -1159,12 +1158,11 @@ typedef struct {			\
 //
 // Parameters:
 //	_dyn_arr - the dynamic array.
-//	_type - the type of data that the array will hold.
 //
 //	======= C =======
-//	rde_arr_new(_arr, A);
+//	rde_arr_new(_arr);
 //	=================
-#define rde_arr_new(_dyn_arr, _type) rde_arr_new_with_capacity(_dyn_arr, _type, RDE_ARR_DEFAULT_CAPACITY)
+#define rde_arr_new(_dyn_arr) rde_arr_new_with_capacity(_dyn_arr, RDE_ARR_DEFAULT_CAPACITY)
 	
 // Macro: rde_arr_add
 // Adds an element to an existing dynamic array.
@@ -1177,20 +1175,20 @@ typedef struct {			\
 //	A _b = { .a = 10 };
 //	rde_arr_add(_arr, _b);
 //	=================
-#define rde_arr_add(_dyn_arr, _element)																												\
-	do {																																			\
-		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");																		\
-		if(_dyn_arr.used + 1 == _dyn_arr.capacity) {																								\
-			_dyn_arr.capacity = _dyn_arr.capacity RDE_ARR_OPERAND_INCREASE RDE_ARR_AMOUNT_INCREASE;													\
-			void* _new_memory = (void*)realloc(_dyn_arr.memory, _dyn_arr.type_size * _dyn_arr.capacity);											\
-			rde_log_level(RDE_LOG_LEVEL_INFO, "Realloc");																							\
-			if(_new_memory == NULL) {																												\
-				free(_dyn_arr.memory);																												\
-				rde_critical_error(true, "Bytes %d could not be allocated for %s", sizeof(_dyn_arr.type_size) * _dyn_arr.capacity, "rde_arr add");	\
-			}																																		\
-			_dyn_arr.memory = _new_memory;																											\
-		}																																			\
-		_dyn_arr.memory[_dyn_arr.used++] = _element;																								\
+#define rde_arr_add(_dyn_arr, _element)																							\
+	do {																														\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");												\
+		if((_dyn_arr)->used + 1 == (_dyn_arr)->capacity) {																		\
+			(_dyn_arr)->capacity = (_dyn_arr)->capacity RDE_ARR_OPERAND_INCREASE RDE_ARR_AMOUNT_INCREASE;						\
+			size_t _size = sizeof(typeof((_dyn_arr)->memory));																	\
+			void* _new_memory = (void*)realloc((_dyn_arr)->memory, _size * (_dyn_arr)->capacity);								\
+			if(_new_memory == NULL) {																							\
+				free((_dyn_arr)->memory);																						\
+				rde_critical_error(true, "Bytes %d could not be allocated for %s", _size * (_dyn_arr)->capacity, "rde_arr add");\
+			}																													\
+			(_dyn_arr)->memory = _new_memory;																					\
+		}																														\
+		(_dyn_arr)->memory[(_dyn_arr)->used++] = _element;																		\
 	} while(0)
 
 // Macro: rde_arr_remove
@@ -1203,11 +1201,18 @@ typedef struct {			\
 //	======= C =======
 //	rde_arr_remove(_arr, 0);
 //	=================
-#define rde_arr_remove(_dyn_arr, _index)																							\
-	do {																															\
-		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
-		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
-		memmove(_dyn_arr.memory + _index, _dyn_arr.memory + (_index + 1), _dyn_arr.capacity - _index);								\
+#define rde_arr_remove(_dyn_arr, _index)																											\
+	do {																																			\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");																	\
+		rde_critical_error(_index < 0 || (unsigned long)_index >= (_dyn_arr)->used, "Arr[%d] out of bounds, max %d \n", _index, (_dyn_arr)->used);	\
+		rde_calloc_init(_new_memory, typeof(*(_dyn_arr)->memory), (_dyn_arr)->capacity);															\
+		memcpy(_new_memory, (_dyn_arr)->memory, _index * sizeof(typeof(*(_dyn_arr)->memory)));														\
+		if((ulong)_index != (_dyn_arr)->used - 1) {																									\
+			memcpy(_new_memory + _index, (_dyn_arr)->memory + (_index + 1), ((_dyn_arr)->used - _index - 1) * sizeof(typeof(*(_dyn_arr)->memory)));	\
+		}																																			\
+		rde_free((_dyn_arr)->memory);																												\
+		(_dyn_arr)->memory = _new_memory;																											\
+		(_dyn_arr)->used--;																															\
 	} while(0)
 
 // Macro: rde_arr_get_element
@@ -1222,11 +1227,11 @@ typedef struct {			\
 //	A _retrieve;
 //	rde_arr_get_element(_arr, 0, _retrieve);
 //	=================
-#define rde_arr_get_element(_dyn_arr, _index, _value) 																				\
-	do {																															\
-		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
-		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
-		_value = _dyn_arr.memory[_index];																							\
+#define rde_arr_get_element(_dyn_arr, _index, _value) 																									\
+	do {																																				\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");																		\
+		rde_critical_error(_index < 0 || (unsigned long)_index >= (_dyn_arr)->capacity, "Arr[%d] out of bounds, max %d", _index, (_dyn_arr)->capacity);	\
+		_value = (_dyn_arr)->memory[_index];																											\
 	} while(0)
 
 // Macro: rde_arr_get_element_ptr
@@ -1241,11 +1246,11 @@ typedef struct {			\
 //	A* _retrieve;
 //	rde_arr_get_element_ptr(_arr, 0, _retrieve);
 //	=================
-#define rde_arr_get_element_ptr(_dyn_arr, _index, _value) 																			\
-	do {																															\
-		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
-		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
-		_value = &_dyn_arr.memory[_index];																							\
+#define rde_arr_get_element_ptr(_dyn_arr, _index, _value) 																				\
+	do {																																\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");														\
+		rde_critical_error(_index < 0 || (unsigned long)_index >= (_dyn_arr)->capacity, "Arr[%d] out of bounds, max %d", _index, (_dyn_arr)->capacity);\
+		_value = &(_dyn_arr)->memory[_index];																							\
 	} while(0)
 
 // Macro: rde_arr_get_total_capacity
@@ -1257,18 +1262,18 @@ typedef struct {			\
 //	======= C =======
 //	ulong  _capacity = rde_arr_get_total_capacity(_arr);
 //	=================
-#define rde_arr_get_total_capacity(_dyn_arr) _dyn_arr.capacity
+#define rde_arr_get_total_capacity(_dyn_arr) (_dyn_arr)->capacity
 	
-// Macro: rde_arr_get_used_capacity
+// Macro: rde_arr_get_length
 // Returns the used capacity of the dynamic array.
 //
 // Parameters:
 //	_dyn_arr - the dynamic array.
 //
 //	======= C =======
-//	ulong  _used_capacity = rde_arr_get_used_capacity(_arr);
+//	ulong  _used_capacity = rde_arr_get_length(_arr);
 //	=================
-#define rde_arr_get_used_capacity(_dyn_arr) _dyn_arr.used
+#define rde_arr_get_length(_dyn_arr) (_dyn_arr)->used
 
 // Macro: rde_arr_set_element
 // Sets an element by index on an existing dynamic array.
@@ -1282,11 +1287,11 @@ typedef struct {			\
 //	A _new_b = { .a = -5 };
 //	rde_arr_set_element_(_arr, 0, _new_b);
 //	=================
-#define rde_arr_set_element(_dyn_arr, _index, _element)																				\
-	do {																															\
-		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");														\
-		rde_critical_error(_index < 0 || _index >= _dyn_arr.capacity, "Arr[%d] out of bounds, max %d", _index, _dyn_arr.capacity);	\
-		_dyn_arr.memory[_index] = _element;																							\
+#define rde_arr_set_element(_dyn_arr, _index, _element)																					\
+	do {																																\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");														\
+		rde_critical_error(_index < 0 || (unsigned long)_index >= (_dyn_arr)->capacity, "Arr[%d] out of bounds, max %d", _index, (_dyn_arr)->capacity);\
+		(_dyn_arr)->memory[_index] = _element;																							\
 	} while(0)
 	
 // Macro: rde_arr_clear
@@ -1300,11 +1305,11 @@ typedef struct {			\
 //	=================
 #define rde_arr_clear(_dyn_arr)													\
 	do {																		\
-		rde_critical_error(_dyn_arr.memory == NULL, "Uninitialized rde_arr");	\
-		for(unsigned int _i = 0; _i < _dyn_arr.capacity; _i++) {				\
-			_dyn_arr.memory[_i] = _dyn_arr.defaul_value;						\
+		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");\
+		for(unsigned int _i = 0; _i < (_dyn_arr)->capacity; _i++) {				\
+			(_dyn_arr)->memory[_i] = (_dyn_arr)->defaul_value;					\
 		}																		\
-		_dyn_arr.used = 0;														\
+		(_dyn_arr)->used = 0;													\
 	} while(0)
 	
 // Macro: rde_arr_free
@@ -1318,13 +1323,12 @@ typedef struct {			\
 //	=================
 #define rde_arr_free(_dyn_arr)			\
 	do {								\
-		if(_dyn_arr.memory != NULL) {	\
-			free(_dyn_arr.memory);		\
-			_dyn_arr.memory = NULL;		\
+		if((_dyn_arr)->memory != NULL) {\
+			free((_dyn_arr)->memory);	\
+			(_dyn_arr)->memory = NULL;	\
 		}								\
-		_dyn_arr.capacity = 0;			\
-		_dyn_arr.used = 0;				\
-		_dyn_arr.type_size = 0;			\
+		(_dyn_arr)->capacity = 0;		\
+		(_dyn_arr)->used = 0;			\
 	} while(0)
 
 // Macro: rde_hash_map_decl
@@ -3502,7 +3506,7 @@ RDE_FUNC rde_vec_2I rde_util_font_get_string_size(const char* _str, const rde_fo
 //
 // Parameters:
 //	_str - string to trim.
-RDE_FUNC void rde_util_string_trim(char* _str);
+RDE_FUNC char* rde_util_string_trim(char* _str);
 
 // Function: rde_util_string_starts_with
 // Tells if a string starts with a given prefix. It makes no allocations.

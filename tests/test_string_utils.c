@@ -5,33 +5,33 @@ void test_string_init() {
 void test_string_trim() {
 	char _test_0[256] = " trim left";
 	char _expected_0[256] = "trim left";
-	char* _trimed_test_0 = rde_util_string_trim(_test_0);
-	rde_test_assert(strcmp(_trimed_test_0, _expected_0) == 0, "test_string_trim/trim_left", "\tExpected: '%s', got '%s'", _expected_0, _trimed_test_0);
+	char* _trimmed = rde_util_string_trim(_test_0);
+	rde_test_assert(strcmp(_trimmed, _expected_0) == 0, "test_string_trim/trim_left", "\tExpected: '%s', got '%s'", _expected_0, _trimmed);
 
 	char _test_1[256] = "trim right ";
 	char _expected_1[256] = "trim right";
-	char* _trimed_test_1 = rde_util_string_trim(_test_1);
-	rde_test_assert(strcmp(_trimed_test_1, _expected_1) == 0, "test_string_trim/trim_right", "\tExpected: '%s', got '%s'", _expected_1, _trimed_test_1);
+	_trimmed = rde_util_string_trim(_test_1);
+	rde_test_assert(strcmp(_trimmed, _expected_1) == 0, "test_string_trim/trim_right", "\tExpected: '%s', got '%s'", _expected_1, _trimmed);
 
 	char _test_2[256] = " trim both ";
 	char _expected_2[256] = "trim both";
-	char* _trimed_test_2 = rde_util_string_trim(_test_2);
-	rde_test_assert(strcmp(_trimed_test_2, _expected_2) == 0, "test_string_trim/trim_both", "\tExpected: '%s', got '%s'", _expected_2, _trimed_test_2);
+	_trimmed = rde_util_string_trim(_test_2);
+	rde_test_assert(strcmp(_trimmed, _expected_2) == 0, "test_string_trim/trim_both", "\tExpected: '%s', got '%s'", _expected_2, _trimmed);
 
 	char _test_3[256] = "        trim multi   ";
 	char _expected_3[256] = "trim multi";
-	char* _trimed_test_3 = rde_util_string_trim(_test_3);
-	rde_test_assert(strcmp(_trimed_test_3, _expected_3) == 0, "test_string_trim/trim_multi", "\tExpected: '%s', got '%s'", _expected_3, _trimed_test_3);
+	_trimmed = rde_util_string_trim(_test_3);
+	rde_test_assert(strcmp(_trimmed, _expected_3) == 0, "test_string_trim/trim_multi", "\tExpected: '%s', got '%s'", _expected_3, _trimmed);
 
 	char _test_4[256] = "   \n\n   trim nl   \n";
 	char _expected_4[256] = "trim nl";
-	char* _trimed_test_4 = rde_util_string_trim(_test_4);
-	rde_test_assert(strcmp(_trimed_test_4, _expected_4) == 0, "test_string_trim/trim_nl", "\tExpected: '%s', got '%s'", _expected_4, _trimed_test_4);
+	_trimmed = rde_util_string_trim(_test_4);
+	rde_test_assert(strcmp(_trimmed, _expected_4) == 0, "test_string_trim/trim_nl", "\tExpected: '%s', got '%s'", _expected_4, _trimmed);
 
 	char _test_5[256] = "   \r\n   trim nl linux  \r\n";
 	char _expected_5[256] = "trim nl linux";
-	char* _trimed_test_5 = rde_util_string_trim(_test_5);
-	rde_test_assert(strcmp(_trimed_test_5, _expected_5) == 0, "test_string_trim/trim_nl_linux", "\tExpected: '%s', got '%s'", _expected_5, _trimed_test_5);
+	_trimmed = rde_util_string_trim(_test_5);
+	rde_test_assert(strcmp(_trimmed, _expected_5) == 0, "test_string_trim/trim_nl_linux", "\tExpected: '%s', got '%s'", _expected_5, _trimmed);
 }
 
 void test_string_starts_with() {
@@ -77,25 +77,25 @@ void test_string_ends_with() {
 void test_string_containns_substring() {
 	char _test_string[256] = "This is my big string with @lso s0me non \"standard\" (char$)";
 	char _expected_0[256] = "@lso";
-	rde_test_assert(rde_util_string_contains_substring(_test_string, _expected_0, false), "test_string_containns_substring/contains_0_c_insensitive", "\t'%s' does not contain '%s'", _test_string, _expected_0);
+	rde_test_assert(rde_util_string_contains_sub_str(_test_string, _expected_0, false), "test_string_containns_substring/contains_0_c_insensitive", "\t'%s' does not contain '%s'", _test_string, _expected_0);
 
 	char _expected_1[256] = "This Is";
-	rde_test_assert(rde_util_string_contains_substring(_test_string, _expected_1, false), "test_string_containns_substring/contains_1_c_insensitive", "\t'%s' does not contain '%s'", _test_string, _expected_1);
+	rde_test_assert(rde_util_string_contains_sub_str(_test_string, _expected_1, false), "test_string_containns_substring/contains_1_c_insensitive", "\t'%s' does not contain '%s'", _test_string, _expected_1);
 
 	char _expected_2[256] = "@Lso";
-	rde_test_assert(rde_util_string_contains_substring(_test_string, _expected_2, false), "test_string_containns_substring/contains_2_c_insensitive", "\t'%s' does not contain '%s'", _test_string, _expected_2);
+	rde_test_assert(rde_util_string_contains_sub_str(_test_string, _expected_2, false), "test_string_containns_substring/contains_2_c_insensitive", "\t'%s' does not contain '%s'", _test_string, _expected_2);
 
 	char _expected_3[256] = "with @lso sOme";
-	rde_test_assert(!rde_util_string_contains_substring(_test_string, _expected_3, false), "test_string_containns_substring/no_contains_0_c_insensitive", "\t'%s' does contain '%s'", _test_string, _expected_3);
+	rde_test_assert(!rde_util_string_contains_sub_str(_test_string, _expected_3, false), "test_string_containns_substring/no_contains_0_c_insensitive", "\t'%s' does contain '%s'", _test_string, _expected_3);
 
 	char _expected_4[256] = "This is my b";
-	rde_test_assert(rde_util_string_contains_substring(_test_string, _expected_4, true), "test_string_containns_substring/contains_0_c_sensitive", "\t'%s' does not contain '%s'", _test_string, _expected_4);
+	rde_test_assert(rde_util_string_contains_sub_str(_test_string, _expected_4, true), "test_string_containns_substring/contains_0_c_sensitive", "\t'%s' does not contain '%s'", _test_string, _expected_4);
 
 	char _expected_5[256] = "n \"stan";
-	rde_test_assert(rde_util_string_contains_substring(_test_string, _expected_5, true), "test_string_containns_substring/contains_1_c_sensitive", "\t'%s' does not contain '%s'", _test_string, _expected_5);
+	rde_test_assert(rde_util_string_contains_sub_str(_test_string, _expected_5, true), "test_string_containns_substring/contains_1_c_sensitive", "\t'%s' does not contain '%s'", _test_string, _expected_5);
 
 	char _expected_6[256] = "n \"staN";
-	rde_test_assert(!rde_util_string_contains_substring(_test_string, _expected_6, true), "test_string_containns_substring/no_contains_0_c_sensitive", "\t'%s' does not contain '%s'", _test_string, _expected_6);
+	rde_test_assert(!rde_util_string_contains_sub_str(_test_string, _expected_6, true), "test_string_containns_substring/no_contains_0_c_sensitive", "\t'%s' does not contain '%s'", _test_string, _expected_6);
 }
 
 void test_string_char_appearence() {

@@ -1808,19 +1808,19 @@ bool compile_windows_rde() {
 		},
 		{
 			if(strcmp(build_type, DEBUG_STR) == 0) {
-				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/examples/RDE.dll")
-				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/examples/SDL3.dll")
-				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/debug/examples/jolt.dll")
-				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/examples/imgui.dll")
-				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/shaders/")	
+				COPY_FILE("build/windows/debug/engine/RDE.dll", "build/windows/debug/unit_tests/RDE.dll")
+				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/unit_tests/SDL3.dll")
+				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/debug/unit_tests/jolt.dll")
+				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/debug/unit_tests/imgui.dll")
+				COPY_FOLDER("examples/hub_assets", "build/windows/debug/unit_tests/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/windows/debug/unit_tests/shaders/")	
 			} else {
-				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/examples/RDE.dll")
-				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/examples/SDL3.dll")
-				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/release/examples/jolt.dll")
-				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/examples/imgui.dll")
-				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/windows/release/examples/shaders/")
+				COPY_FILE("build/windows/release/engine/RDE.dll", "build/windows/release/unit_tests/RDE.dll")
+				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/unit_tests/SDL3.dll")
+				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/release/unit_tests/jolt.dll")
+				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/unit_tests/imgui.dll")
+				COPY_FOLDER("examples/hub_assets", "build/windows/release/unit_tests/hub_assets/")
+				COPY_FOLDER("engine/shaders", "build/windows/release/unit_tests/shaders/")
 			}
 		})
 	}
