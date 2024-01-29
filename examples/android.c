@@ -40,52 +40,52 @@ rde_vec_2I android_mouse_pos;
 
 void android_keyboard_controller(float _dt) {
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(android_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
 		_position.x += android_camera_front.x * 10 * _dt;
 		_position.y += android_camera_front.y * 10 * _dt;
 		_position.z += android_camera_front.z * 10 * _dt;
-		rde_engine_transform_set_position(android_camera.transform, _position);
+		rde_transform_set_position(android_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(android_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
 		_position.x -= android_camera_front.x * 10 * _dt;
 		_position.y -= android_camera_front.y * 10 * _dt;
 		_position.z -= android_camera_front.z * 10 * _dt;
-		rde_engine_transform_set_position(android_camera.transform, _position);
+		rde_transform_set_position(android_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(android_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
 		_position.y -= 10 * _dt;
-		rde_engine_transform_set_position(android_camera.transform, _position);
+		rde_transform_set_position(android_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_engine_transform_get_position(android_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
 		_position.y += 10 * _dt;
-		rde_engine_transform_set_position(android_camera.transform, _position);
+		rde_transform_set_position(android_camera.transform, _position);
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
 		rde_vec_3F _cp = rde_math_cross_product(android_camera_front, android_camera_up);
 		rde_math_normalize(&_cp);
 		
-		rde_vec_3F _position = rde_engine_transform_get_position(android_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
 		_position.x -= _cp.x * 10 * _dt;
 		_position.y -= _cp.y * 10 * _dt;
 		_position.z -= _cp.z * 10 * _dt;
-		rde_engine_transform_set_position(android_camera.transform, _position);
+		rde_transform_set_position(android_camera.transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
 		rde_vec_3F _cp = rde_math_cross_product(android_camera_front, android_camera_up);
 		rde_math_normalize(&_cp);
 
-		rde_vec_3F _position = rde_engine_transform_get_position(android_camera.transform);
+		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
 		_position.x += _cp.x * 10 * _dt;
 		_position.y += _cp.y * 10 * _dt;
 		_position.z += _cp.z * 10 * _dt;
-		rde_engine_transform_set_position(android_camera.transform, _position);
+		rde_transform_set_position(android_camera.transform, _position);
 	}
 }
 
 void android_mouse_controller(float _dt) {
-	RDE_UNUSED((_dt)
+	RDE_UNUSED(_dt)
 
 	if(rde_events_is_mobile_touch_just_pressed(current_window, 0)) { 
 		android_first_mouse = true;
@@ -136,8 +136,8 @@ void android_mouse_controller(float _dt) {
 }
 
 void android_on_event(rde_event* _event, rde_window* _window) {
-	RDE_UNUSED((_window);
-	RDE_UNUSED((_event);
+	RDE_UNUSED(_window);
+	RDE_UNUSED(_event);
 
 	if(_event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_MOVED || _event->type == RDE_EVENT_TYPE_MOBILE_TOUCH_DOWN) {
 		android_mouse_pos = _event->data.mobile_event_data.moved_touch_position;
@@ -169,15 +169,15 @@ void android_on_update(float _dt) {
 }
 
 void android_on_fixed_update(float _dt) {
-	RDE_UNUSED((_dt)
+	RDE_UNUSED(_dt)
 }
 
 void android_on_late_update(float _dt) {
-	RDE_UNUSED((_dt)
+	RDE_UNUSED(_dt)
 }
 
 void android_draw_3d(rde_window* _window, float _dt) {
-	RDE_UNUSED((_dt)
+	RDE_UNUSED(_dt)
 
 	if(android_model != NULL) {
 		rde_render_3d(_window, &android_camera, false, {
@@ -200,7 +200,6 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 			android_directional_light_direction.x = _vec[0];
 			android_directional_light_direction.y = _vec[1];
 			android_directional_light_direction.z = _vec[2];
-			rde_rendering_lighting_set_directional_light_direction(android_directional_light_direction);
 		}
 	
 		float _vec_1[3] = { android_directional_light_ambient_color.x, android_directional_light_ambient_color.y, android_directional_light_ambient_color.z };
@@ -208,7 +207,6 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 			android_directional_light_ambient_color.x = _vec_1[0];
 			android_directional_light_ambient_color.y = _vec_1[1];
 			android_directional_light_ambient_color.z = _vec_1[2];
-			rde_rendering_lighting_set_directional_light_ambient_color_f(android_directional_light_ambient_color);
 		}
 	
 		float _vec_2[3] = { android_directional_light_diffuse_color.x, android_directional_light_diffuse_color.y, android_directional_light_diffuse_color.z };
@@ -216,7 +214,6 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 			android_directional_light_diffuse_color.x = _vec_2[0];
 			android_directional_light_diffuse_color.y = _vec_2[1];
 			android_directional_light_diffuse_color.z = _vec_2[2];
-			rde_rendering_lighting_set_directional_light_diffuse_color_f(android_directional_light_diffuse_color);
 		}
 	
 		float _vec_3[3] = { android_directional_light_specular_color.x, android_directional_light_specular_color.y, android_directional_light_specular_color.z };
@@ -224,8 +221,16 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 			android_directional_light_specular_color.x = _vec_3[0];
 			android_directional_light_specular_color.y = _vec_3[1];
 			android_directional_light_specular_color.z = _vec_3[2];
-			rde_rendering_lighting_set_directional_light_specular_color_f(android_directional_light_specular_color);
 		}
+		
+		rde_directional_light _directional_light = (rde_directional_light) {
+			.direction = android_directional_light_direction,
+			.position = (rde_vec_3F) {0, 0, 0},
+			.ambient_color = android_directional_light_ambient_color,
+			.diffuse_color =android_directional_light_diffuse_color,
+			.specular_color = android_directional_light_specular_color
+		};
+		rde_rendering_lighting_set_directional_light(_directional_light);
 		rde_imgui_pop_id();
 		rde_imgui_end();
 	}
@@ -233,14 +238,14 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_begin("Model", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 
 	rde_imgui_text("Transform");
-	rde_vec_3F _pos = rde_engine_transform_get_position(android_transform);
+	rde_vec_3F _pos = rde_transform_get_position(android_transform);
 	float _position[3] = { _pos.x, _pos.y, _pos.z };
 	if(rde_imgui_drag_float_3("Position", _position, 1.f, 0, 0, "%.3f", 0)) {
-		rde_engine_transform_set_position(android_transform, (rde_vec_3F) { _position[0], _position[1], _position[2] });
+		rde_transform_set_position(android_transform, (rde_vec_3F) { _position[0], _position[1], _position[2] });
 	}
 
 	rde_imgui_separator();
-	rde_vec_3F _rotation = rde_engine_transform_get_rotation_degs(android_transform);
+	rde_vec_3F _rotation = rde_transform_get_rotation_degs(android_transform);
 	float _radians = rde_math_degrees_to_radians(_rotation.x);
 
 	float _rot_x = _radians;
@@ -260,20 +265,20 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 		_rot_z = rde_math_radians_to_degrees(_radians);
 	}
 
-	rde_engine_transform_set_rotation(android_transform, (rde_vec_3F) { _rot_x, _rot_y, _rot_z });
+	rde_transform_set_rotation(android_transform, (rde_vec_3F) { _rot_x, _rot_y, _rot_z });
 	
 	rde_imgui_separator();
 	static bool _proportional_scale = true;
 
-	rde_vec_3F _scl = rde_engine_transform_get_scale(android_transform);
+	rde_vec_3F _scl = rde_transform_get_scale(android_transform);
 	float _scale[3] = { _scl.x, _scl.y, _scl.z };
 	if(!_proportional_scale) {
 		if(rde_imgui_drag_float_3("Scale", &_scale[0], 0.25f, 0, 0, "%.3f", 0)) {
-			rde_engine_transform_set_scale(android_transform, (rde_vec_3F) { _scale[0], _scale[1], _scale[2] });
+			rde_transform_set_scale(android_transform, (rde_vec_3F) { _scale[0], _scale[1], _scale[2] });
 		}
 	} else {
 		if(rde_imgui_drag_float("Scale", &_scale[0], 0.25f, 0, 0, "%.3f", 0)) {
-			rde_engine_transform_set_scale(android_transform, (rde_vec_3F) { _scale[0], _scale[0], _scale[0] });
+			rde_transform_set_scale(android_transform, (rde_vec_3F) { _scale[0], _scale[0], _scale[0] });
 		}
 	}
 
@@ -339,7 +344,7 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 }
 
 void android_on_render(float _dt, rde_window* _window) {
-	RDE_UNUSED((_dt)
+	RDE_UNUSED(_dt)
 	
 	draw_grid(&android_camera, _window);
 	android_draw_3d(_window, _dt);
@@ -363,13 +368,13 @@ void android_unload() {
 
 void android_init() {
 	android_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
-	rde_engine_transform_set_position(android_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
+	rde_transform_set_position(android_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	android_model = rde_rendering_model_load("assets/skatepark/park.obj");
 	android_model_data = rde_rendering_model_get_data(android_model);
 	android_max_meshes_to_render = android_model_data.amount_of_meshes;
 
-	android_transform = rde_engine_transform_load();
+	android_transform = rde_transform_load();
 
 	events_callback = &android_on_event;
 	update_callback = &android_on_update;

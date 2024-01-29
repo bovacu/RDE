@@ -5637,7 +5637,7 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 	}
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "This is the new path: %s", _sanitized_path);
-	size_t _total_size = 0;
+	uint _total_size = 0;
 	rde_file_handle* _file_handle = rde_file_open(_sanitized_path, RDE_FILE_MODE_READ);
 	const unsigned char* _texture_data = rde_file_read_full_file_bytes(_file_handle, &_total_size);
 	_data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
