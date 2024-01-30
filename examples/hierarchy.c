@@ -158,7 +158,7 @@ void hierarchy_draw_3d(rde_window* _window, float _dt) {
 }
 
 void hierarchy_imgui_transform(const char* _name, rde_transform* _transform) {
-	rde_imgui_begin(_name, NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin(_name, NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_push_id(id_counter++);
 	rde_vec_3F _model_position = rde_transform_get_position(_transform);
 	float _position[3] = { _model_position.x, _model_position.y, _model_position.z };

@@ -165,7 +165,7 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_pop_id();
 
 	{
-		rde_imgui_begin("Directional Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_begin("Directional Lighting", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 		rde_imgui_push_id(3);
 		float _vec[3] = { shadows_directional_light_direction.x, shadows_directional_light_direction.y, shadows_directional_light_direction.z };
 		if (rde_imgui_drag_float_3("Position", _vec, 0.25f, 0, 0, "%.3f", 0)) {

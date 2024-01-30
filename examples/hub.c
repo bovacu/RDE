@@ -108,12 +108,12 @@ void on_late_update(float _dt) {
 }
 
 void on_imgui_hub_menu(float _dt) {
-	static rde_ImGuiDockNodeFlags _dockspace_flags = rde_ImGuiDockNodeFlags_None;
-	_dockspace_flags &= ~rde_ImGuiDockNodeFlags_PassthruCentralNode;
-	rde_ImGuiID _dockspace_id = rde_imgui_get_id("MyDockSpace");
+	static RDE_IMGUI_DOCK_NODE_FLAGS_ _dockspace_flags = RDE_IMGUI_DOCK_NODE_FLAGS_None;
+	_dockspace_flags &= ~RDE_IMGUI_DOCK_NODE_FLAGS_PassthruCentralNode;
+	rde_imgui_id _dockspace_id = rde_imgui_get_id("MyDockSpace");
  	rde_imgui_dockspace(_dockspace_id, (rde_vec_2F) {0, 0}, _dockspace_flags);
 
-	if(rde_imgui_begin("Hub", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize)) {
+	if(rde_imgui_begin("Hub", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize)) {
 
 		static int _fps = 0;
 		static float _second = 0;
@@ -200,7 +200,7 @@ void on_render(float _dt, rde_window* _window) {
 
 void draw_imgui_transform(const char* _name, rde_transform* _transform) {
 	static int id_counter = 0;
-	rde_imgui_begin(_name, NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin(_name, NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_push_id(id_counter++);
 	rde_vec_3F _model_position = rde_transform_get_position(_transform);
 	float _position[3] = { _model_position.x, _model_position.y, _model_position.z };

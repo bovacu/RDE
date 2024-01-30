@@ -145,7 +145,7 @@ void physics_draw_imgui(float _dt, rde_window* _window) {
 	(void)_dt;
 	(void)_window;
 	
-	rde_imgui_begin("Physics Settings", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Physics Settings", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	if(rde_imgui_button_default("Play Simulation")) {
 		physics_simulation_running = !physics_simulation_running;
 		rde_physics_body_set_active(physics_cube_body, physics_simulation_running);

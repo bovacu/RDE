@@ -154,7 +154,7 @@ void performance_test_3d_draw_3d(rde_window* _window, float _dt) {
 void performance_test_3d_draw_imgui(float _dt, rde_window* _window) {
 	(void)_dt;
 	(void)_window;
-	rde_imgui_begin("Performance Control", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Performance Control", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_drag_int("Amount To Render", &performance_test_3d_amount_to_show, 1, 0, performance_test_3d_MAX_3D, 0);
 	performance_test_3d_amount_to_show = rde_math_clamp_int(performance_test_3d_amount_to_show, 0, performance_test_3d_MAX_3D);
 	unsigned int _total_vertices = rde_rendering_model_get_vertices_count(performance_test_3d_model);

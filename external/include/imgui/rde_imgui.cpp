@@ -36,8 +36,8 @@ void rde_imgui_handle_events(void* _sdl_event) {
 	ImGui_ImplSDL3_ProcessEvent((SDL_Event*)_sdl_event);
 }
 
-rde_ImGuiID rde_imgui_get_id(const char* _str_id) {
-	return (rde_ImGuiID)ImGui::GetID(_str_id);
+rde_imgui_id rde_imgui_get_id(const char* _str_id) {
+	return (rde_imgui_id)ImGui::GetID(_str_id);
 }
 
 void rde_imgui_push_id(int _id) {
@@ -48,11 +48,11 @@ void rde_imgui_pop_id() {
 	ImGui::PopID();
 }
 
-void rde_imgui_dockspace(rde_ImGuiID _id, rde_vec_2F _size, rde_ImGuiDockNodeFlags _flags) {
+void rde_imgui_dockspace(rde_imgui_id _id, rde_vec_2F _size, rde_imgui_dock_node_flags _flags) {
 	ImGui::DockSpace((ImGuiID)_id, ImVec2(_size.x, _size.y), (ImGuiDockNodeFlags)_flags, NULL);
 }
 
-bool rde_imgui_begin(const char* _name, bool* _open, rde_ImGuiWindowFlags _flags) {
+bool rde_imgui_begin(const char* _name, bool* _open, rde_imgui_window_flags _flags) {
 	return ImGui::Begin(_name, _open, (ImGuiButtonFlags)_flags);
 }
 
@@ -83,39 +83,39 @@ bool rde_imgui_radio_button(const char* _label, int* _v, int _v_button) {
 	return ImGui::RadioButton(_label, _v, _v_button);
 }
 
-bool rde_imgui_drag_float(const char* _label, float* _v, float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_float(const char* _label, float* _v, float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags) {
 	return ImGui::DragFloat(_label, _v, _v_speed, _v_min, _v_max, _format, _flags);
 }
 
-bool rde_imgui_drag_float_2(const char* _label, float _v[2], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_float_2(const char* _label, float _v[2], float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags) {
 	return ImGui::DragFloat2(_label, _v, _v_speed, _v_min, _v_max, _format, _flags);
 }
 
-bool rde_imgui_drag_float_3(const char* _label, float _v[3], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_float_3(const char* _label, float _v[3], float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags) {
 	return ImGui::DragFloat3(_label, _v, _v_speed, _v_min, _v_max, _format, _flags);
 }
 
-bool rde_imgui_drag_float_4(const char* _label, float _v[4], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_float_4(const char* _label, float _v[4], float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags) {
 	return ImGui::DragFloat4(_label, _v, _v_speed, _v_min, _v_max, _format, _flags);
 }
 
-bool rde_imgui_drag_int(const char* _label, int* _v, float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_int(const char* _label, int* _v, float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags) {
 	return ImGui::DragInt(_label, _v, _v_speed, _v_min, _v_max, "%d", _flags);
 }
 
-bool rde_imgui_drag_int_2(const char* _label, int _v[2], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_int_2(const char* _label, int _v[2], float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags) {
 	return ImGui::DragInt2(_label, _v, _v_speed, _v_min, _v_max, "%d", _flags);
 }
 
-bool rde_imgui_drag_int_3(const char* _label, int _v[3], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_int_3(const char* _label, int _v[3], float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags) {
 	return ImGui::DragInt3(_label, _v, _v_speed, _v_min, _v_max, "%d", _flags);
 }
 
-bool rde_imgui_drag_int_4(const char* _label, int _v[4], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_drag_int_4(const char* _label, int _v[4], float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags) {
 	return ImGui::DragInt4(_label, _v, _v_speed, _v_min, _v_max, "%d", _flags);
 }
 
-bool rde_imgui_slider_angle(const char* _label, float* _v_rad, float _v_degrees_min, float _v_degrees_max, rde_ImGuiSliderFlags _flags) {
+bool rde_imgui_slider_angle(const char* _label, float* _v_rad, float _v_degrees_min, float _v_degrees_max, rde_imgui_slider_flags _flags) {
 	return ImGui::SliderAngle(_label, _v_rad, _v_degrees_min, _v_degrees_max, "%.0f deg", _flags);
 }
 

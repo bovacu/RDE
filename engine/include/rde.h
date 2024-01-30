@@ -2337,63 +2337,111 @@ typedef enum {
 // =================================================================== IMGUI ========================================================================
 
 #ifdef RDE_IMGUI_MODULE
+// Enum: RDE_IMGUI_WINDOW_FLAGS_
+// ImGui Window flags.
+//
+// RDE_IMGUI_WINDOW_FLAGS_None                   	 - No flags.
+// RDE_IMGUI_WINDOW_FLAGS_NoTitleBar             	 - Disable title-bar
+// RDE_IMGUI_WINDOW_FLAGS_NoResize               	 - Disable user resizing with the lower-right grip
+// RDE_IMGUI_WINDOW_FLAGS_NoMove                 	 - Disable user moving the window
+// RDE_IMGUI_WINDOW_FLAGS_NoScrollbar            	 - Disable scrollbars (window can still scroll with mouse or programmatically)
+// RDE_IMGUI_WINDOW_FLAGS_NoScrollWithMouse      	 - Disable user vertically scrolling with mouse wheel. On child window, mouse wheel will be forwarded to the parent unless NoScrollbar is also set.
+// RDE_IMGUI_WINDOW_FLAGS_NoCollapse             	 - Disable user collapsing window by double-clicking on it. Also referred to as Window Menu Button (e.g. within a docking node).
+// RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize       	 - Resize every window to its content every frame
+// RDE_IMGUI_WINDOW_FLAGS_NoBackground           	 - Disable drawing background color (WindowBg, etc.) and outside border. Similar as using SetNextWindowBgAlpha(0.0f).
+// RDE_IMGUI_WINDOW_FLAGS_NoSavedSettings        	 - Never load/save settings in .ini file
+// RDE_IMGUI_WINDOW_FLAGS_NoMouseInputs          	 - Disable catching mouse, hovering test with pass through.
+// RDE_IMGUI_WINDOW_FLAGS_MenuBar                	 - Has a menu-bar
+// RDE_IMGUI_WINDOW_FLAGS_HorizontalScrollbar    	 - Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(ImVec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
+// RDE_IMGUI_WINDOW_FLAGS_NoFocusOnAppearing     	 - Disable taking focus when transitioning from hidden to visible state
+// RDE_IMGUI_WINDOW_FLAGS_NoBringToFrontOnFocus  	 - Disable bringing window to front when taking focus (e.g. clicking on it or programmatically giving it focus)
+// RDE_IMGUI_WINDOW_FLAGS_AlwaysVerticalScrollbar	 - Always show vertical scrollbar (even if ContentSize.y < Size.y)
+// RDE_IMGUI_WINDOW_FLAGS_AlwaysHorizontalScrollbar  - Always show horizontal scrollbar (even if ContentSize.x < Size.x)
+// RDE_IMGUI_WINDOW_FLAGS_AlwaysUseWindowPadding 	 - Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)
+// RDE_IMGUI_WINDOW_FLAGS_NoNavInputs            	 - No gamepad/keyboard navigation within the window
+// RDE_IMGUI_WINDOW_FLAGS_NoNavFocus             	 - No focusing toward this window with gamepad/keyboard navigation (e.g. skipped by CTRL+TAB)
+// RDE_IMGUI_WINDOW_FLAGS_UnsavedDocument        	 - Display a dot next to the title. When used in a tab/docking context, tab is selected when clicking the X + closure is not assumed (will wait for user to stop submitting the tab). Otherwise closure is assumed when pressing the X, so if you keep submitting the tab may reappear at end of tab bar.
+// RDE_IMGUI_WINDOW_FLAGS_NoDocking              	 - Disable docking of this window
+// RDE_IMGUI_WINDOW_FLAGS_NoNav              	 	 - RDE_IMGUI_WINDOW_FLAGS_NoNavInputs | RDE_IMGUI_WINDOW_FLAGS_NoNavFocus
+// RDE_IMGUI_WINDOW_FLAGS_NoDecoration               - RDE_IMGUI_WINDOW_FLAGS_NoTitleBar | RDE_IMGUI_WINDOW_FLAGS_NoResize | RDE_IMGUI_WINDOW_FLAGS_NoScrollbar | RDE_IMGUI_WINDOW_FLAGS_NoCollapse
+// RDE_IMGUI_WINDOW_FLAGS_NoInputs              	 - RDE_IMGUI_WINDOW_FLAGS_NoMouseInputs | RDE_IMGUI_WINDOW_FLAGS_NoNavInputs | RDE_IMGUI_WINDOW_FLAGS_NoNavFocus
 typedef enum {
-    rde_ImGuiWindowFlags_None                   = 0,
-    rde_ImGuiWindowFlags_NoTitleBar             = 1 << 0,   // Disable title-bar
-    rde_ImGuiWindowFlags_NoResize               = 1 << 1,   // Disable user resizing with the lower-right grip
-    rde_ImGuiWindowFlags_NoMove                 = 1 << 2,   // Disable user moving the window
-    rde_ImGuiWindowFlags_NoScrollbar            = 1 << 3,   // Disable scrollbars (window can still scroll with mouse or programmatically)
-    rde_ImGuiWindowFlags_NoScrollWithMouse      = 1 << 4,   // Disable user vertically scrolling with mouse wheel. On child window, mouse wheel will be forwarded to the parent unless NoScrollbar is also set.
-    rde_ImGuiWindowFlags_NoCollapse             = 1 << 5,   // Disable user collapsing window by double-clicking on it. Also referred to as Window Menu Button (e.g. within a docking node).
-    rde_ImGuiWindowFlags_AlwaysAutoResize       = 1 << 6,   // Resize every window to its content every frame
-    rde_ImGuiWindowFlags_NoBackground           = 1 << 7,   // Disable drawing background color (WindowBg, etc.) and outside border. Similar as using SetNextWindowBgAlpha(0.0f).
-    rde_ImGuiWindowFlags_NoSavedSettings        = 1 << 8,   // Never load/save settings in .ini file
-    rde_ImGuiWindowFlags_NoMouseInputs          = 1 << 9,   // Disable catching mouse, hovering test with pass through.
-    rde_ImGuiWindowFlags_MenuBar                = 1 << 10,  // Has a menu-bar
-    rde_ImGuiWindowFlags_HorizontalScrollbar    = 1 << 11,  // Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(ImVec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
-    rde_ImGuiWindowFlags_NoFocusOnAppearing     = 1 << 12,  // Disable taking focus when transitioning from hidden to visible state
-    rde_ImGuiWindowFlags_NoBringToFrontOnFocus  = 1 << 13,  // Disable bringing window to front when taking focus (e.g. clicking on it or programmatically giving it focus)
-    rde_ImGuiWindowFlags_AlwaysVerticalScrollbar= 1 << 14,  // Always show vertical scrollbar (even if ContentSize.y < Size.y)
-    rde_ImGuiWindowFlags_AlwaysHorizontalScrollbar=1<< 15,  // Always show horizontal scrollbar (even if ContentSize.x < Size.x)
-    rde_ImGuiWindowFlags_AlwaysUseWindowPadding = 1 << 16,  // Ensure child windows without border uses style.WindowPadding (ignored by default for non-bordered child windows, because more convenient)
-    rde_ImGuiWindowFlags_NoNavInputs            = 1 << 18,  // No gamepad/keyboard navigation within the window
-    rde_ImGuiWindowFlags_NoNavFocus             = 1 << 19,  // No focusing toward this window with gamepad/keyboard navigation (e.g. skipped by CTRL+TAB)
-    rde_ImGuiWindowFlags_UnsavedDocument        = 1 << 20,  // Display a dot next to the title. When used in a tab/docking context, tab is selected when clicking the X + closure is not assumed (will wait for user to stop submitting the tab). Otherwise closure is assumed when pressing the X, so if you keep submitting the tab may reappear at end of tab bar.
-    rde_ImGuiWindowFlags_NoDocking              = 1 << 21,  // Disable docking of this window
+    RDE_IMGUI_WINDOW_FLAGS_None                   	= 0,
+    RDE_IMGUI_WINDOW_FLAGS_NoTitleBar             	= 1 << 0, 
+    RDE_IMGUI_WINDOW_FLAGS_NoResize               	= 1 << 1, 
+    RDE_IMGUI_WINDOW_FLAGS_NoMove                 	= 1 << 2, 
+    RDE_IMGUI_WINDOW_FLAGS_NoScrollbar            	= 1 << 3, 
+    RDE_IMGUI_WINDOW_FLAGS_NoScrollWithMouse      	= 1 << 4, 
+    RDE_IMGUI_WINDOW_FLAGS_NoCollapse             	= 1 << 5, 
+    RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize       	= 1 << 6, 
+    RDE_IMGUI_WINDOW_FLAGS_NoBackground           	= 1 << 7, 
+    RDE_IMGUI_WINDOW_FLAGS_NoSavedSettings        	= 1 << 8, 
+    RDE_IMGUI_WINDOW_FLAGS_NoMouseInputs          	= 1 << 9, 
+    RDE_IMGUI_WINDOW_FLAGS_MenuBar                	= 1 << 10,
+    RDE_IMGUI_WINDOW_FLAGS_HorizontalScrollbar    	= 1 << 11,
+    RDE_IMGUI_WINDOW_FLAGS_NoFocusOnAppearing     	= 1 << 12,
+    RDE_IMGUI_WINDOW_FLAGS_NoBringToFrontOnFocus  	= 1 << 13,
+    RDE_IMGUI_WINDOW_FLAGS_AlwaysVerticalScrollbar	= 1 << 14,
+    RDE_IMGUI_WINDOW_FLAGS_AlwaysHorizontalScrollbar= 1 << 15,
+    RDE_IMGUI_WINDOW_FLAGS_AlwaysUseWindowPadding 	= 1 << 16,
+    RDE_IMGUI_WINDOW_FLAGS_NoNavInputs            	= 1 << 18,
+    RDE_IMGUI_WINDOW_FLAGS_NoNavFocus             	= 1 << 19,
+    RDE_IMGUI_WINDOW_FLAGS_UnsavedDocument        	= 1 << 20,
+    RDE_IMGUI_WINDOW_FLAGS_NoDocking              	= 1 << 21,
 
-    rde_ImGuiWindowFlags_NoNav                  = rde_ImGuiWindowFlags_NoNavInputs | rde_ImGuiWindowFlags_NoNavFocus,
-    rde_ImGuiWindowFlags_NoDecoration           = rde_ImGuiWindowFlags_NoTitleBar | rde_ImGuiWindowFlags_NoResize | rde_ImGuiWindowFlags_NoScrollbar | rde_ImGuiWindowFlags_NoCollapse,
-    rde_ImGuiWindowFlags_NoInputs               = rde_ImGuiWindowFlags_NoMouseInputs | rde_ImGuiWindowFlags_NoNavInputs | rde_ImGuiWindowFlags_NoNavFocus,
+    RDE_IMGUI_WINDOW_FLAGS_NoNav                  	= RDE_IMGUI_WINDOW_FLAGS_NoNavInputs | RDE_IMGUI_WINDOW_FLAGS_NoNavFocus,
+    RDE_IMGUI_WINDOW_FLAGS_NoDecoration           	= RDE_IMGUI_WINDOW_FLAGS_NoTitleBar | RDE_IMGUI_WINDOW_FLAGS_NoResize | RDE_IMGUI_WINDOW_FLAGS_NoScrollbar | RDE_IMGUI_WINDOW_FLAGS_NoCollapse,
+    RDE_IMGUI_WINDOW_FLAGS_NoInputs               	= RDE_IMGUI_WINDOW_FLAGS_NoMouseInputs | RDE_IMGUI_WINDOW_FLAGS_NoNavInputs | RDE_IMGUI_WINDOW_FLAGS_NoNavFocus,
 
     // [Internal]
-    rde_ImGuiWindowFlags_NavFlattened           = 1 << 23,  // [BETA] On child window: allow gamepad/keyboard navigation to cross over parent border to this child or between sibling child windows.
-    rde_ImGuiWindowFlags_ChildWindow            = 1 << 24,  // Don't use! For internal use by BeginChild()
-    rde_ImGuiWindowFlags_Tooltip                = 1 << 25,  // Don't use! For internal use by BeginTooltip()
-    rde_ImGuiWindowFlags_Popup                  = 1 << 26,  // Don't use! For internal use by BeginPopup()
-    rde_ImGuiWindowFlags_Modal                  = 1 << 27,  // Don't use! For internal use by BeginPopupModal()
-    rde_ImGuiWindowFlags_ChildMenu              = 1 << 28,  // Don't use! For internal use by BeginMenu()
-    rde_ImGuiWindowFlags_DockNodeHost           = 1 << 29,  // Don't use! For internal use by Begin()/NewFrame()
-} rde_ImGuiWindowFlags_;
+    RDE_IMGUI_WINDOW_FLAGS_NavFlattened           	= 1 << 23,  // [BETA] On child window: allow gamepad/keyboard navigation to cross over parent border to this child or between sibling child windows.
+    RDE_IMGUI_WINDOW_FLAGS_ChildWindow            	= 1 << 24,  // Don't use! For internal use by BeginChild()
+    RDE_IMGUI_WINDOW_FLAGS_Tooltip                	= 1 << 25,  // Don't use! For internal use by BeginTooltip()
+    RDE_IMGUI_WINDOW_FLAGS_Popup                  	= 1 << 26,  // Don't use! For internal use by BeginPopup()
+    RDE_IMGUI_WINDOW_FLAGS_Modal                  	= 1 << 27,  // Don't use! For internal use by BeginPopupModal()
+    RDE_IMGUI_WINDOW_FLAGS_ChildMenu              	= 1 << 28,  // Don't use! For internal use by BeginMenu()
+    RDE_IMGUI_WINDOW_FLAGS_DockNodeHost           	= 1 << 29,  // Don't use! For internal use by Begin()/NewFrame()
+} RDE_IMGUI_WINDOW_FLAGS_;
 
+// Enum: RDE_IMGUI_DOCK_NODE_FLAGS_
+// ImGui Dock Node flags.
+//
+// RDE_IMGUI_DOCK_NODE_FLAGS_None					  - No flags.
+// RDE_IMGUI_DOCK_NODE_FLAGS_KeepAliveOnly            - Don't display the dockspace node but keep it alive. Windows docked into this dockspace node won't be undocked.
+// RDE_IMGUI_DOCK_NODE_FLAGS_NoDockingOverCentralNode - Disable docking over the Central Node, which will be always kept empty.
+// RDE_IMGUI_DOCK_NODE_FLAGS_PassthruCentralNode      - Enable passthru dockspace: 1) DockSpace() will render a ImGuiCol_WindowBg background covering everything excepted the Central Node when empty. Meaning the host window should probably use SetNextWindowBgAlpha(0.0f) prior to Begin() when using this. 2) When Central Node is empty: let inputs pass-through + won't display a DockingEmptyBg background. See demo for details.
+// RDE_IMGUI_DOCK_NODE_FLAGS_NoDockingSplit           - Disable other windows/nodes from splitting this node.
+// RDE_IMGUI_DOCK_NODE_FLAGS_NoResize                 - Disable resizing node using the splitter/separators. Useful with programmatically setup dockspaces.
+// RDE_IMGUI_DOCK_NODE_FLAGS_AutoHideTabBar           - Tab bar will automatically hide when there is a single window in the dock node.
+// RDE_IMGUI_DOCK_NODE_FLAGS_NoUndocking              - Disable undocking this node.
 typedef enum {
-    rde_ImGuiDockNodeFlags_None                         = 0,
-    rde_ImGuiDockNodeFlags_KeepAliveOnly                = 1 << 0,   //       // Don't display the dockspace node but keep it alive. Windows docked into this dockspace node won't be undocked.
-    rde_ImGuiDockNodeFlags_NoDockingOverCentralNode     = 1 << 2,   //       // Disable docking over the Central Node, which will be always kept empty.
-    rde_ImGuiDockNodeFlags_PassthruCentralNode          = 1 << 3,   //       // Enable passthru dockspace: 1) DockSpace() will render a ImGuiCol_WindowBg background covering everything excepted the Central Node when empty. Meaning the host window should probably use SetNextWindowBgAlpha(0.0f) prior to Begin() when using this. 2) When Central Node is empty: let inputs pass-through + won't display a DockingEmptyBg background. See demo for details.
-    rde_ImGuiDockNodeFlags_NoDockingSplit               = 1 << 4,   //       // Disable other windows/nodes from splitting this node.
-    rde_ImGuiDockNodeFlags_NoResize                     = 1 << 5,   // Saved // Disable resizing node using the splitter/separators. Useful with programmatically setup dockspaces.
-    rde_ImGuiDockNodeFlags_AutoHideTabBar               = 1 << 6,   //       // Tab bar will automatically hide when there is a single window in the dock node.
-    rde_ImGuiDockNodeFlags_NoUndocking                  = 1 << 7,   //       // Disable undocking this node.
-} rde_ImGuiDockNodeFlags_;
+    RDE_IMGUI_DOCK_NODE_FLAGS_None                         = 0,
+    RDE_IMGUI_DOCK_NODE_FLAGS_KeepAliveOnly                = 1 << 0,
+    RDE_IMGUI_DOCK_NODE_FLAGS_NoDockingOverCentralNode     = 1 << 2,
+    RDE_IMGUI_DOCK_NODE_FLAGS_PassthruCentralNode          = 1 << 3,
+    RDE_IMGUI_DOCK_NODE_FLAGS_NoDockingSplit               = 1 << 4,
+    RDE_IMGUI_DOCK_NODE_FLAGS_NoResize                     = 1 << 5,
+    RDE_IMGUI_DOCK_NODE_FLAGS_AutoHideTabBar               = 1 << 6,
+    RDE_IMGUI_DOCK_NODE_FLAGS_NoUndocking                  = 1 << 7,
+} RDE_IMGUI_DOCK_NODE_FLAGS_;
 
+// Enum: RDE_IMGUI_SLIDER_FLAGS_
+// ImGui Slider flags.
+//
+// RDE_IMGUI_SLIDER_FLAGS_None			  - No flags.
+// RDE_IMGUI_SLIDER_FLAGS_AlwaysClamp     - Clamp value to min/max bounds when input manually with CTRL+Click. By default CTRL+Click allows going out of bounds.
+// RDE_IMGUI_SLIDER_FLAGS_Logarithmic     - Make the widget logarithmic (linear otherwise). Consider using ImGuiSliderFlags_NoRoundToFormat with this if using a format-string with small amount of digits.
+// RDE_IMGUI_SLIDER_FLAGS_NoRoundToFormat - Disable rounding underlying value to match precision of the display format string (e.g. %.3f values are rounded to those 3 digits)
+// RDE_IMGUI_SLIDER_FLAGS_NoInput         - Disable CTRL+Click or Enter key allowing to input text directly into the widget
+// RDE_IMGUI_SLIDER_FLAGS_InvalidMask_    - [Internal] We treat using those bits as being potentially a 'float power' argument from the previous API that has got miscast to this enum, and will trigger an assert if needed.
 typedef enum {
-    rde_ImGuiSliderFlags_None                   = 0,
-    rde_ImGuiSliderFlags_AlwaysClamp            = 1 << 4,       // Clamp value to min/max bounds when input manually with CTRL+Click. By default CTRL+Click allows going out of bounds.
-    rde_ImGuiSliderFlags_Logarithmic            = 1 << 5,       // Make the widget logarithmic (linear otherwise). Consider using ImGuiSliderFlags_NoRoundToFormat with this if using a format-string with small amount of digits.
-    rde_ImGuiSliderFlags_NoRoundToFormat        = 1 << 6,       // Disable rounding underlying value to match precision of the display format string (e.g. %.3f values are rounded to those 3 digits)
-    rde_ImGuiSliderFlags_NoInput                = 1 << 7,       // Disable CTRL+Click or Enter key allowing to input text directly into the widget
-    rde_ImGuiSliderFlags_InvalidMask_           = 0x7000000F,   // [Internal] We treat using those bits as being potentially a 'float power' argument from the previous API that has got miscast to this enum, and will trigger an assert if needed.
-} rde_ImGuiSliderFlags_;
+    RDE_IMGUI_SLIDER_FLAGS_None                   = 0,
+    RDE_IMGUI_SLIDER_FLAGS_AlwaysClamp            = 1 << 4,    
+    RDE_IMGUI_SLIDER_FLAGS_Logarithmic            = 1 << 5,    
+    RDE_IMGUI_SLIDER_FLAGS_NoRoundToFormat        = 1 << 6,    
+    RDE_IMGUI_SLIDER_FLAGS_NoInput                = 1 << 7,    
+    RDE_IMGUI_SLIDER_FLAGS_InvalidMask_           = 0x7000000F,
+} RDE_IMGUI_SLIDER_FLAGS_;
 #endif
 
 // =================================================================== PHYSICS 3D ===================================================================
@@ -2431,32 +2479,63 @@ typedef enum {
 	RDE_PHYSICS_SHAPE_TYPE_MESH
 } RDE_PHYSICS_SHAPE_TYPE_;
 
+// Enum: RDE_PHYSICS_BODY_MOTION_TYPE_
+// Types of body.
+//
+// RDE_PHYSICS_BODY_MOTION_TYPE_STATIC - Object cannot move, cannot be moved by other bodies and is not affected by foreces.
+// RDE_PHYSICS_BODY_MOTION_TYPE_KINEMATIC - Object can move, cannot be moved by other bodies and is affected by foreces.
+// RDE_PHYSICS_BODY_MOTION_TYPE_DYNAMIC - Object can move, can be moved by other bodies and is affected by foreces.
 typedef enum {
 	RDE_PHYSICS_BODY_MOTION_TYPE_STATIC,		///< Non movable
 	RDE_PHYSICS_BODY_MOTION_TYPE_KINEMATIC,	///< Movable using velocities only, does not respond to forces
 	RDE_PHYSICS_BODY_MOTION_TYPE_DYNAMIC,		///< Responds to forces as a normal physics object
 } RDE_PHYSICS_BODY_MOTION_TYPE_;
 
+// Enum: RDE_PHYSICS_BODY_ACTIVATION_
+// Types of body activation.
+//
+// RDE_PHYSICS_BODY_ACTIVATION_ACTIVATE - Will enable a body and be updated inside the simulation.
+// RDE_PHYSICS_BODY_ACTIVATION_DONT_ACTIVATE - Will disable a body and be ignored inside the simulation.
 typedef enum {
 	RDE_PHYSICS_BODY_ACTIVATION_ACTIVATE,		///< Activate the body, making it part of the simulation
 	RDE_PHYSICS_BODY_ACTIVATION_DONT_ACTIVATE	///< Leave activation state as it is (will not deactivate an active body)
 } RDE_PHYSICS_BODY_ACTIVATION_;
 
+// Enum: RDE_PHYSICS_SHAPE_
+// Types of body shape.
+//
+// RDE_PHYSICS_SHAPE_BOX - Box shape.
+// RDE_PHYSICS_SHAPE_SPHERE - Sphere shape.
 typedef enum {
 	RDE_PHYSICS_SHAPE_BOX,
 	RDE_PHYSICS_SHAPE_SPHERE,
 } RDE_PHYSICS_SHAPE_;
 
+
+// Enum: RDE_PHYSICS_BODY_DOF_
+// Types of degrees of freedom, how the body can be moved/rotated.
+//
+// RDE_PHYSICS_BODY_DOF_NONE - Cannot move/rotate at all.
+// RDE_PHYSICS_BODY_DOF_ALL - Can move/rotate freely.
+// RDE_PHYSICS_BODY_DOF_TRANSLATION_X - Cannot move on X axis.
+// RDE_PHYSICS_BODY_DOF_TRANSLATION_Y - Cannot move on Y axis.
+// RDE_PHYSICS_BODY_DOF_TRANSLATION_Z - Cannot move on Z axis.
+// RDE_PHYSICS_BODY_DOF_ROTATION_X - Cannot rotate on X axis.
+// RDE_PHYSICS_BODY_DOF_ROTATION_Y - Cannot rotate on Y axis.
+// RDE_PHYSICS_BODY_DOF_ROTATION_Z - Cannot rotate on Z axis.
+// RDE_PHYSICS_BODY_DOF_PLANE_2 - Cannot rotate/move on 3D space, only 2D
+// RDE_PHYSICS_BODY_DOF_ALL_TRANSLATION	- Can move freely.
+// RDE_PHYSICS_BODY_DOF_ALL_ROTATION - Can rotate freely.
 typedef enum {
-	RDE_PHYSICS_BODY_DOF_NONE				= 0b000000,									///< No degrees of freedom are allowed. Note that this is not valid and will crash. Use a static body instead.
-	RDE_PHYSICS_BODY_DOF_ALL				= 0b111111,									///< All degrees of freedom are allowed
-	RDE_PHYSICS_BODY_DOF_TRANSLATION_X		= 0b000001,									///< Body cannot move in world space X axis
-	RDE_PHYSICS_BODY_DOF_TRANSLATION_Y		= 0b000010,									///< Body cannot move in world space Y axis
-	RDE_PHYSICS_BODY_DOF_TRANSLATION_Z		= 0b000100,									///< Body cannot move in world space Z axis
-	RDE_PHYSICS_BODY_DOF_ROTATION_X		= 0b001000,									///< Body cannot rotate around local space X axis
-	RDE_PHYSICS_BODY_DOF_ROTATION_Y		= 0b010000,									///< Body cannot rotate around local space Y axis
-	RDE_PHYSICS_BODY_DOF_ROTATION_Z		= 0b100000,									///< Body cannot rotate around local space Z axis
-	RDE_PHYSICS_BODY_DOF_PLANE_2D			= RDE_PHYSICS_BODY_DOF_TRANSLATION_X | RDE_PHYSICS_BODY_DOF_TRANSLATION_Y | RDE_PHYSICS_BODY_DOF_TRANSLATION_Z,	///< Body can only move in X and Y axis and rotate around Z axis
+	RDE_PHYSICS_BODY_DOF_NONE				= 0b000000,
+	RDE_PHYSICS_BODY_DOF_ALL				= 0b111111,
+	RDE_PHYSICS_BODY_DOF_TRANSLATION_X		= 0b000001,
+	RDE_PHYSICS_BODY_DOF_TRANSLATION_Y		= 0b000010,
+	RDE_PHYSICS_BODY_DOF_TRANSLATION_Z		= 0b000100,
+	RDE_PHYSICS_BODY_DOF_ROTATION_X			= 0b001000,
+	RDE_PHYSICS_BODY_DOF_ROTATION_Y			= 0b010000,
+	RDE_PHYSICS_BODY_DOF_ROTATION_Z			= 0b100000,
+	RDE_PHYSICS_BODY_DOF_PLANE_2D			= RDE_PHYSICS_BODY_DOF_TRANSLATION_X | RDE_PHYSICS_BODY_DOF_TRANSLATION_Y | RDE_PHYSICS_BODY_DOF_TRANSLATION_Z,
 	RDE_PHYSICS_BODY_DOF_ALL_TRANSLATION	= RDE_PHYSICS_BODY_DOF_TRANSLATION_X | RDE_PHYSICS_BODY_DOF_TRANSLATION_Y | RDE_PHYSICS_BODY_DOF_TRANSLATION_Z,
 	RDE_PHYSICS_BODY_DOF_ALL_ROTATION		= RDE_PHYSICS_BODY_DOF_ROTATION_X | RDE_PHYSICS_BODY_DOF_ROTATION_Y | RDE_PHYSICS_BODY_DOF_ROTATION_Z,
 } RDE_PHYSICS_BODY_DOF_;
@@ -2719,12 +2798,12 @@ typedef uint rde_skybox_id;
 typedef struct rde_mesh rde_mesh;
 
 #ifdef RDE_IMGUI_MODULE
-typedef int rde_ImGuiWindowFlags;       // -> enum ImGuiWindowFlags_     // Flags: for Begin(), BeginChild()
-typedef int rde_ImGuiDockNodeFlags;     // -> enum ImGuiDockNodeFlags_   // Flags: for DockSpace()
-typedef int rde_ImGuiSliderFlags;     // -> enum ImGuiSliderFlags_
-typedef unsigned int rde_ImGuiID;// A unique ID used by widgets (typically the result of hashing a stack of string)
-#ifndef rde_ImTextureID
-typedef void* rde_ImTextureID;
+typedef int rde_imgui_window_flags;       // -> enum ImGuiWindowFlags_     // Flags: for Begin(), BeginChild()
+typedef int rde_imgui_dock_node_flags;     // -> enum ImGuiDockNodeFlags_   // Flags: for DockSpace()
+typedef int rde_imgui_slider_flags;     // -> enum ImGuiSliderFlags_
+typedef unsigned int rde_imgui_id;// A unique ID used by widgets (typically the result of hashing a stack of string)
+#ifndef rde_imgui_texture_id
+typedef void* rde_imgui_texture_id;
 #endif
 #endif
 
@@ -5156,12 +5235,12 @@ RDE_FUNC void rde_imgui_new_frame();
 RDE_FUNC void rde_imgui_draw();
 RDE_FUNC void rde_imgui_handle_events(void* _sdl_event);
 
-RDE_FUNC rde_ImGuiID rde_imgui_get_id(const char* _str_id);
+RDE_FUNC rde_imgui_id rde_imgui_get_id(const char* _str_id);
 RDE_FUNC void rde_imgui_push_id(int _id);
 RDE_FUNC void rde_imgui_pop_id();
-RDE_FUNC void rde_imgui_dockspace(rde_ImGuiID _id, rde_vec_2F _size, rde_ImGuiDockNodeFlags _flags);
+RDE_FUNC void rde_imgui_dockspace(rde_imgui_id _id, rde_vec_2F _size, rde_imgui_dock_node_flags _flags);
 
-RDE_FUNC bool rde_imgui_begin(const char* _name, bool* _open, rde_ImGuiWindowFlags _flags);
+RDE_FUNC bool rde_imgui_begin(const char* _name, bool* _open, rde_imgui_window_flags _flags);
 RDE_FUNC void rde_imgui_end();
 
 RDE_FUNC void rde_imgui_new_line();
@@ -5171,17 +5250,17 @@ RDE_FUNC void rde_imgui_same_line(float _offset_from_start_x, float _spacing);
 RDE_FUNC void rde_imgui_text(const char* _fmt, ...);
 RDE_FUNC bool rde_imgui_radio_button(const char* _label, int* _v, int _v_button);
 
-RDE_FUNC bool rde_imgui_drag_float(const char* _label, float* _v, float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
-RDE_FUNC bool rde_imgui_drag_float_2(const char* _label, float _v[2], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
-RDE_FUNC bool rde_imgui_drag_float_3(const char* _label, float _v[3], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
-RDE_FUNC bool rde_imgui_drag_float_4(const char* _label, float _v[4], float _v_speed, float _v_min, float _v_max, const char* _format, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_float(const char* _label, float* _v, float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags);
+RDE_FUNC bool rde_imgui_drag_float_2(const char* _label, float _v[2], float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags);
+RDE_FUNC bool rde_imgui_drag_float_3(const char* _label, float _v[3], float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags);
+RDE_FUNC bool rde_imgui_drag_float_4(const char* _label, float _v[4], float _v_speed, float _v_min, float _v_max, const char* _format, rde_imgui_slider_flags _flags);
 
-RDE_FUNC bool rde_imgui_drag_int(const char* _label, int* _v, float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
-RDE_FUNC bool rde_imgui_drag_int_2(const char* _label, int _v[2], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
-RDE_FUNC bool rde_imgui_drag_int_3(const char* _label, int _v[3], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
-RDE_FUNC bool rde_imgui_drag_int_4(const char* _label, int _v[4], float _v_speed, float _v_min, float _v_max, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_drag_int(const char* _label, int* _v, float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags);
+RDE_FUNC bool rde_imgui_drag_int_2(const char* _label, int _v[2], float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags);
+RDE_FUNC bool rde_imgui_drag_int_3(const char* _label, int _v[3], float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags);
+RDE_FUNC bool rde_imgui_drag_int_4(const char* _label, int _v[4], float _v_speed, float _v_min, float _v_max, rde_imgui_slider_flags _flags);
 
-RDE_FUNC bool rde_imgui_slider_angle(const char* _label, float* _v_rad, float _v_degrees_min, float _v_degrees_max, rde_ImGuiSliderFlags _flags);
+RDE_FUNC bool rde_imgui_slider_angle(const char* _label, float* _v_rad, float _v_degrees_min, float _v_degrees_max, rde_imgui_slider_flags _flags);
 
 RDE_FUNC bool rde_imgui_checkbox(const char* _label, bool* _v);
 

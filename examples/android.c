@@ -193,7 +193,7 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 	(void)_window;
 	
 	{
-		rde_imgui_begin("Directional Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_begin("Directional Lighting", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 		rde_imgui_push_id(1);
 		float _vec[3] = { android_directional_light_direction.x, android_directional_light_direction.y, android_directional_light_direction.z };
 		if (rde_imgui_drag_float_3("Direction", _vec, 0.25f, 0, 0, "%.3f", 0)) {
@@ -235,7 +235,7 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 		rde_imgui_end();
 	}
 
-	rde_imgui_begin("Model", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Model", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 
 	rde_imgui_text("Transform");
 	rde_vec_3F _pos = rde_transform_get_position(android_transform);
@@ -285,7 +285,7 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_checkbox("Proportional Scale", &_proportional_scale);
 	rde_imgui_end();
 
-	rde_imgui_begin("Camera Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Camera Options", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_drag_float("FOV", &android_camera.fov, 1, 0, 180, "%.3f", 0);
 
 	float _near_far[2] = { android_camera.near_far.x, android_camera.near_far.y };
@@ -296,7 +296,7 @@ void android_draw_imgui(float _dt, rde_window* _window) {
 
 	rde_imgui_end();
 
-	rde_imgui_begin("Rendering Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Rendering Options", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_text("Total Meshes: %zu", android_model_data.amount_of_meshes);
 	unsigned int _total_vertices = android_model != NULL ? rde_rendering_model_get_vertices_count(android_model) : 0;
 	rde_imgui_text("Total Triangles: %zu", _total_vertices);

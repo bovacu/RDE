@@ -237,7 +237,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	(void)_window;
 	
 	{
-		rde_imgui_begin("Directional Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_begin("Directional Lighting", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 		rde_imgui_push_id(1);
 		float _vec[3] = { model_viewer_directional_light_direction.x, model_viewer_directional_light_direction.y, model_viewer_directional_light_direction.z };
 		if (rde_imgui_drag_float_3("Direction", _vec, 0.25f, 0, 0, "%.3f", 0)) {
@@ -287,7 +287,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	}
 
 	{
-		rde_imgui_begin("Point Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_begin("Point Lighting", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 		rde_imgui_push_id(2);
 		float _vec[3] = { model_viewer_point_light.position.x, model_viewer_point_light.position.y, model_viewer_point_light.position.z };
 		if(rde_imgui_drag_float_3("Position", _vec, 0.25f, 0, 0, "%.3f", 0)) {
@@ -325,7 +325,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	}
 
 	{
-		rde_imgui_begin("Spot Lighting", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+		rde_imgui_begin("Spot Lighting", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 		rde_imgui_push_id(3);
 		float _vec[3] = { model_viewer_spot_light.position.x, model_viewer_spot_light.position.y, model_viewer_spot_light.position.z };
 		if(rde_imgui_drag_float_3("Position", _vec, 0.25f, 0, 0, "%.3f", 0)) {
@@ -371,7 +371,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 		rde_imgui_end();
 	}
 
-	rde_imgui_begin("Model", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Model", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 
 	rde_imgui_text("Transform");
 	
@@ -421,7 +421,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_checkbox("Proportional Scale", &_proportional_scale);
 	rde_imgui_end();
 
-	rde_imgui_begin("Camera Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Camera Options", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_drag_float("FOV", &model_viewer_camera.fov, 1, 0, 180, "%.3f", 0);
 
 	float _near_far[2] = { model_viewer_camera.near_far.x, model_viewer_camera.near_far.y };
@@ -432,7 +432,7 @@ void model_viewer_draw_imgui(float _dt, rde_window* _window) {
 
 	rde_imgui_end();
 
-	rde_imgui_begin("Rendering Options", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
+	rde_imgui_begin("Rendering Options", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 	rde_imgui_text("Total Meshes: %zu", model_viewer_model_data.amount_of_meshes);
 	unsigned int _total_vertices = model_viewer_model != NULL ? rde_rendering_model_get_vertices_count(model_viewer_model) : 0;
 	rde_imgui_text("Total Triangles: %zu", _total_vertices);
