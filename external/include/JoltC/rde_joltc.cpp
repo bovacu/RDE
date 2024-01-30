@@ -1,4 +1,5 @@
-#include "rde_joltc.h"
+#define RDE_PHYSICS_MODULE
+#include "rde.h"
 
 #include <iostream>
 #include <cassert>
@@ -185,36 +186,36 @@ class rde_contact_listener : public JPH::ContactListener {
 //		}
 //};
 
-struct rde_jolt_shape {
+struct rde_physics_shape {
 	JPH::Shape* inner_shape;
-	RDE_JOLT_SHAPE_ shape_type;
+	RDE_PHYSICS_SHAPE_ shape_type;
 };
-rde_jolt_shape create_shape_struct() {
-	rde_jolt_shape _s;
+rde_physics_shape create_shape_struct() {
+	rde_physics_shape _s;
 	_s.inner_shape = nullptr;
 	return _s;
 }
 
-struct rde_jolt_body {
-	rde_jolt_shape shape;
+struct rde_physics_body {
+	rde_physics_shape shape;
 	JPH::Body* inner_body;
-	RDE_JOLT_BODY_MOTION_TYPE_ motion_type;
+	RDE_PHYSICS_BODY_MOTION_TYPE_ motion_type;
 	rde_transform* transform;
 	size_t layer;
 	size_t index;
 };
-rde_jolt_body create_body_struct() {
-	rde_jolt_body _j;
+rde_physics_body create_body_struct() {
+	rde_physics_body _j;
 	_j.shape = create_shape_struct();
 	_j.inner_body = nullptr;
-	_j.motion_type = RDE_JOLT_BODY_MOTION_TYPE_STATIC;
+	_j.motion_type = RDE_PHYSICS_BODY_MOTION_TYPE_STATIC;
 	_j.transform = nullptr;
 	_j.layer = 0;
 	_j.index = -1;
 	return _j;
 }
 
-static rde_jolt_init_config init_config;
+static rde_physics_init_config init_config;
 static JPH::TempAllocatorImpl* temp_allocator;
 static JPH::PhysicsSystem* physics_system;
 static JPH::JobSystem* job_system;
@@ -224,39 +225,50 @@ static rde_object_vs_broad_phase_layer_filter* object_vs_broad_phase_layer_filte
 static rde_object_layer_pair_filter* object_layer_pair_filter;
 static rde_contact_listener* contact_listener;
 static rde_activation_listener* activation_listener;
-static rde_jolt_body* body_pool;
+static rde_physics_body* body_pool;
 
-#define RDE_JOLT_PI 3.14159265358979323846f
-#define DEGS_TO_RADS(_a) (_a * RDE_JOLT_PI) / 180.f
-#define RADS_TO_DEGS(_a) (_a * 180.f) / RDE_JOLT_PI
+#define RDE_PHYSICS_PI 3.14159265358979323846f
+#define DEGS_TO_RADS(_a) (_a * RDE_PHYSICS_PI) / 180.f
+#define RADS_TO_DEGS(_a) (_a * 180.f) / RDE_PHYSICS_PI
 
-static critical_error rde_critical_error;
-static logger rde_log_level;
+static rde_physics_error_fn rde_error;
+static rde_physics_log_fn rde_log;
+static rde_physics_transform_get_pos rde_transform_get_pos;
+static rde_physics_transform_get_rot rde_transform_get_rot_degs;
+static rde_physics_transform_set_pos rde_transform_set_pos;
+static rde_physics_transform_set_rot rde_transform_set_rot;
 
 static int last_used_body_index;
 
-bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critical_error_callback, logger _log_callback) {
-	assert(_rde_critical_error_callback != nullptr && "Callback '_rde_critical_error_callback' MUST be not nullptr");
-	rde_critical_error = _rde_critical_error_callback;
+bool rde_physics_init(rde_physics_init_config _init_config, rde_physics_callbacks _callbacks) {
+	assert(_callbacks.error_fn 		!= nullptr && "Callback 'error_fn' MUST be not nullptr");
+	assert(_callbacks.log_fn   		!= nullptr && "Callback 'log_fn' MUST be not nullptr");
+	assert(_callbacks.get_pos_fn 	!= nullptr && "Callback 'get_pos_fn' MUST be not nullptr");
+	assert(_callbacks.get_rot_fn 	!= nullptr && "Callback 'get_rot_fn' MUST be not nullptr");
+	assert(_callbacks.set_pos_fn 	!= nullptr && "Callback 'set_pos_fn' MUST be not nullptr");
+	assert(_callbacks.set_rot_fn 	!= nullptr && "Callback 'set_rot_fn' MUST be not nullptr");
+	rde_error = _callbacks.error_fn;
+	rde_log = _callbacks.log_fn;
+	rde_transform_get_pos = _callbacks.get_pos_fn;
+	rde_transform_get_rot_degs = _callbacks.get_rot_fn;
+	rde_transform_set_pos = _callbacks.set_pos_fn;
+	rde_transform_set_rot = _callbacks.set_rot_fn;
 
-	rde_critical_error(_log_callback == nullptr, "Callback '_post_update_callback' MUST be not nullptr");
-	rde_log_level = _log_callback;
-
-	body_pool = new rde_jolt_body[_init_config.max_amount_of_bodies];
+	body_pool = new rde_physics_body[_init_config.max_amount_of_bodies];
 	for(size_t _i = 0; _i < _init_config.max_amount_of_bodies; _i++) {
 		body_pool[_i] = create_body_struct();
 	}
 
-	rde_critical_error(body_pool == nullptr, "'_body_pool' cannot be nullptr");
+	rde_error(body_pool == nullptr, "'_body_pool' cannot be nullptr");
 
 	init_config = _init_config;
 	JPH::RegisterDefaultAllocator();
 	JPH::Factory::sInstance = new JPH::Factory();
 	JPH::RegisterTypes();
 
-    rde_critical_error(_init_config.max_amount_of_physics_jobs == 0, "max_physics_jobs cannot be 0. \n");
-    rde_critical_error(_init_config.max_amount_of_physics_barriers == 0, "max_physics_barriers cannot be 0. \n");
-    rde_critical_error(_init_config.max_amount_of_threads == 0, "max_threads cannot be 0. \n");
+    rde_error(_init_config.max_amount_of_physics_jobs == 0, "max_physics_jobs cannot be 0. \n");
+    rde_error(_init_config.max_amount_of_physics_barriers == 0, "max_physics_barriers cannot be 0. \n");
+    rde_error(_init_config.max_amount_of_threads == 0, "max_threads cannot be 0. \n");
 
 	temp_allocator = new JPH::TempAllocatorImpl(_init_config.temp_allocator_size);
 	job_system = new JPH::JobSystemThreadPool(_init_config.max_amount_of_physics_jobs, 
@@ -289,12 +301,12 @@ bool rde_jolt_init(rde_jolt_init_config _init_config, critical_error _rde_critic
 	return true;
 }
 
-rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_settings _body_settings, void* _shape_settings, rde_transform* _transform) {
-	rde_jolt_body* _body = nullptr;
+rde_physics_body* rde_physics_body_load(RDE_PHYSICS_SHAPE_ _shape_type, rde_physics_body_settings _body_settings, void* _shape_settings, rde_transform* _transform) {
+	rde_physics_body* _body = nullptr;
 	size_t _index = -1;
 
 	for(size_t _i = 0; _i < init_config.max_amount_of_bodies; _i++) {
-		rde_jolt_body* _b = &body_pool[_i];
+		rde_physics_body* _b = &body_pool[_i];
 
 		if(_b->inner_body == nullptr) {
 			_body = _b;
@@ -309,27 +321,27 @@ rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_set
 		}
 	}
 
-	rde_critical_error(_body == nullptr, "Max number of bodies '%d' reached. Crashing application \n", init_config.max_amount_of_bodies);
+	rde_error(_body == nullptr, "Max number of bodies '%d' reached. Crashing application \n", init_config.max_amount_of_bodies);
 
 	JPH::ShapeSettings::ShapeResult _shape;
 
 	switch(_shape_type) {
-		case RDE_JOLT_SHAPE_BOX: {
-			rde_jolt_box_shape_settings* _rde_shape_settings = (rde_jolt_box_shape_settings*)_shape_settings;
+		case RDE_PHYSICS_SHAPE_BOX: {
+			rde_physics_box_shape_settings* _rde_shape_settings = (rde_physics_box_shape_settings*)_shape_settings;
 			JPH::BoxShapeSettings _jolt_shape_settings = JPH::BoxShapeSettings(JPH::Vec3(_rde_shape_settings->width,
 			                                                                             _rde_shape_settings->height,
 			                                                                             _rde_shape_settings->depth));
 			_shape = _jolt_shape_settings.Create();
 		} break;
 		
-		case RDE_JOLT_SHAPE_SPHERE: {
-			rde_jolt_sphere_shape_settings* _rde_shape_settings = (rde_jolt_sphere_shape_settings*)_shape_settings;
+		case RDE_PHYSICS_SHAPE_SPHERE: {
+			rde_physics_sphere_shape_settings* _rde_shape_settings = (rde_physics_sphere_shape_settings*)_shape_settings;
 			JPH::SphereShapeSettings _jolt_shape_settings = JPH::SphereShapeSettings(_rde_shape_settings->radius);
 			_shape = _jolt_shape_settings.Create();
 		} break;
 
 		default: {
-			rde_critical_error(true, "RDE Jolt Physics, tried to add a non supported or implemented shape with id '%d' \n", _shape_type);
+			rde_error(true, "RDE Jolt Physics, tried to add a non supported or implemented shape with id '%d' \n", _shape_type);
 		}
 	}
 
@@ -338,13 +350,16 @@ rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_set
 
 	// RDE is left-handed with Y-Up, Jolt is righ-handed with Y-Up, this modifications are used to 
 	// transform form RDE's Coordinate system to Jolts's Coordinate system
-	JPH::Quat _quat = JPH::Quat::sEulerAngles(JPH::Vec3Arg(DEGS_TO_RADS(_transform->rotation.z), 
-	                                                       DEGS_TO_RADS(_transform->rotation.y), 
-	                                                       DEGS_TO_RADS(_transform->rotation.x)));
+	rde_vec_3F _rotation = rde_transform_get_rot_degs(_transform);
+	JPH::Quat _quat = JPH::Quat::sEulerAngles(JPH::Vec3Arg(DEGS_TO_RADS(_rotation.z), 
+	                                                       DEGS_TO_RADS(_rotation.y), 
+	                                                       DEGS_TO_RADS(_rotation.x)));
+	
+	rde_vec_3F _position = rde_transform_get_pos(_transform);
 	JPH::BodyCreationSettings _body_creation_settings(_body->shape.inner_shape, 
-	                                                  JPH::RVec3(_transform->position.x, 
-	                                                             _transform->position.y,
-	                                                             _transform->position.z), 
+	                                                  JPH::RVec3(_position.x, 
+	                                                             _position.y,
+	                                                             _position.z), 
 	                                                             _quat,
 	                                                             (JPH::EMotionType)_body_settings.motion_type, 
 	                                                             _body_settings.layer);
@@ -359,8 +374,8 @@ rde_jolt_body* rde_jolt_body_load(RDE_JOLT_SHAPE_ _shape_type, rde_jolt_body_set
 	return _body;
 }
 
-void rde_jolt_body_unload(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_unload(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 
 	if(body_interface->IsAdded(_body->inner_body->GetID())) {
 		body_interface->RemoveBody(_body->inner_body->GetID());
@@ -372,7 +387,7 @@ void rde_jolt_body_unload(rde_jolt_body* _body) {
 		int _new_last_index = -1;
 
 		for(int _i = 0; _i < last_used_body_index; _i++) {
-			rde_jolt_body* _body = &body_pool[_i];
+			rde_physics_body* _body = &body_pool[_i];
 			
 			if(_body->inner_body != nullptr) {
 				_new_last_index = _i;
@@ -385,20 +400,20 @@ void rde_jolt_body_unload(rde_jolt_body* _body) {
 	*_body = create_body_struct();
 }
 
-void rde_jolt_body_add_to_simulation(rde_jolt_body* _body, RDE_JOLT_BODY_ACTIVATION_ _activation) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_to_simulation(rde_physics_body* _body, RDE_PHYSICS_BODY_ACTIVATION_ _activation) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->AddBody(_body->inner_body->GetID(), (JPH::EActivation)_activation);
 }
 
-void rde_jolt_body_remove_from_simulation(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_remove_from_simulation(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	if(body_interface->IsAdded(_body->inner_body->GetID())) {
 		body_interface->RemoveBody(_body->inner_body->GetID());
 	}
 }
 
-void rde_jolt_body_set_active(rde_jolt_body* _body, bool _active) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_active(rde_physics_body* _body, bool _active) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	
 	if(_active) {
 		body_interface->ActivateBody(_body->inner_body->GetID());
@@ -407,30 +422,33 @@ void rde_jolt_body_set_active(rde_jolt_body* _body, bool _active) {
 	}
 }
 
-void rde_jolt_body_set_transform(rde_jolt_body* _body, rde_transform* _transform) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
-	rde_critical_error(_body == NULL, "%s had '_transform' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_transform(rde_physics_body* _body, rde_transform* _transform) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+	rde_error(_body == NULL, "%s had '_transform' NULL, crashing application", __FUNCTION__);
 
 	// RDE is left-handed with Y-Up, Jolt is righ-handed with Y-Up, this modifications are used to 
 	// transform form RDE's Coordinate system to Jolts's Coordinate system
-	JPH::Quat _quat = JPH::Quat::sEulerAngles(JPH::Vec3Arg(DEGS_TO_RADS(_transform->rotation.z), 
-	                                                       DEGS_TO_RADS(_transform->rotation.y), 
-	                                                       DEGS_TO_RADS(_transform->rotation.x)));
+	rde_vec_3F _rotation = rde_transform_get_rot_degs(_transform);
+	JPH::Quat _quat = JPH::Quat::sEulerAngles(JPH::Vec3Arg(DEGS_TO_RADS(_rotation.z), 
+	                                                       DEGS_TO_RADS(_rotation.y), 
+	                                                       DEGS_TO_RADS(_rotation.x)));
+	
+	rde_vec_3F _position = rde_transform_get_pos(_transform);
 	body_interface->SetPositionAndRotation(_body->inner_body->GetID(),
-										   { _transform->position.x, _transform->position.y, _transform->position.z },
+										   { _position.x, _position.y, _position.z },
 										   _quat, 
 										   _body->inner_body->IsActive() ? JPH::EActivation::Activate : JPH::EActivation::DontActivate);
 }
 
-void rde_jolt_body_set_position(rde_jolt_body* _body, rde_vec_3F _position) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_position(rde_physics_body* _body, rde_vec_3F _position) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->SetPosition(_body->inner_body->GetID(),
 	                            { _position.x, _position.y, _position.z },
 								_body->inner_body->IsActive() ? JPH::EActivation::Activate : JPH::EActivation::DontActivate);
 }
 
-void rde_jolt_body_set_rotation(rde_jolt_body* _body, rde_vec_3F _rotation_degs) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_rotation(rde_physics_body* _body, rde_vec_3F _rotation_degs) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 
 	// RDE is left-handed with Y-Up, Jolt is righ-handed with Y-Up, this modifications are used to 
 	// transform form RDE's Coordinate system to Jolts's Coordinate system
@@ -442,15 +460,15 @@ void rde_jolt_body_set_rotation(rde_jolt_body* _body, rde_vec_3F _rotation_degs)
 	                            _body->inner_body->IsActive() ? JPH::EActivation::Activate : JPH::EActivation::DontActivate);
 }
 
-rde_quaternion rde_jolt_body_get_rotation_quat(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+rde_quaternion rde_physics_body_get_rotation_quat(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	JPH::Quat _quat = _body->inner_body->GetRotation();
 	// I think this is wrong, need to check it out. 
 	return { _quat.GetZ(), _quat.GetY(), _quat.GetX(), -_quat.GetW() };
 }
 
-rde_vec_3F rde_jolt_body_get_rotation_euler_rads(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+rde_vec_3F rde_physics_body_get_rotation_euler_rads(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	JPH::Vec3 _euler = _body->inner_body->GetRotation().GetEulerAngles();
 
 	// RDE is left-handed with Y-Up, Jolt is righ-handed with Y-Up, this modifications are used to 
@@ -462,8 +480,8 @@ rde_vec_3F rde_jolt_body_get_rotation_euler_rads(rde_jolt_body* _body) {
 	};
 }
 
-rde_vec_3F rde_jolt_body_get_rotation_euler_degs(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+rde_vec_3F rde_physics_body_get_rotation_euler_degs(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	JPH::Vec3 _euler = _body->inner_body->GetRotation().GetEulerAngles();
 
 	// RDE is left-handed with Y-Up, Jolt is righ-handed with Y-Up, this modifications are used to 
@@ -475,30 +493,30 @@ rde_vec_3F rde_jolt_body_get_rotation_euler_degs(rde_jolt_body* _body) {
 	};
 }
 
-float rde_jolt_body_get_friction(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+float rde_physics_body_get_friction(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return _body->inner_body->GetFriction();
 }
 
-void rde_jolt_body_set_friction(rde_jolt_body* _body, float _friction) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_friction(rde_physics_body* _body, float _friction) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	_friction = _friction > 1.0f ? 1.0f : (_friction < 0.0f ? 0.0f : _friction);
 	_body->inner_body->SetFriction(_friction);
 }
 
-float rde_jolt_body_get_restitution(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+float rde_physics_body_get_restitution(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return _body->inner_body->GetRestitution();
 }
 
-void rde_jolt_body_set_restitution(rde_jolt_body* _body, float _restitution) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_restitution(rde_physics_body* _body, float _restitution) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	_restitution = _restitution > 1.0f ? 1.0f : (_restitution < 0.0f ? 0.0f : _restitution);
 	_body->inner_body->SetRestitution(_restitution);
 }
 
-float rde_jolt_body_get_mass(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+float rde_physics_body_get_mass(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 
 	if(_body->inner_body->GetMotionType() != JPH::EMotionType::Dynamic) {
 		// Non Dynamic bodies have infinite mass
@@ -508,10 +526,10 @@ float rde_jolt_body_get_mass(rde_jolt_body* _body) {
 	return 1.f / _body->inner_body->GetMotionPropertiesUnchecked()->GetInverseMass();
 }
 
-void rde_jolt_body_set_mass(rde_jolt_body* _body, float _mass) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_mass(rde_physics_body* _body, float _mass) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	if(_body->inner_body->GetMotionType() != JPH::EMotionType::Dynamic) {
-		rde_log_level(RDE_LOG_LEVEL_WARNING, "Non Dynamic bodies cannot set their mass, it is infinite \n");
+		rde_log(RDE_LOG_LEVEL_WARNING, "Non Dynamic bodies cannot set their mass, it is infinite \n");
 		return;
 	}
 	JPH::EAllowedDOFs _dofs = _body->inner_body->GetMotionProperties()->GetAllowedDOFs();
@@ -521,125 +539,125 @@ void rde_jolt_body_set_mass(rde_jolt_body* _body, float _mass) {
 	});
 }
 
-bool rde_jolt_body_is_sensor(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+bool rde_physics_body_is_sensor(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return _body->inner_body->IsSensor();
 }
 
-void rde_jolt_body_set_sensor(rde_jolt_body* _body, bool _sensor) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_sensor(rde_physics_body* _body, bool _sensor) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	_body->inner_body->SetIsSensor(_sensor);
 }
 
-RDE_JOLT_BODY_MOTION_TYPE_ rde_jolt_body_get_motion_type(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
-	return (RDE_JOLT_BODY_MOTION_TYPE_)_body->inner_body->GetMotionType();
+RDE_PHYSICS_BODY_MOTION_TYPE_ rde_physics_body_get_motion_type(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+	return (RDE_PHYSICS_BODY_MOTION_TYPE_)_body->inner_body->GetMotionType();
 }
 
-void rde_jolt_body_set_motion_type(rde_jolt_body* _body, RDE_JOLT_BODY_MOTION_TYPE_ _motion_type) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_motion_type(rde_physics_body* _body, RDE_PHYSICS_BODY_MOTION_TYPE_ _motion_type) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	_body->inner_body->SetMotionType((JPH::EMotionType)_motion_type);
 }
 
-RDE_JOLT_BODY_DOF_ rde_jolt_body_get_degrees_of_freedom(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
-	return (RDE_JOLT_BODY_DOF_)_body->inner_body->GetMotionProperties()->GetAllowedDOFs();
+RDE_PHYSICS_BODY_DOF_ rde_physics_body_get_degrees_of_freedom(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+	return (RDE_PHYSICS_BODY_DOF_)_body->inner_body->GetMotionProperties()->GetAllowedDOFs();
 }
 
-void rde_jolt_body_set_degrees_of_freedom(rde_jolt_body* _body, RDE_JOLT_BODY_DOF_ _degrees_of_freedom) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_degrees_of_freedom(rde_physics_body* _body, RDE_PHYSICS_BODY_DOF_ _degrees_of_freedom) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	_body->inner_body->GetMotionProperties()->SetMassProperties((JPH::EAllowedDOFs)_degrees_of_freedom,
 	                                                            _body->shape.inner_shape->GetMassProperties());
 }
 
-bool rde_jolt_body_is_sleeping(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+bool rde_physics_body_is_sleeping(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return !_body->inner_body->IsActive();
 }
 
-float rde_jolt_body_get_gravity_factor(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+float rde_physics_body_get_gravity_factor(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return body_interface->GetGravityFactor(_body->inner_body->GetID());
 }
 
-void rde_jolt_body_set_gravity_factor(rde_jolt_body* _body, float _gravity_factor) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_set_gravity_factor(rde_physics_body* _body, float _gravity_factor) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->SetGravityFactor(_body->inner_body->GetID(), _gravity_factor);
 }
 
-void rde_jolt_body_add_impulse(rde_jolt_body* _body, rde_vec_3F _impulse) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_impulse(rde_physics_body* _body, rde_vec_3F _impulse) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->AddImpulse(_body->inner_body->GetID(), { _impulse.x, _impulse.y, _impulse.z });
 }
 
-void rde_jolt_body_add_force(rde_jolt_body* _body, rde_vec_3F _force) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_force(rde_physics_body* _body, rde_vec_3F _force) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->AddForce(_body->inner_body->GetID(), { _force.x, _force.y, _force.z });
 }
 
-void rde_jolt_body_add_linear_velocity(rde_jolt_body* _body, rde_vec_3F _linear_velocity) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_linear_velocity(rde_physics_body* _body, rde_vec_3F _linear_velocity) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->AddLinearVelocity(_body->inner_body->GetID(), { _linear_velocity.x, _linear_velocity.y, _linear_velocity.z });
 }
 
-void rde_jolt_body_add_torque(rde_jolt_body* _body, rde_vec_3F _torque) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_torque(rde_physics_body* _body, rde_vec_3F _torque) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->AddTorque(_body->inner_body->GetID(), { _torque.x, _torque.y, _torque.z });
 }
 
-void rde_jolt_body_add_angular_impulse(rde_jolt_body* _body, rde_vec_3F _angular_impulse) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_angular_impulse(rde_physics_body* _body, rde_vec_3F _angular_impulse) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->AddAngularImpulse(_body->inner_body->GetID(), { _angular_impulse.x, _angular_impulse.y, _angular_impulse.z });
 }
 
-void rde_jolt_body_add_angular_linear_velocity(rde_jolt_body* _body, rde_vec_3F _angular_linear_velocity) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+void rde_physics_body_add_angular_linear_velocity(rde_physics_body* _body, rde_vec_3F _angular_linear_velocity) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	body_interface->SetAngularVelocity(_body->inner_body->GetID(), { _angular_linear_velocity.z, _angular_linear_velocity.y, _angular_linear_velocity.x });
 }
 
-rde_jolt_shape* rde_jolt_body_get_shape(rde_jolt_body* _body) {
-	rde_critical_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
+rde_physics_shape* rde_physics_body_get_shape(rde_physics_body* _body) {
+	rde_error(_body == NULL, "%s had '_body' NULL, crashing application", __FUNCTION__);
 	return &_body->shape;
 }
 
-RDE_JOLT_SHAPE_ rde_jolt_shape_get_type(rde_jolt_shape* _shape) {
-	rde_critical_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
+RDE_PHYSICS_SHAPE_ rde_physics_shape_get_type(rde_physics_shape* _shape) {
+	rde_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
 	return _shape->shape_type;
 }
 
-void rde_jolt_shape_get_bounds(rde_jolt_shape* _shape, RDE_JOLT_SHAPE_ _shape_type, void* _out_bounds) {
-	rde_critical_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
+void rde_physics_shape_get_bounds(rde_physics_shape* _shape, RDE_PHYSICS_SHAPE_ _shape_type, void* _out_bounds) {
+	rde_error(_shape == NULL, "%s had '_shape' NULL, crashing application", __FUNCTION__);
 
 	switch(_shape_type) {
-		case RDE_JOLT_SHAPE_BOX: {
+		case RDE_PHYSICS_SHAPE_BOX: {
 			JPH::BoxShape* _box_shape = (JPH::BoxShape*)_shape->inner_shape;
 			JPH::Vec3 _half_extent = _box_shape->GetHalfExtent();
-			rde_jolt_box_shape_bounds* _rde_box_shape = (rde_jolt_box_shape_bounds*)_out_bounds;
+			rde_physics_box_shape_bounds* _rde_box_shape = (rde_physics_box_shape_bounds*)_out_bounds;
 			_rde_box_shape->width = _half_extent.GetX();
 			_rde_box_shape->height = _half_extent.GetY();
 			_rde_box_shape->depth = _half_extent.GetZ();
 		} break;
 
-		case RDE_JOLT_SHAPE_SPHERE: {
+		case RDE_PHYSICS_SHAPE_SPHERE: {
 			JPH::SphereShape* _sphere_shape = (JPH::SphereShape*)_shape->inner_shape;
 			float _radius = _sphere_shape->GetRadius();
-			rde_jolt_sphere_shape_bounds* _rde_box_shape = (rde_jolt_sphere_shape_bounds*)_out_bounds;
+			rde_physics_sphere_shape_bounds* _rde_box_shape = (rde_physics_sphere_shape_bounds*)_out_bounds;
 			_rde_box_shape->radius = _radius;
 		} break;
 
 		default: {
-			rde_critical_error(true, "rde_jolt_shape_get_bounds shape id '%d' not supported or not implemented \n", _shape_type);
+			rde_error(true, "rde_physics_shape_get_bounds shape id '%d' not supported or not implemented \n", _shape_type);
 		} break;
 	}
 }
 
 
-void rde_jolt_update(float _fixed_dt) {
+void rde_physics_update(float _fixed_dt) {
 	JPH::EPhysicsUpdateError _error = physics_system->Update(_fixed_dt, init_config.collision_steps_per_update, temp_allocator, job_system);
-	rde_critical_error(_error != JPH::EPhysicsUpdateError::None, "RDE Jolt Physics Update error code '%d', crashing before malfunctioning", _error);
+	rde_error(_error != JPH::EPhysicsUpdateError::None, "RDE Jolt Physics Update error code '%d', crashing before malfunctioning", _error);
 
 	for(int _i = 0; _i <= last_used_body_index; _i++) {
-		rde_jolt_body* _body = &body_pool[_i];
+		rde_physics_body* _body = &body_pool[_i];
 		if(_body->inner_body == NULL) {
 			continue;
 		}
@@ -647,50 +665,54 @@ void rde_jolt_update(float _fixed_dt) {
 		JPH::RVec3 _position = _body->inner_body->GetPosition();
 		JPH::Quat _quat = _body->inner_body->GetRotation();
 
-		if(_body->motion_type != RDE_JOLT_BODY_MOTION_TYPE_STATIC) {
+		if(_body->motion_type != RDE_PHYSICS_BODY_MOTION_TYPE_STATIC) {
 			JPH::Vec3 _euler = _quat.GetEulerAngles();
-			_body->transform->position.x = _position.GetX();
-			_body->transform->position.y = _position.GetY();
-			_body->transform->position.z = _position.GetZ();
+			rde_transform_set_pos(_body->transform, (rde_vec_3F) {
+				_position.GetX(),
+				_position.GetY(),
+				_position.GetZ()
+			});
 
 			// Jolt is righ-handed with Y-Up, RDE is left-handed with Y-Up, this modifications are used to 
 			// transform form Jolt's Coordinate system to RDE's Coordinate system
-			_body->transform->rotation.x = -RADS_TO_DEGS(_euler.GetZ());
-			_body->transform->rotation.y = -RADS_TO_DEGS(_euler.GetY());
-			_body->transform->rotation.z = -RADS_TO_DEGS(_euler.GetX());
+			rde_transform_set_pos(_body->transform, (rde_vec_3F) {
+				-RADS_TO_DEGS(_euler.GetZ()),
+				-RADS_TO_DEGS(_euler.GetY()),
+				-RADS_TO_DEGS(_euler.GetX())
+			});
 		}
 	}
 }
 
-rde_quaternion rde_jolt_euler_degs_to_quaternion(rde_vec_3F _euler) {
+rde_quaternion rde_physics_euler_degs_to_quaternion(rde_vec_3F _euler) {
 	JPH::Quat _quat = JPH::Quat::sEulerAngles(JPH::Vec3Arg(DEGS_TO_RADS(_euler.x), DEGS_TO_RADS(_euler.y), DEGS_TO_RADS(_euler.z)));
 	return { _quat.GetX(), _quat.GetY(), _quat.GetZ(), _quat.GetW() };
 }
 
-rde_quaternion rde_jolt_euler_rads_to_quaternion(rde_vec_3F _euler) {
+rde_quaternion rde_physics_euler_rads_to_quaternion(rde_vec_3F _euler) {
 	JPH::Quat _quat = JPH::Quat::sEulerAngles(JPH::Vec3Arg(_euler.x, _euler.y, _euler.z));
 	return { _quat.GetX(), _quat.GetY(), _quat.GetZ(), _quat.GetW() };
 }
 
-rde_vec_3F rde_jolt_quaternion_to_euler_degs(rde_quaternion _quat) {
+rde_vec_3F rde_physics_quaternion_to_euler_degs(rde_quaternion _quat) {
 	JPH::Quat _q(_quat.x, _quat.y, _quat.z, _quat.w);
 	JPH::Vec3 _euler = _q.GetEulerAngles();
 	return { RADS_TO_DEGS(_euler.GetX()), RADS_TO_DEGS(_euler.GetY()), RADS_TO_DEGS(_euler.GetZ()) };
 }
 
-rde_vec_3F rde_jolt_quaternion_to_euler_rads(rde_quaternion _quat) {
+rde_vec_3F rde_physics_quaternion_to_euler_rads(rde_quaternion _quat) {
 	JPH::Quat _q(_quat.x, _quat.y, _quat.z, _quat.w);
 	JPH::Vec3 _euler = _q.GetEulerAngles();
 	return { _euler.GetX(), _euler.GetY(), _euler.GetZ() };
 }
 
-void rde_jolt_iterate_over_bodies(body_iter_callback _iterate_body_callback) {
+void rde_physics_iterate_over_bodies(rde_physics_body_iter_callback_fn _iterate_body_callback) {
 	if(_iterate_body_callback == nullptr) {
 		return;
 	}
 
 	for (int _i = 0; _i <= last_used_body_index; _i++) {
-		rde_jolt_body* _body = &body_pool[_i];
+		rde_physics_body* _body = &body_pool[_i];
 		if (_body->inner_body == NULL) {
 			continue;
 		}
@@ -699,13 +721,13 @@ void rde_jolt_iterate_over_bodies(body_iter_callback _iterate_body_callback) {
 	}
 }
 
-void rde_jolt_end() {
+void rde_physics_end() {
 
 	for(int _i = 0; _i <= last_used_body_index; _i++) {
-		rde_jolt_body* _body = &body_pool[_i];
+		rde_physics_body* _body = &body_pool[_i];
 		
 		if(_body->inner_body != nullptr) {
-			rde_jolt_body_unload(_body);
+			rde_physics_body_unload(_body);
 		}
 	}
 

@@ -15,8 +15,8 @@ rde_transform physics_cube_body_transform;
 rde_transform physics_floor_body_transform;
 rde_model* physics_body_model;
 rde_mesh* physics_floor_mesh;
-rde_jolt_body* physics_cube_body;
-rde_jolt_body* physics_floor_body;
+rde_physics_body* physics_cube_body;
+rde_physics_body* physics_floor_body;
 
 bool physics_simulation_running = false;
 
@@ -148,8 +148,8 @@ void physics_draw_imgui(float _dt, rde_window* _window) {
 	rde_imgui_begin("Physics Settings", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize);
 	if(rde_imgui_button_default("Play Simulation")) {
 		physics_simulation_running = !physics_simulation_running;
-		rde_jolt_body_set_active(physics_cube_body, physics_simulation_running);
-		rde_jolt_body_set_active(physics_floor_body, physics_simulation_running);
+		rde_physics_body_set_active(physics_cube_body, physics_simulation_running);
+		rde_physics_body_set_active(physics_floor_body, physics_simulation_running);
 	}
 	rde_imgui_checkbox("Draw debug shapes", &physics_draw_debug_shapes);
 
@@ -182,9 +182,9 @@ void physics_draw_imgui(float _dt, rde_window* _window) {
 
 	if(rde_imgui_button_default("Restart Simulation")) {
 		physics_simulation_running = true;
-		rde_jolt_body_set_active(physics_cube_body, physics_simulation_running);
-		rde_jolt_body_set_active(physics_floor_body, physics_simulation_running);
-		rde_jolt_body_set_transform(physics_cube_body, &INITIAL_TRANSFORM);
+		rde_physics_body_set_active(physics_cube_body, physics_simulation_running);
+		rde_physics_body_set_active(physics_floor_body, physics_simulation_running);
+		rde_physics_body_set_transform(physics_cube_body, &INITIAL_TRANSFORM);
 	}
 
 	rde_imgui_end();
@@ -197,13 +197,13 @@ void physics_on_render(float _dt, rde_window* _window) {
 	physics_draw_3d(_window, _dt);
 	
 	if(physics_draw_debug_shapes) {
-		rde_jolt_draw_debug_shapes(_window, &physics_camera);
+		rde_physics_draw_debug_shapes(_window, &physics_camera);
 	}
 }
 
 void physics_unload() {
-	rde_jolt_body_unload(physics_floor_body);
-	rde_jolt_body_unload(physics_cube_body);
+	rde_physics_body_unload(physics_floor_body);
+	rde_physics_body_unload(physics_cube_body);
 
 	rde_rendering_mesh_destroy(physics_floor_mesh, false);
 	rde_rendering_model_unload(physics_body_model);
@@ -240,38 +240,38 @@ void physics_init() {
 	physics_cube_body_transform = INITIAL_TRANSFORM;
 	physics_floor_body_transform = rde_struct_create_transform();
 
-	rde_jolt_body_settings _floor_settings = {
-		.motion_type = RDE_JOLT_BODY_MOTION_TYPE_STATIC,
+	rde_physics_body_settings _floor_settings = {
+		.motion_type = RDE_PHYSICS_BODY_MOTION_TYPE_STATIC,
 		.layer = 0,
 		.mass = 1.f,
 		.restitution = 0.0f,
 		.friction = 0.5f
 	};
-	rde_jolt_box_shape_settings _floor_box_shape_settings = {
+	rde_physics_box_shape_settings _floor_box_shape_settings = {
 		.width = 10.f,
 		.height = 1.f,
 		.depth = 10.f
 	};
 	physics_floor_mesh = rde_rendering_mesh_create_prism((rde_vec_3F) { _floor_box_shape_settings.width, _floor_box_shape_settings.height, _floor_box_shape_settings.depth }, NULL);
-	physics_floor_body = rde_jolt_body_load(RDE_JOLT_SHAPE_BOX, _floor_settings, (void*)&_floor_box_shape_settings, &physics_floor_body_transform);
+	physics_floor_body = rde_physics_body_load(RDE_PHYSICS_SHAPE_BOX, _floor_settings, (void*)&_floor_box_shape_settings, &physics_floor_body_transform);
 
 
-	rde_jolt_body_settings _cube_settings = {
-		.motion_type = RDE_JOLT_BODY_MOTION_TYPE_DYNAMIC,
+	rde_physics_body_settings _cube_settings = {
+		.motion_type = RDE_PHYSICS_BODY_MOTION_TYPE_DYNAMIC,
 		.layer = 1,
 		.mass = 1.f,
 		.restitution = 0.0f,
 		.friction = 0.5f
 	};
-	rde_jolt_box_shape_settings _cube_box_shape_settings = {
+	rde_physics_box_shape_settings _cube_box_shape_settings = {
 		.width = 1.f,
 		.height = 1.f,
 		.depth = 1.f
 	};
 
 	physics_body_model = rde_rendering_model_load("../../../../skate_or_dice/assets/dices/dice.obj");
-	physics_cube_body = rde_jolt_body_load(RDE_JOLT_SHAPE_BOX, _cube_settings, (void*)&_cube_box_shape_settings, &physics_cube_body_transform);
+	physics_cube_body = rde_physics_body_load(RDE_PHYSICS_SHAPE_BOX, _cube_settings, (void*)&_cube_box_shape_settings, &physics_cube_body_transform);
 
-	rde_jolt_body_add_to_simulation(physics_floor_body, RDE_JOLT_BODY_ACTIVATION_DONT_ACTIVATE);
-	rde_jolt_body_add_to_simulation(physics_cube_body, RDE_JOLT_BODY_ACTIVATION_DONT_ACTIVATE);
+	rde_physics_body_add_to_simulation(physics_floor_body, RDE_PHYSICS_BODY_ACTIVATION_DONT_ACTIVATE);
+	rde_physics_body_add_to_simulation(physics_cube_body, RDE_PHYSICS_BODY_ACTIVATION_DONT_ACTIVATE);
 }

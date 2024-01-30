@@ -1620,9 +1620,9 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
 
 #ifdef RDE_PHYSICS_MODULE
 rde_vec_3F rde_inner_physics_rotate_box_point(rde_vec_3F _point, rde_vec_3F _rotation, rde_vec_3F _bounds);
-void rde_inner_jolt_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds);
-void rde_inner_jolt_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform);
-void rde_inner_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+void rde_inner_physics_draw_debug_box(rde_transform* _transform, rde_physics_box_shape_bounds* _box_bounds);
+void rde_inner_physics_draw_debug_shapes_specific(rde_physics_body* _body, rde_physics_shape* _shape, rde_transform* _transform);
+void rde_inner_physics_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 #endif
 
 /// ******************************************* EVENTS *********************************************
@@ -1782,7 +1782,7 @@ void rde_inner_engine_on_update(float _dt) {
 
 #if defined(RDE_PHYSICS_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
 void rde_inner_engine_on_fixed_update(float _fixed_dt) {
-	rde_jolt_update(_fixed_dt);
+	rde_physics_update(_fixed_dt);
 }
 #endif
 
@@ -1944,7 +1944,15 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 	rde_inner_rendering_set_rendering_configuration(_default_window);
 
 #ifdef RDE_PHYSICS_MODULE
-	rde_jolt_init(_engine_init_info.jolt_config, rde_critical_error, rde_log_level_inner);
+	rde_physics_callbacks _callbacks = {
+		.error_fn = rde_critical_error,
+		.log_fn = rde_log_level_inner,
+		.get_pos_fn = rde_transform_get_position,
+		.get_rot_fn = rde_transform_get_rotation_degs,
+		.set_pos_fn = rde_transform_set_position,
+		.set_rot_fn = rde_transform_set_rotation
+	};
+	rde_physics_init(_engine_init_info.jolt_config, _callbacks);
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Jolt loaded correctly");
 #endif
 
@@ -2256,7 +2264,7 @@ void rde_engine_destroy_engine() {
 #endif
 
 #ifdef RDE_PHYSICS_MODULE
-	rde_jolt_end();
+	rde_physics_end();
 #endif
 
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
@@ -7316,7 +7324,7 @@ rde_vec_3F rde_inner_physics_rotate_box_point(rde_vec_3F _point, rde_vec_3F _rot
 	return (rde_vec_3F) { _rotated_point[0], _rotated_point[1], _rotated_point[2] };
 }
 
-void rde_inner_jolt_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape_bounds* _box_bounds) {
+void rde_inner_physics_draw_debug_box(rde_transform* _transform, rde_physics_box_shape_bounds* _box_bounds) {
 
 	// Front and back faces
 	for(int _i = 0; _i < 2; _i++) {
@@ -7359,26 +7367,26 @@ void rde_inner_jolt_draw_debug_box(rde_transform* _transform, rde_jolt_box_shape
 	}
 }
 
-void rde_inner_jolt_draw_debug_shapes_specific(rde_jolt_body* _body, rde_jolt_shape* _shape, rde_transform* _transform) {
+void rde_inner_physics_draw_debug_shapes_specific(rde_physics_body* _body, rde_physics_shape* _shape, rde_transform* _transform) {
 	RDE_UNUSED(_body)
 
-	RDE_JOLT_SHAPE_ _shape_type = rde_jolt_shape_get_type(_shape);
+	RDE_PHYSICS_SHAPE_ _shape_type = rde_physics_shape_get_type(_shape);
 	switch(_shape_type) {
-		case RDE_JOLT_SHAPE_BOX: {
-			rde_jolt_box_shape_bounds _box_bounds;
-			rde_jolt_shape_get_bounds(_shape, RDE_JOLT_SHAPE_BOX, (void*)&_box_bounds);
-			rde_inner_jolt_draw_debug_box(_transform, &_box_bounds);
+		case RDE_PHYSICS_SHAPE_BOX: {
+			rde_physics_box_shape_bounds _box_bounds;
+			rde_physics_shape_get_bounds(_shape, RDE_PHYSICS_SHAPE_BOX, (void*)&_box_bounds);
+			rde_inner_physics_draw_debug_box(_transform, &_box_bounds);
 		} break;
 
-		case RDE_JOLT_SHAPE_SPHERE: {
+		case RDE_PHYSICS_SHAPE_SPHERE: {
 			rde_log_level(RDE_LOG_LEVEL_WARNING, "Rendering Debug Sphere is not implemented yet");
 		} break;
 	}
 }
 
-void rde_inner_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera) {
+void rde_inner_physics_draw_debug_shapes(rde_window* _window, rde_camera* _camera) {
 	rde_render_3d(_window, _camera, false, {
-		rde_jolt_iterate_over_bodies(rde_inner_jolt_draw_debug_shapes_specific);
+		rde_physics_iterate_over_bodies(rde_inner_physics_draw_debug_shapes_specific);
 	})
 }
 

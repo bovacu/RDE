@@ -2369,6 +2369,36 @@ typedef enum {
 	RDE_PHYSICS_SHAPE_TYPE_MESH
 } RDE_PHYSICS_SHAPE_TYPE_;
 
+typedef enum {
+	RDE_PHYSICS_BODY_MOTION_TYPE_STATIC,		///< Non movable
+	RDE_PHYSICS_BODY_MOTION_TYPE_KINEMATIC,	///< Movable using velocities only, does not respond to forces
+	RDE_PHYSICS_BODY_MOTION_TYPE_DYNAMIC,		///< Responds to forces as a normal physics object
+} RDE_PHYSICS_BODY_MOTION_TYPE_;
+
+typedef enum {
+	RDE_PHYSICS_BODY_ACTIVATION_ACTIVATE,		///< Activate the body, making it part of the simulation
+	RDE_PHYSICS_BODY_ACTIVATION_DONT_ACTIVATE	///< Leave activation state as it is (will not deactivate an active body)
+} RDE_PHYSICS_BODY_ACTIVATION_;
+
+typedef enum {
+	RDE_PHYSICS_SHAPE_BOX,
+	RDE_PHYSICS_SHAPE_SPHERE,
+} RDE_PHYSICS_SHAPE_;
+
+typedef enum {
+	RDE_PHYSICS_BODY_DOF_NONE				= 0b000000,									///< No degrees of freedom are allowed. Note that this is not valid and will crash. Use a static body instead.
+	RDE_PHYSICS_BODY_DOF_ALL				= 0b111111,									///< All degrees of freedom are allowed
+	RDE_PHYSICS_BODY_DOF_TRANSLATION_X		= 0b000001,									///< Body cannot move in world space X axis
+	RDE_PHYSICS_BODY_DOF_TRANSLATION_Y		= 0b000010,									///< Body cannot move in world space Y axis
+	RDE_PHYSICS_BODY_DOF_TRANSLATION_Z		= 0b000100,									///< Body cannot move in world space Z axis
+	RDE_PHYSICS_BODY_DOF_ROTATION_X		= 0b001000,									///< Body cannot rotate around local space X axis
+	RDE_PHYSICS_BODY_DOF_ROTATION_Y		= 0b010000,									///< Body cannot rotate around local space Y axis
+	RDE_PHYSICS_BODY_DOF_ROTATION_Z		= 0b100000,									///< Body cannot rotate around local space Z axis
+	RDE_PHYSICS_BODY_DOF_PLANE_2D			= RDE_PHYSICS_BODY_DOF_TRANSLATION_X | RDE_PHYSICS_BODY_DOF_TRANSLATION_Y | RDE_PHYSICS_BODY_DOF_TRANSLATION_Z,	///< Body can only move in X and Y axis and rotate around Z axis
+	RDE_PHYSICS_BODY_DOF_ALL_TRANSLATION	= RDE_PHYSICS_BODY_DOF_TRANSLATION_X | RDE_PHYSICS_BODY_DOF_TRANSLATION_Y | RDE_PHYSICS_BODY_DOF_TRANSLATION_Z,
+	RDE_PHYSICS_BODY_DOF_ALL_ROTATION		= RDE_PHYSICS_BODY_DOF_ROTATION_X | RDE_PHYSICS_BODY_DOF_ROTATION_Y | RDE_PHYSICS_BODY_DOF_ROTATION_Z,
+} RDE_PHYSICS_BODY_DOF_;
+
 // 											==============================================================================
 // 											=									STRUCTS					 	   	 		 =
 // 											==============================================================================
@@ -2623,7 +2653,19 @@ typedef uint rde_skybox_id;
 // Represents a mesh, may be part of a model or not. This is just a pointer, implementation is in the source file.
 typedef struct rde_mesh rde_mesh;
 
+#ifdef RDE_PHYSICS_MODULE
+// Type: rde_physics_body_id
+// Represents an ID from a physics body.
+typedef unsigned int rde_physics_body_id;
 
+// Type: rde_physics_shape
+// Represents the shape of a physics body.
+typedef struct rde_physics_shape rde_physics_shape;
+
+// Type: rde_physics_body
+// Represents a physics body.
+typedef struct rde_physics_body rde_physics_body;
+#endif
 
 // =================================================================== UTIL ====================================================================
 
@@ -2666,10 +2708,6 @@ struct rde_camera {
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;
 };
-
-#ifdef RDE_PHYSICS_MODULE
-#include "JoltC/rde_joltc.h"
-#endif
 
 #ifdef RDE_IMGUI_MODULE
 #include "rde_imgui.h"
@@ -2860,6 +2898,31 @@ typedef void (*rde_update_func)(float);
 //	_window - the pointer to the window that will render the scene.
 typedef void (*rde_render_func)(float, rde_window*);
 
+#ifdef RDE_PHYSICS_MODULE
+// Callback: rde_render_func
+// Function pointer (callback) valid for render function. Users need one of these callbacks per function.
+//
+// Parameters:
+//	_dt - delta time passed between frames.
+//	_window - the pointer to the window that will render the scene.
+typedef void(*rde_physics_error_fn)(bool, const char*, ...);
+typedef void(*rde_physics_log_fn)(RDE_LOG_LEVEL_, const char*, ...);
+typedef rde_vec_3F(*rde_physics_transform_get_pos)(rde_transform*);
+typedef rde_vec_3F(*rde_physics_transform_get_rot)(rde_transform*);
+typedef void(*rde_physics_transform_set_pos)(rde_transform*, rde_vec_3F);
+typedef void(*rde_physics_transform_set_rot)(rde_transform*, rde_vec_3F);
+typedef void(*rde_physics_body_iter_callback_fn)(rde_physics_body*, rde_physics_shape*, rde_transform*);
+
+typedef struct {
+	rde_physics_error_fn error_fn;
+	rde_physics_log_fn log_fn;
+	rde_physics_transform_get_pos get_pos_fn;
+	rde_physics_transform_get_rot get_rot_fn;
+	rde_physics_transform_set_pos set_pos_fn;
+	rde_physics_transform_set_rot set_rot_fn;
+} rde_physics_callbacks;
+#endif
+
 // Type: rde_end_user_mandatory_callbacks
 // All callbacks that end user must provide for the engine to work.
 //
@@ -2919,6 +2982,7 @@ struct rde_illumination_config {
 	uint max_amount_of_spot_lights;
 };
 
+#ifdef RDE_PHYSICS_MODULE
 // Type: rde_physics_3d_config
 // Defines initialization info for Jolt Physics Engine.
 //
@@ -2930,16 +2994,48 @@ struct rde_illumination_config {
 //	max_amount_of_bodies - (uint) max number of bodies that can get into the simulation.
 //	max_amount_of_mutexes - (uint) max number of mutexes.
 //	max_amount_of_contact_constraints - (uint) max number of contact constrations.
-typedef struct rde_physics_3d_config rde_physics_3d_config;
-struct rde_physics_3d_config {
-	uint temp_allocator_bytes; // 
-	uint max_amout_of_allowed_jobs;
-	uint max_amount_of_physics_barriers;
-	int max_amount_of_threads;
-	uint max_amount_of_bodies;
-	uint max_amount_of_mutexes;
-	uint max_amount_of_contact_constraints;
-};
+typedef struct {
+	size_t temp_allocator_size;
+	size_t max_amount_of_physics_jobs;
+	size_t max_amount_of_physics_barriers;
+	size_t max_amount_of_bodies;
+	size_t max_amount_of_body_mutexes;
+	size_t max_amount_of_body_pairs;
+	size_t max_amount_of_contact_constraints;
+	int    max_amount_of_threads;
+	size_t collision_steps_per_update;
+} rde_physics_init_config;
+
+typedef struct {
+	float width;
+	float height;
+	float depth;
+} rde_physics_box_shape_settings;
+
+typedef struct {
+	float radius;
+} rde_physics_sphere_shape_settings;
+
+typedef struct {
+	RDE_PHYSICS_BODY_MOTION_TYPE_ motion_type;
+	size_t layer;
+	float mass;
+	float restitution;
+	float friction;
+	RDE_PHYSICS_BODY_DOF_ degrees_of_freedom;
+	bool is_sensor;
+} rde_physics_body_settings;
+
+typedef struct {
+	float width;
+	float height;
+	float depth;
+} rde_physics_box_shape_bounds;
+
+typedef struct {
+	float radius;
+} rde_physics_sphere_shape_bounds;
+#endif
 
 // Type: rde_engine_init_info
 // Struct that joins all the different areas initials info.
@@ -2947,7 +3043,7 @@ struct rde_physics_3d_config {
 // Fields:
 //	heap_allocs_config - (<rde_engine_heap_allocs_config>) see <rde_engine_heap_allocs_config>.
 //	illumination_config - (<rde_illumination_config>) see <rde_illumination_config>.
-//	jolt_config - (<rde_jolt_init_config>) This one is only available if RDE_PHYSICS_MODULE is defined. See <rde_jolt_init_config>.
+//	jolt_config - (<rde_physics_init_config>) This one is only available if RDE_PHYSICS_MODULE is defined. See <rde_physics_init_config>.
 typedef struct rde_engine_init_info rde_engine_init_info;
 struct rde_engine_init_info {
 	rde_engine_heap_allocs_config heap_allocs_config;
@@ -2955,7 +3051,7 @@ struct rde_engine_init_info {
 	rde_illumination_config illumination_config;
 
 #ifdef RDE_PHYSICS_MODULE
-	rde_jolt_init_config jolt_config;
+	rde_physics_init_config jolt_config;
 #endif
 
 };
@@ -4982,16 +5078,77 @@ RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
 
 
 // =================================================================== PHYSICS ===================================================================
-
+// 1218dll, 14lib
 #ifdef RDE_PHYSICS_MODULE
-// Function: rde_jolt_draw_debug_shapes
+RDE_FUNC bool rde_physics_init(rde_physics_init_config _init_config, rde_physics_callbacks _callbacks);
+RDE_FUNC rde_physics_body* rde_physics_body_load(RDE_PHYSICS_SHAPE_ _shape_type, rde_physics_body_settings _body_settings, void* _shape_settings, rde_transform* _transform);
+RDE_FUNC void rde_physics_body_unload(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_add_to_simulation(rde_physics_body* _body, RDE_PHYSICS_BODY_ACTIVATION_ _activation);
+RDE_FUNC void rde_physics_body_remove_from_simulation(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_active(rde_physics_body* _body, bool _active);
+RDE_FUNC void rde_physics_body_set_transform(rde_physics_body* _body, rde_transform* _transform);
+
+RDE_FUNC void rde_physics_body_set_position(rde_physics_body* _body, rde_vec_3F _position);
+RDE_FUNC rde_vec_3F rde_physics_body_get_position(rde_physics_body* _body);
+
+RDE_FUNC void rde_physics_body_set_rotation(rde_physics_body* _body, rde_vec_3F _rotation_degs);
+RDE_FUNC rde_quaternion rde_physics_body_get_rotation_quat(rde_physics_body* _body);
+RDE_FUNC rde_vec_3F rde_physics_body_get_rotation_euler_rads(rde_physics_body* _body);
+RDE_FUNC rde_vec_3F rde_physics_body_get_rotation_euler_degs(rde_physics_body* _body);
+
+RDE_FUNC float rde_physics_body_get_friction(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_friction(rde_physics_body* _body, float _friction);
+
+RDE_FUNC float rde_physics_body_get_restitution(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_restitution(rde_physics_body* _body, float _restitution);
+
+RDE_FUNC float rde_physics_body_get_mass(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_mass(rde_physics_body* _body, float _mass);
+
+RDE_FUNC bool rde_physics_body_is_sensor(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_sensor(rde_physics_body* _body, bool _sensor);
+
+RDE_FUNC float rde_physics_body_get_gravity_factor(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_gravity_factor(rde_physics_body* _body, float _gravity_factor);
+
+RDE_FUNC void rde_physics_body_add_impulse(rde_physics_body* _body, rde_vec_3F _impulse);
+RDE_FUNC void rde_physics_body_add_force(rde_physics_body* _body, rde_vec_3F _force);
+RDE_FUNC void rde_physics_body_add_linear_velocity(rde_physics_body* _body, rde_vec_3F _linear_velocity);
+RDE_FUNC void rde_physics_body_add_torque(rde_physics_body* _body, rde_vec_3F _torque);
+RDE_FUNC void rde_physics_body_add_angular_impulse(rde_physics_body* _body, rde_vec_3F _angular_impulse);
+RDE_FUNC void rde_physics_body_add_angular_linear_velocity(rde_physics_body* _body, rde_vec_3F _angular_linear_velocity);
+
+RDE_FUNC bool rde_physics_body_is_sleeping(rde_physics_body* _body);
+
+RDE_FUNC RDE_PHYSICS_BODY_MOTION_TYPE_ rde_physics_body_get_motion_type(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_motion_type(rde_physics_body* _body, RDE_PHYSICS_BODY_MOTION_TYPE_ _motion_type);
+
+RDE_FUNC RDE_PHYSICS_BODY_DOF_ rde_physics_body_get_degrees_of_freedom(rde_physics_body* _body);
+RDE_FUNC void rde_physics_body_set_degrees_of_freedom(rde_physics_body* _body, RDE_PHYSICS_BODY_DOF_ _degrees_of_freedom);
+
+RDE_FUNC rde_physics_shape* rde_physics_body_get_shape(rde_physics_body* _body);
+RDE_FUNC void rde_physics_shape_get_bounds(rde_physics_shape* _shape, RDE_PHYSICS_SHAPE_ _shape_type, void* _out_bounds);
+RDE_FUNC RDE_PHYSICS_SHAPE_ rde_physics_shape_get_type(rde_physics_shape* _shape);
+
+RDE_FUNC void rde_physics_update(float _fixed_dt);
+
+RDE_FUNC rde_quaternion rde_physics_euler_degs_to_quaternion(rde_vec_3F _euler);
+RDE_FUNC rde_quaternion rde_physics_euler_rads_to_quaternion(rde_vec_3F _euler);
+RDE_FUNC rde_vec_3F rde_physics_quaternion_to_euler_degs(rde_quaternion _quat);
+RDE_FUNC rde_vec_3F rde_physics_quaternion_to_euler_rads(rde_quaternion _quat);
+
+RDE_FUNC void rde_physics_iterate_over_bodies(rde_physics_body_iter_callback_fn _iterate_body_callback);
+
+// Function: rde_physics_draw_debug_shapes
 // Draws debug shapes of the colliders of the physics system. This function is not optmized and is just for debugging purposes. This function must be called
 // OUTSIDE of a block <rde_rendering_3d_begin_drawing>/<rde_rendering_3d_end_drawing>.
 //
 // Parameters:
 //	_window - window to render the debug shapes.
 //	_camera - camera to render the debug shapes with.
-RDE_FUNC void rde_jolt_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+RDE_FUNC void rde_physics_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
+
+RDE_FUNC void rde_physics_end();
 #endif
 
 
@@ -5311,7 +5468,7 @@ RDE_FUNC ANativeWindow* rde_android_get_native_window();
 #define free_read_bytes(_file_handle) 								rde_file_free_read_bytes(_file_handle)
 
 #ifdef RDE_PHYSICS_MODULE
-#define jolt_draw_debug_shapes(_window, _camera)					rde_jolt_draw_debug_shapes(_window, _camera)
+#define physics_draw_debug_shapes(_window, _camera)					rde_physics_draw_debug_shapes(_window, _camera)
 #endif
 
 #define critical_error(_condition, _fmt, ...) 						rde_critical_error(_condition, _fmt, __VA_ARGS__)
