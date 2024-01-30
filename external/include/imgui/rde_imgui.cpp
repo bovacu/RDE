@@ -1,4 +1,9 @@
+#ifndef RDE_IMGUI_MODULE
 #define RDE_IMGUI_MODULE
+#endif
+#ifndef INCL_SDL_GESTURE_H
+#define INCL_SDL_GESTURE_H
+#endif
 #include "rde.h"
 
 #include "imgui.h"
