@@ -490,12 +490,15 @@ size_t current_frame = 0;
 /// *                                INNER STRUCT DEFINITIONS                         			  *
 /// *************************************************************************************************
 
+rde_arr_decl(int);
+rde_arr_decl(rde_mesh);
+
 struct rde_transform {
 	rde_vec_3F position;
 	rde_vec_3F rotation;
 	rde_vec_3F scale;
 	int parent;
-	int* children;
+	rde_arr_int children;
 	int index;
 	bool dirty;
 	bool updated_this_frame;
@@ -564,6 +567,7 @@ typedef struct {
 	rde_vec_2I metrics;
 	rde_texture texture;
 } rde_font_char_info;
+rde_arr_decl(rde_font_char_info);
 	
 typedef struct {
 	rde_vec_3F position;
@@ -620,7 +624,7 @@ struct rde_atlas {
 	
 struct rde_font {
 	rde_texture* texture;
-	rde_font_char_info* chars;
+	rde_arr_rde_font_char_info chars;
 };
 	
 #define RDE_MESH_NAME_MAX 512
@@ -642,7 +646,7 @@ struct rde_mesh {
 };
 	
 struct rde_model {
-	rde_mesh* mesh_array;
+	rde_arr_rde_mesh mesh_array;
 	uint mesh_array_size;
 	char file_path[RDE_MAX_PATH];
 };
@@ -744,7 +748,7 @@ typedef struct {
 	    int trace_size;
 	} rde_posix_stacktrace;
 #endif
-
+	
 /// Engine
 struct rde_engine {
 	float delta_time;
@@ -765,7 +769,7 @@ struct rde_engine {
 	rde_transform* transforms;
 	mat4* world_transforms;
 	int last_transform_used;
-	int* free_transforms;
+	rde_arr_int free_transforms;
 		
 #if RDE_IS_ANDROID()
 	ANativeWindow* android_native_window;
@@ -829,7 +833,8 @@ rde_transform rde_struct_create_transform() {
 	_t.parent = RDE_INT_MIN;
 	_t.dirty = false;
 	_t.updated_this_frame = false;
-	_t.children = NULL;
+	rde_arr_init(&_t.children);
+	rde_arr_new_with_capacity(&_t.children, 10);
 	// _t.index = RDE_INT_MIN;
 	return _t;
 }
@@ -1129,7 +1134,8 @@ rde_font_char_info rde_struct_create_font_char_info() {
 rde_font rde_struct_create_font() {
 	rde_font _f;
 	_f.texture = NULL;
-	_f.chars = NULL;
+	rde_arr_init(&_f.chars);
+	rde_arr_new(&_f.chars);
 	return _f;
 }
 
@@ -1190,7 +1196,8 @@ rde_batch_3d rde_struct_create_batch_3d() {
 
 rde_model rde_struct_create_model() {
 	rde_model _m;
-	_m.mesh_array = NULL;
+	rde_arr_init(&_m.mesh_array);
+	rde_arr_new(&_m.mesh_array);
 	_m.mesh_array_size = 0;
 	memset(_m.file_path, 0, RDE_MAX_PATH);
 	return _m;
@@ -1292,8 +1299,9 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 		glm_mat4_identity(_e.world_transforms[_i]);
 	}
 	_e.last_transform_used = -1;
-	_e.free_transforms = NULL;
-	stbds_arrput(_e.free_transforms, 0);
+	rde_arr_init(&_e.free_transforms);
+	rde_arr_new(&_e.free_transforms);
+	rde_arr_add(&_e.free_transforms, 0);
 
 #if RDE_IS_ANDROID()
 	_e.android_env = SDL_AndroidGetJNIEnv();
@@ -1518,7 +1526,7 @@ char* rde_inner_strstr(char* _string, const char* _strf);
 /// ******************************************* FILE_SYSTEM ***********************************************
 
 rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas);
-rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas);
+void rde_inner_file_system_read_font_config(const char* _font_path, rde_font* _font, rde_texture* _atlas);
 const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode);
 void rde_inner_file_system_free_text_allocation(rde_file_handle* _handler);
 void rde_inner_file_system_check_file_mode_or_convert(rde_file_handle* _handler, RDE_FILE_MODE_ _expected);
@@ -1840,21 +1848,24 @@ void rde_inner_transform_parse_parent(rde_transform* _transform, mat4 _mat) {
 void rde_inner_transform_remove_transform_from_parent_children(rde_transform* _transform) {
 	if(_transform->parent != -1) {
 		rde_transform* _parent = &ENGINE.transforms[_transform->parent];
-		for(unsigned int _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
-			if(_parent->children[_i] == _transform->index) {
-				stbds_arrdel(_parent->children, _i);
+		for(unsigned int _i = 0; _i < rde_arr_get_length(&_parent->children); _i++) {
+			int _child_index = 0;
+			rde_arr_get_element(&_parent->children, _i, _child_index);
+			if(_child_index == _transform->index) {
+				rde_arr_remove(&_parent->children, _i);
 				break;
 			}
 		}
 	}
 
-	for(unsigned int _i = 0; _i < stbds_arrlenu(_transform->children); _i++) {
-		ENGINE.transforms[_transform->children[_i]].parent = -1;
+	for(unsigned int _i = 0; _i < rde_arr_get_length(&_transform->children); _i++) {
+		int _child_index = 0;
+		rde_arr_get_element(&_transform->children, _i, _child_index);
+		ENGINE.transforms[_child_index].parent = -1;
 	}
 
-	stbds_arrfree(_transform->children);
+	rde_arr_clear(&_transform->children);
 	_transform->parent = -1;
-	_transform->children = NULL;
 }
 
 void rde_inner_transform_update() {
@@ -2165,7 +2176,7 @@ void rde_engine_destroy_engine() {
 
 	rde_free(ENGINE.transforms);
 	rde_free(ENGINE.world_transforms);
-	stbds_arrfree(ENGINE.free_transforms);
+	rde_arr_free(&ENGINE.free_transforms);
 
 	// rde_rendering_render_texture_destroy(SHADOWS_RENDER_TEXTURE);
 	// glDeleteBuffers(1, &SHADOWS_RENDER_TEXTURE->vbo);
@@ -2212,7 +2223,7 @@ void rde_engine_destroy_engine() {
 	rde_free(ENGINE.textures);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
-		if (ENGINE.models[_i].mesh_array == NULL) {
+		if (rde_arr_get_length(&ENGINE.models[_i].mesh_array) == 0) {
 			continue;
 		}
 
@@ -2285,9 +2296,11 @@ rde_transform* rde_transform_load() {
 	
 	rde_transform* _t = NULL;
 
-	if(stbds_arrlen(ENGINE.free_transforms) > 0) {
-		_t = &ENGINE.transforms[ENGINE.free_transforms[0]];
-		stbds_arrdel(ENGINE.free_transforms, 0);
+	if(rde_arr_get_length(&ENGINE.free_transforms) > 0) {
+		int _free_transform_index = 0;
+		rde_arr_get_element(&ENGINE.free_transforms, 0, _free_transform_index);
+		_t = &ENGINE.transforms[_free_transform_index];
+		rde_arr_remove(&ENGINE.free_transforms, 0);
 
 		if(ENGINE.last_transform_used < _t->index) {
 			ENGINE.last_transform_used = _t->index;
@@ -2352,15 +2365,17 @@ void rde_transform_set_parent(rde_transform* _transform, rde_transform* _parent)
 	if(_parent != NULL) {
 		_transform->parent = _parent->index;
 		bool _has_child_already = false;
-		for(unsigned int _i = 0; _i < stbds_arrlenu(_parent->children); _i++) {
-			if(_parent->children[_i] == _transform->index) {
+		for(unsigned int _i = 0; _i < rde_arr_get_length(&_parent->children); _i++) {
+			int _child_index = 0;
+			rde_arr_get_element(&_parent->children, _i, _child_index);
+			if(_child_index == _transform->index) {
 				_has_child_already = true;
 				break;
 			}
 		}
 	
 		if(!_has_child_already) {
-			stbds_arrput(_parent->children, _transform->index);
+			rde_arr_add(&_parent->children, _transform->index);
 		}
 	} else {
 		rde_inner_transform_remove_transform_from_parent_children(_transform);
@@ -2369,12 +2384,12 @@ void rde_transform_set_parent(rde_transform* _transform, rde_transform* _parent)
 
 uint rde_transform_get_children_count(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "Transform on get children count");
-	return stbds_arrlenu(_transform->children);
+	return rde_arr_get_length(&_transform->children);
 }
 
 void rde_transform_unload(rde_transform* _transform) {
 	rde_critical_error(_transform == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_transform_unload -> transform");
-	stbds_arrput(ENGINE.free_transforms, _transform->index);
+	rde_arr_add(&ENGINE.free_transforms, _transform->index);
 
 	if(_transform == &ENGINE.transforms[ENGINE.last_transform_used]) {
 		int _last_transform_used = ENGINE.last_transform_used;
@@ -2717,7 +2732,8 @@ uint rde_util_font_get_string_width(const char* _string, const rde_font* _font) 
 	uint _size = 0;
 	for (int _i = 0; _i < _text_size; _i++) {
 		int _key = (int)_string[_i];
-		rde_font_char_info _char_info = _font->chars[_key];
+		rde_font_char_info _char_info = {0};
+		rde_arr_get_element(&_font->chars, _key, _char_info);
 		_size += (_char_info.advance.x >> 6); // /64.f
 	}
 
@@ -2731,7 +2747,8 @@ rde_vec_2I rde_util_font_get_string_size(const char* _string, const rde_font* _f
 	int _height = 0;
 	for (int _i = 0; _i < _text_size; _i++) {
 		int _key = (int)_string[_i];
-		rde_font_char_info _char_info = _font->chars[_key];
+		rde_font_char_info _char_info = {0};
+		rde_arr_get_element(&_font->chars, _key, _char_info);
 		_width += (_char_info.advance.x >> 6);
 
 		if(_char_info.size.y > _height) {
@@ -3130,8 +3147,6 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 // ==============================================================================
 
 rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas);
-rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas);
-
 rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
 
@@ -3190,7 +3205,7 @@ rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atl
 	return hash;
 }
 
-rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_path, rde_texture* _atlas) {
+void rde_inner_file_system_read_font_config(const char* _font_path, rde_font* _font, rde_texture* _atlas) {
 	FILE* _file = NULL;
 
 	#if RDE_IS_WINDOWS()
@@ -3209,8 +3224,6 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 	rde_calloc_init(_text, char, _num_bytes);
 	fread(_text, sizeof(char), _num_bytes, _file);
 
-
-	rde_font_char_info* _chars = NULL;
 	cJSON* _font_json = cJSON_Parse(_text);
 
 	if(_font_json == NULL) {
@@ -3223,7 +3236,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 	cJSON* _extra_data = cJSON_GetObjectItemCaseSensitive(_font_json, "extra_data");
 	cJSON* _offset_from_start = cJSON_GetObjectItemCaseSensitive(_extra_data, "offset_from_start");
 	for(int _i = 0; _i < _offset_from_start->valueint; _i++) {
-		stbds_arrput(_chars, _fci_default);
+		rde_arr_add(&_font->chars, _fci_default);
 	}
 
 	cJSON* _characters = cJSON_GetObjectItemCaseSensitive(_font_json, "characters");
@@ -3255,7 +3268,7 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 		_texture.atlas_texture = _atlas;
 		_char_info.texture = _texture;
 
-		stbds_arrput(_chars, _char_info);
+		rde_arr_add(&_font->chars, _char_info);
 
 		cJSON_free(_advance);
 		cJSON_free(_size);
@@ -3267,8 +3280,6 @@ rde_font_char_info* rde_inner_file_system_read_font_config(const char* _font_pat
 
 	fclose(_file);
 	rde_free(_text);
-
-	return _chars;
 }
 
 const char* rde_inner_file_system_file_mode_to_char(const RDE_FILE_MODE_ _mode) {
@@ -4519,7 +4530,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 		rde_model* _m = &ENGINE.models[_i];
 
-		if (_m->mesh_array != NULL) {
+		if (rde_arr_get_length(&_m->mesh_array) != 0) {
 			continue;
 		}
 
@@ -4639,7 +4650,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		rde_engine_supress_logs(true);
 		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
 		rde_engine_supress_logs(false);
-		stbds_arrput(_model->mesh_array, _mesh);
+		rde_arr_add(&_model->mesh_array, _mesh);
 		_model->mesh_array_size++;
 	}
 
@@ -5972,7 +5983,6 @@ rde_font* rde_rendering_font_load(const char* _font_path) {
 	rde_snprintf(_texture_path_ext, RDE_MAX_PATH, "%s.png", _font_path);
 
 	rde_texture* _texture = rde_rendering_texture_text_load(_texture_path_ext);
-	rde_font_char_info* _chars = rde_inner_file_system_read_font_config(_config_path_ext, _texture);
 
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_fonts; _i++) {
 		if (ENGINE.fonts[_i].texture != NULL && strcmp(ENGINE.fonts[_i].texture->file_path, _texture_path_ext) == 0) {
@@ -5987,7 +5997,7 @@ rde_font* rde_rendering_font_load(const char* _font_path) {
 		}
 
 		_font->texture = _texture;
-		_font->chars = _chars;
+		rde_inner_file_system_read_font_config(_config_path_ext, _font, _texture);
 		return _font;
 	}
 
@@ -5999,14 +6009,13 @@ rde_font_data rde_rendering_font_get_data(rde_font* _font) {
 	rde_critical_error(_font == NULL, RDE_ERROR_NO_NULL_ALLOWED, "font");
 	return (rde_font_data) {
 		.texture_data = rde_rendering_texture_get_data(_font->texture),
-		.amount_of_chars = stbds_arrlenu(_font->chars)
+		.amount_of_chars = rde_arr_get_length(&_font->chars)
 	};
 }
 
 void rde_rendering_font_unload(rde_font* _font) {
 	rde_critical_error(_font == NULL, RDE_ERROR_NO_NULL_ALLOWED, "font");
-	stbds_arrfree(_font->chars);
-	_font->chars = NULL;
+	rde_arr_free(&_font->chars);
 	rde_rendering_texture_unload(_font->texture);
 	_font->texture = NULL;
 }
@@ -6616,7 +6625,8 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 	for (int _i = 0; _i < _text_size; _i++) {
 		rde_transform _t = *_transform;
 		int _key = (int)_text[_i];
-		rde_font_char_info _char_info = _font->chars[_key];
+		rde_font_char_info _char_info = {0};
+		rde_arr_get_element(&_font->chars, _key, _char_info);
 		_t.position.x += _next_pos_x + _char_info.bearing.x * _t.scale.x;
 		_t.position.y -= (_char_info.size.y * 0.5f - _char_info.bearing.y) * _t.scale.y;
 
@@ -7054,7 +7064,8 @@ void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh
 
 void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
 	for(uint _i = 0; _i < _model->mesh_array_size; _i++) {
-		rde_mesh* _mesh = &_model->mesh_array[_i];
+		rde_mesh* _mesh = NULL;
+		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
 		rde_rendering_3d_draw_mesh(_transform, _mesh, _shader);
 	}
 }
@@ -7125,7 +7136,9 @@ uint rde_rendering_model_get_vertices_count(rde_model* _model) {
 	uint _total_vertices = 0;
 	
 	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
-		_total_vertices += rde_rendering_mesh_get_data(&_model->mesh_array[_i]).amount_of_vertices;
+		rde_mesh* _mesh = NULL;
+		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
+		_total_vertices += rde_rendering_mesh_get_data(_mesh).amount_of_vertices;
 	}
 
 	return _total_vertices;
@@ -7134,12 +7147,16 @@ uint rde_rendering_model_get_vertices_count(rde_model* _model) {
 void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
 	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
-		_model->mesh_array[_i].material.material_light_data = _light_data;
+		rde_mesh* _mesh = NULL;
+		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
+		_mesh->material.material_light_data = _light_data;
 	}
 }
 rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
-	return _model->mesh_array[0].material.material_light_data;
+	rde_mesh* _mesh = NULL;
+	rde_arr_get_element_ptr(&_model->mesh_array, 0, _mesh);
+	return _mesh->material.material_light_data;
 }
 
 rde_model_data rde_rendering_model_get_data(rde_model* _model) {
@@ -7149,7 +7166,9 @@ rde_model_data rde_rendering_model_get_data(rde_model* _model) {
 	rde_malloc(_m.meshes, rde_mesh*, _m.amount_of_meshes);
 
 	for(unsigned int _i = 0; _i < _m.amount_of_meshes; _i++) {
-		_m.meshes[_i] = &_model->mesh_array[_i];
+		rde_mesh* _mesh = NULL;
+		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
+		_m.meshes[_i] = _mesh;
 	}
 
 	return _m;
@@ -7158,13 +7177,13 @@ rde_model_data rde_rendering_model_get_data(rde_model* _model) {
 void rde_rendering_model_unload(rde_model* _model) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "obj model");
 
-	for(unsigned int _c = 0; _c < stbds_arrlenu(_model->mesh_array); _c++) {
-		rde_mesh* _mesh = &_model->mesh_array[_c];
+	for(unsigned int _c = 0; _c < rde_arr_get_length(&_model->mesh_array); _c++) {
+		rde_mesh* _mesh = NULL;
+		rde_arr_get_element_ptr(&_model->mesh_array, _c, _mesh);
 		rde_rendering_mesh_destroy(_mesh, true);
 	}
 
-	stbds_arrfree(_model->mesh_array);
-	_model->mesh_array = NULL;
+	rde_arr_free(&_model->mesh_array);
 	_model->mesh_array_size = 0;
 	memset(_model->file_path, 0, RDE_MAX_PATH);
 }

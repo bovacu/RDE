@@ -1306,9 +1306,6 @@ typedef struct {			\
 #define rde_arr_clear(_dyn_arr)													\
 	do {																		\
 		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");\
-		for(unsigned int _i = 0; _i < (_dyn_arr)->capacity; _i++) {				\
-			(_dyn_arr)->memory[_i] = (_dyn_arr)->defaul_value;					\
-		}																		\
 		(_dyn_arr)->used = 0;													\
 	} while(0)
 	

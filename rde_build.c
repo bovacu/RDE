@@ -1354,7 +1354,7 @@ void parse_arguments(int _argc, char** _argv);
 	do {																																\
 		_build_command = NULL;																											\
 																																		\
-		dyn_str* _tools_path = dyn_str_new(builder_exe_full_path_dir);																		\
+		dyn_str* _tools_path = dyn_str_new(builder_exe_full_path_dir);																	\
 		dyn_str_append(_tools_path, "build/"_platform"/tools/");																		\
 																																		\
 		if(!make_dir_if_not_exists(dyn_str_get(_tools_path))) {																			\
