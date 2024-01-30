@@ -7183,7 +7183,7 @@ void rde_rendering_model_unload(rde_model* _model) {
 		rde_rendering_mesh_destroy(_mesh, true);
 	}
 
-	rde_arr_free(&_model->mesh_array);
+	rde_arr_clear(&_model->mesh_array);
 	_model->mesh_array_size = 0;
 	memset(_model->file_path, 0, RDE_MAX_PATH);
 }
