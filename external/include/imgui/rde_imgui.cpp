@@ -1,10 +1,10 @@
-#include "rde_imgui.h"
+#define RDE_IMGUI_MODULE
+#include "rde.h"
 
 #include "imgui.h"
 #include <SDL3/SDL.h>
 
 #include "backends/imgui_impl_sdl3.h"
-
 #include "backends/imgui_impl_opengl3.h"
 
 void rde_imgui_init(void* _sdl_window, void* _opengl_context, const char* _gl_version) {
@@ -48,7 +48,7 @@ void rde_imgui_pop_id() {
 	ImGui::PopID();
 }
 
-void rde_imgui_dockspace(rde_ImGuiID _id, rde_ImVec2 _size, rde_ImGuiDockNodeFlags _flags) {
+void rde_imgui_dockspace(rde_ImGuiID _id, rde_vec_2F _size, rde_ImGuiDockNodeFlags _flags) {
 	ImGui::DockSpace((ImGuiID)_id, ImVec2(_size.x, _size.y), (ImGuiDockNodeFlags)_flags, NULL);
 }
 
@@ -124,10 +124,10 @@ bool rde_imgui_checkbox(const char* _label, bool* _v) {
 }
 
 bool rde_imgui_button_default(const char* _label) {
-	return rde_imgui_button(_label, (rde_ImVec2) { 0, 0 });
+	return rde_imgui_button(_label, (rde_vec_2F) { 0, 0 });
 }
 
-bool rde_imgui_button(const char* _label, rde_ImVec2 _size) {
+bool rde_imgui_button(const char* _label, rde_vec_2F _size) {
 	return ImGui::Button(_label, ImVec2(_size.x, _size.y));
 }
 

@@ -111,7 +111,7 @@ void on_imgui_hub_menu(float _dt) {
 	static rde_ImGuiDockNodeFlags _dockspace_flags = rde_ImGuiDockNodeFlags_None;
 	_dockspace_flags &= ~rde_ImGuiDockNodeFlags_PassthruCentralNode;
 	rde_ImGuiID _dockspace_id = rde_imgui_get_id("MyDockSpace");
- 	rde_imgui_dockspace(_dockspace_id, (rde_ImVec2) {0, 0}, _dockspace_flags);
+ 	rde_imgui_dockspace(_dockspace_id, (rde_vec_2F) {0, 0}, _dockspace_flags);
 
 	if(rde_imgui_begin("Hub", NULL, rde_ImGuiWindowFlags_AlwaysAutoResize)) {
 
