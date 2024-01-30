@@ -776,13 +776,14 @@ struct rde_engine {
 	JNIEnv* android_env;
 #endif
 
-#define RDE_SHADERS_AMOUNT 8
+#define RDE_SHADERS_AMOUNT 9
 	rde_shader* line_shader;
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* framebuffer_shader;
 	rde_shader* mesh_shader;
+	rde_shader* render_texture_shader;
 	rde_shader* skybox_shader;
 	rde_shader* shadows_shader;
 	rde_shader* shaders;
@@ -1355,6 +1356,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.text_shader_2d = NULL;
 	_e.framebuffer_shader = NULL;
 	_e.mesh_shader = NULL;
+	_e.render_texture_shader = NULL;
 	_e.skybox_shader = NULL;
 	_e.skybox = rde_struct_create_skybox();
 	_e.antialiasing = rde_struct_create_antialiasing();
@@ -4029,21 +4031,24 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_FRAMEBUFFER, 	.shader = &ENGINE.framebuffer_shader }
 	};
 
-	#define SHADERS_3D_COUNT 3
+	#define SHADERS_3D_COUNT 4
 	char* _3d_shaders_vert[SHADERS_3D_COUNT] = {
 		"shaders/"SHADER_TYPE"/mesh_vert.glsl",
+		"shaders/"SHADER_TYPE"/render_texture_vert.glsl",
 		"shaders/"SHADER_TYPE"/skybox_vert.glsl",
 		"shaders/"SHADER_TYPE"/shadows_vert.glsl"
 	};
 
 	char* _3d_shaders_frag[SHADERS_3D_COUNT] = {
 		"shaders/"SHADER_TYPE"/mesh_frag.glsl",
+		"shaders/"SHADER_TYPE"/render_texture_frag.glsl",
 		"shaders/"SHADER_TYPE"/skybox_frag.glsl",
 		"shaders/"SHADER_TYPE"/shadows_frag.glsl"
 	};
 
 	rde_shader_ptr__name_pair _3d_shaders[SHADERS_3D_COUNT] = {
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_MESH, 			.shader = &ENGINE.mesh_shader },
+		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_RENDER_TEXTURE,.shader = &ENGINE.render_texture_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_SKYBOX, 		.shader = &ENGINE.skybox_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_DEPTH_SHADOWS, .shader = &ENGINE.shadows_shader }
 	};
@@ -5146,7 +5151,6 @@ void rde_inner_rendering_flush_batch_3d() {
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
 
-	GLint _using_render_texture_location = glGetUniformLocation(_shader->compiled_program_id, "material.using_render_texture");
 	if(_mesh->material.render_texture != NULL) {
 		RDE_CHECK_GL(glUseProgram, current_batch_3d.shader->compiled_program_id);
 
@@ -5155,8 +5159,6 @@ void rde_inner_rendering_flush_batch_3d() {
 
 		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
 		RDE_CHECK_GL(glBindTexture, GL_TEXTURE_2D, _mesh->material.render_texture->opengl_texture_id);
-
-		RDE_CHECK_GL(glUniform1i, _using_render_texture_location, 1);
 	} else {
 		rde_texture* _ka_texture = _mesh->material.map_ka != NULL ? _mesh->material.map_ka : DEFAULT_TEXTURE;
 		RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
@@ -5188,7 +5190,6 @@ void rde_inner_rendering_flush_batch_3d() {
 		RDE_CHECK_GL(glUniform1i, _bump_location, 3);
 		GLint _shadow_map_location = glGetUniformLocation(_shader->compiled_program_id, "shadow_map");
 		RDE_CHECK_GL(glUniform1i, _shadow_map_location, 4);
-		RDE_CHECK_GL(glUniform1i, _using_render_texture_location, 0);
 	}
 
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);

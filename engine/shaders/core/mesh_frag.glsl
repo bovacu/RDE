@@ -13,7 +13,6 @@ struct rde_material {
 	vec3 Ka;
 	vec3 Kd;
 	vec3 Ks;
-	int using_render_texture;
 };
 struct rde_directional_light {
 	vec3 direction;
@@ -65,7 +64,6 @@ uniform sampler2D tex_ka;
 uniform sampler2D tex_kd;
 uniform sampler2D tex_ks;
 uniform sampler2D tex_bump;
-uniform sampler2D render_texture;
 
 vec3 directional_light_calc() {
 	vec3 _final_light = vec3(0, 0, 0);
@@ -159,6 +157,10 @@ vec3 spot_light_calc(int _i) {
 #endif
 
 void normal_rendering() {
+	
+}
+
+void main(){
 	if(texture(tex_kd, text_coord).a < 0.05) discard;
 	vec3 _final_light = vec3(0.0);
 
@@ -177,16 +179,4 @@ void normal_rendering() {
 #endif
 
 	color_out = vec4(_final_light, 1.0);
-}
-
-void render_texture_rendering() {
-	color_out = texture(render_texture, text_coord);
-}
-
-void main(){
-	if(material.using_render_texture == 0) {
-		normal_rendering();
-	} else {
-		render_texture_rendering();
-	}
 }

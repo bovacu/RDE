@@ -226,7 +226,7 @@ void model_viewer_draw_3d(rde_window* _window, float _dt) {
 				rde_vec_3F _position = rde_transform_get_position(model_viewer_second_screen_texture_transform);
 				_position.y = 4;
 				rde_transform_set_position(model_viewer_second_screen_texture_transform, _position);
-				rde_rendering_3d_draw_mesh(model_viewer_second_screen_texture_transform ,model_viewer_second_screen_mesh, NULL);
+				rde_rendering_3d_draw_mesh(model_viewer_second_screen_texture_transform, model_viewer_second_screen_mesh, rde_rendering_shader_get_by_name("render_texture"));
 			}
 		})
 	}

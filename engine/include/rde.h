@@ -231,6 +231,10 @@ extern "C" {
 // Name for the 3D meshes, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'mesh_shader'.
 #define RDE_SHADER_MESH "mesh_shader"
 
+// Constant: RDE_SHADER_RENDER_TEXTURE
+// Name for the render textures, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'render_texture'.
+#define RDE_SHADER_RENDER_TEXTURE "render_texture"
+	
 // Constant: RDE_SHADER_SKYBOX
 // Name for the skybox, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'skybox_shader'.
 #define RDE_SHADER_SKYBOX "skybox_shader"

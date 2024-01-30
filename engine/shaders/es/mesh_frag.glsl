@@ -66,7 +66,6 @@ uniform sampler2D tex_ka;
 uniform sampler2D tex_kd;
 uniform sampler2D tex_ks;
 uniform sampler2D tex_bump;
-uniform sampler2D render_texture;
 
 vec3 directional_light_calc() {
 	vec3 _final_light = vec3(0, 0, 0);
@@ -143,36 +142,20 @@ vec3 spot_light_calc(int _i) {
 }
 #endif
 
-void normal_rendering() {
-// 	if(texture(tex_kd, text_coord).a < 0.05) discard;
-	vec3 _final_light = vec3(0.0);
-
-	_final_light += directional_light_calc();
-
-// #if RDE_MAX_POINT_LIGHTS
-// 	for (int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
-// 		_final_light += point_light_calc(_i);
-// 	}
-// #endif
-// 
-// #if RDE_MAX_SPOT_LIGHTS
-// 	for (int _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
-// 		_final_light += spot_light_calc(_i);
-// 	}
-// #endif
-
-	color_out = vec4(_final_light, 1.0);
-}
-
-void render_texture_rendering() {
-	color_out = texture(render_texture, text_coord);
-}
-
 void main(){
-	normal_rendering();
-// 	if(material.using_render_texture == 0) {
-// 		normal_rendering();
-// 	} else {
-// 		render_texture_rendering();
-// 	}
+	// if(texture(tex_kd, text_coord).a < 0.05) discard;
+	vec3 _final_light = vec3(0.0);
+	_final_light += directional_light_calc();
+	// #if RDE_MAX_POINT_LIGHTS
+	// 	for (int _i = 0; _i < RDE_MAX_POINT_LIGHTS; _i++) {
+	// 		_final_light += point_light_calc(_i);
+	// 	}
+	// #endif
+	// 
+	// #if RDE_MAX_SPOT_LIGHTS
+	// 	for (int _i = 0; _i < RDE_MAX_SPOT_LIGHTS; _i++) {
+	// 		_final_light += spot_light_calc(_i);
+	// 	}
+	// #endif
+	color_out = vec4(_final_light, 1.0);
 }
