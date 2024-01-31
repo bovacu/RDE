@@ -839,7 +839,7 @@ typedef unsigned int uint;
 //	======= C =======
 //	int _max = RDE_MAX(15, -5)
 //	=================
-#define RDE_MAX(a, b) ((a) > (b) ? (a) : (b));
+#define RDE_MAX(_a, _b) ((_a) > (_b) ? (_a) : (_b));
 
 // Macro: RDE_MIN
 // Gets the minimum value of 2 values.
@@ -851,260 +851,9 @@ typedef unsigned int uint;
 //	======= C =======
 //	int _min = RDE_MIN(15, -5)
 //	=================
-#define RDE_MIN(a, b) ((a) < (b) ? (a) : (b));
+#define RDE_MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b));
 
-/// =================================================================== WARNING SILENCER ===================================================================
-
-// Macro: RDE_UNUSED
-// Used to silence non-used variables warnings.
-//
-// Parameters:
-//	_x - variable name to be silenced.
-//
-//	======= C =======
-//	RDE_UNUSED(_my_unused_var)
-//	=================
-#define RDE_UNUSED(_x) (void)_x;
-
-// Macro: RDE_UNIMPLEMENTED
-// Used to trigger a crash if a function is not implemented.
-//
-//	======= C =======
-//	RDE_UNIMPLEMENTED()
-//	=================
-#define RDE_UNIMPLEMENTED() assert(false && __func__);
-
-// Macro: RDE_UNIMPLEMENTED_STRUCT
-// Used to give a "default" body to structure if it is not yet filled.
-//
-//	======= C =======
-//	typedef struct {
-//		RDE_UNIMPLEMENTED_STRUCT();
-//	} my_unfilled_struct;
-//	=================
-#define RDE_UNIMPLEMENTED_STRUCT() short foo;
-
-
-/// =================================================================== GENERIC FUNCS AND STRUCTS ===================================================================
-
-#if RDE_IS_WINDOWS()
-// Macro: RDE_MAIN
-// Simple and direct entry point to use on main source file of a project. Everything done in macro can be done without it, this is just a "quicker/automatic" way to have an entry point for the game.
-//
-// Parameters:
-//	_window - output variable where the default window will be saved.
-//	_config_path - path to the config.rde file. This is REQUIRED to have to build an RDE application.
-//	_mandatory_callbacks - struct of callbacks that the user MUST fill for the application to run. Struct is <rde_end_user_mandatory_callbacks>.
-//	_init_func - function that will be executed after engine initialization.
-//	_end_func - function that will be executed before engine destruction.
-//
-//	======= C =======
-//	rde_window* default_window = NULL;
-//
-//	void on_event(rde_event* _event, rde_window* _window);
-//	void on_update(float _dt);
-//	void on_fixed_update(float _dt);
-//	void on_late_update(float _dt);
-//	void on_render(float _dt, rde_window* _window);
-//
-//	const rde_end_user_mandatory_callbacks mandatory_callbacks = {
-//		&on_update,
-//		&on_fixed_update,
-//		&on_late_update,
-//		&on_render
-//	};
-//
-//	void init_func(int _argc, char** _argv) {
-//		...	
-//	}
-//
-//	void end_func() {
-//		...	
-//	}
-//
-//	RDE_MAIN(default_window, "assets/config.rde_config", mandatory_callbacks, init_func, end_func);
-//	=================
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {												 	\
-		RDE_SHOW_WINDOWS_CONSOLE														\
-																						\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
-		rde_setup_initial_info(_mandatory_callbacks);								   	\
-																						\
-		_init_func(_argc, _argv);													   	\
-																						\
-		rde_engine_on_run();															\
-		_end_func();																	\
-		rde_engine_destroy_engine();													\
-																						\
-		return 0;																	   	\
-	}
-	
-#elif RDE_IS_ANDROID()
-
-#include "SDL3/SDL.h"
-#include "SDL3/SDL_main.h"
-#define SDL_GESTURE_IMPLEMENTATION 1
-#include "SDL3/SDL_gesture.h"
-#include <jni.h>
-#include <android/native_window.h>
-#include <android/input.h>
-#include <android/keycodes.h>
-#include <android/log.h>
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   	\
-	int main(int _argc, char* _argv[]) {											   	\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);					\
-		rde_setup_initial_info(_mandatory_callbacks);								  	\
-																						\
-		_init_func(_argc, _argv);													  	\
-																						\
-		rde_engine_on_run();														   	\
-		_end_func();																   	\
-		rde_engine_destroy_engine();												   	\
-																						\
-		return 0;																	  	\
-	}
-
-#else
-
-#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
-	int main(int _argc, char** _argv) {												 	\
-		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
-		rde_setup_initial_info(_mandatory_callbacks);								   	\
-																						\
-		_init_func(_argc, _argv);													   	\
-																						\
-		rde_engine_on_run();															\
-		_end_func();																	\
-		rde_engine_destroy_engine();													\
-																						\
-		return 0;																	   	\
-	}
-
-#endif
-
-// Macro: RDE_SPECIALIZED_VEC2
-// Declares a struct for a Vec2 of an specific type. This struct has fields, x and y.
-//
-// Parameters:
-//	_type - the type of the fields.
-//	_name - the name of the specialized Vec2.
-// ======= C =======
-// 	RDE_SPECIALIZED_VEC2(int, int)
-// ==================
-#define RDE_SPECIALIZED_VEC2(_type, _name) 	\
-	typedef struct _name _name;				\
-	struct _name {							\
-		_type x;							\
-		_type y;							\
-	};
-
-// Macro: RDE_SPECIALIZED_VEC3
-// Declares a struct for a Vec3 of an specific type. This struct has fields, x, y and z.
-//
-// Parameters:
-//	_type - the type of the fields.
-//	_name - the name of the specialized Vec3.
-// ======= C =======
-// 	RDE_SPECIALIZED_VEC3(int, int)
-// ==================
-#define RDE_SPECIALIZED_VEC3(_type, _name) 	\
-	typedef struct _name _name;				\
-	struct _name {							\
-		_type x;							\
-		_type y;							\
-		_type z;							\
-	};
-
-// Macro: RDE_SPECIALIZED_VEC4
-// Declares a struct for a Vec4 of an specific type. This struct has fields, x, y, z and w.
-//
-// Parameters:
-//	_type - the type of the fields.
-//	_name - the name of the specialized Vec4.
-// ======= C =======
-// 	RDE_SPECIALIZED_VEC4(int, int)
-// ==================
-#define RDE_SPECIALIZED_VEC4(_type, _name) 	\
-	typedef struct _name _name;				\
-	struct _name {							\
-		_type x;							\
-		_type y;							\
-		_type z;							\
-		_type w;							\
-	};
-
-// Macro: RDE_SPECIALIZED_MAT2
-// Declares a struct for a Mat2 of an specific type. This struct has 4 elements, that can be accessed as independent elements, as an array of 4 elements or an array of arrays.
-//
-// Parameters:
-//	_type - the type of the fields.
-//	_name - the name of the specialized Vec4.
-// ======= C =======
-// 	RDE_SPECIALIZED_MAT2(int, int)
-// ==================
-#define RDE_SPECIALIZED_MAT2(_type, _name) 	\
-	typedef struct _name _name;				\
-	struct _name {							\
-		union {								\
-			struct {						\
-				float m00, m01;				\
-				float m10, m11;				\
-			};								\
-											\
-			float m[2][2];					\
-			float v[4];						\
-		};									\
-	};
-
-// Macro: RDE_SPECIALIZED_MAT3
-// Declares a struct for a Mat3 of an specific type. This struct has 9 elements, that can be accessed as independent elements, as an array of 9 elements or an array of arrays.
-//
-// Parameters:
-//	_type - the type of the fields.
-//	_name - the name of the specialized Vec4.
-// ======= C =======
-// 	RDE_SPECIALIZED_MAT3(int, int)
-// ==================
-#define RDE_SPECIALIZED_MAT3(_type, _name) 	\
-	typedef struct _name _name;				\
-	struct _name {							\
-		union {								\
-			struct {						\
-				float m00, m01, m02;		\
-				float m10, m11, m12;		\
-				float m20, m21, m22;		\
-			};								\
-											\
-			float m[3][3];					\
-			float v[9];						\
-		};									\
-	};
-
-// Macro: RDE_SPECIALIZED_MAT4
-// Declares a struct for a Mat4 of an specific type. This struct has 16 elements, that can be accessed as independent elements, as an array of 16 elements or an array of arrays.
-//
-// Parameters:
-//	_type - the type of the fields.
-//	_name - the name of the specialized Vec4.
-// ======= C =======
-// 	RDE_SPECIALIZED_MAT4(int, int)
-// ==================
-#define RDE_SPECIALIZED_MAT4(_type, _name) 		\
-	typedef struct _name _name;					\
-	struct _name {								\
-		union {									\
-			struct {							\
-				float m00, m01, m02, m03;		\
-				float m10, m11, m12, m13;		\
-				float m20, m21, m22, m23;		\
-				float m30, m31, m32, m33;		\
-			};									\
-												\
-			float m[4][4];						\
-			float v[16];						\
-		};										\
-	};
+#define RDE_ABS(_a) ((_a) < 0 ? -(_a) : (_a))
 
 // Macro: rde_arr_decl
 // Defines a new type of dynamic array.
@@ -1762,6 +1511,265 @@ typedef struct {			\
 		_rde_str.size = 0;			\
 		rde_free(_rde_str.str);		\
 	} while(0)
+	
+#define rde_thread_for_arr(_type, _init_index, _end_index, _out_var, _num_threads, _block_of_code)	\
+	do {																							\
+		int _amount = RDE_ABS(_end_index - _init_index);											\
+																									\
+	} while(0)
+
+/// =================================================================== WARNING SILENCER ===================================================================
+
+// Macro: RDE_UNUSED
+// Used to silence non-used variables warnings.
+//
+// Parameters:
+//	_x - variable name to be silenced.
+//
+//	======= C =======
+//	RDE_UNUSED(_my_unused_var)
+//	=================
+#define RDE_UNUSED(_x) (void)_x;
+
+// Macro: RDE_UNIMPLEMENTED
+// Used to trigger a crash if a function is not implemented.
+//
+//	======= C =======
+//	RDE_UNIMPLEMENTED()
+//	=================
+#define RDE_UNIMPLEMENTED() assert(false && __func__);
+
+// Macro: RDE_UNIMPLEMENTED_STRUCT
+// Used to give a "default" body to structure if it is not yet filled.
+//
+//	======= C =======
+//	typedef struct {
+//		RDE_UNIMPLEMENTED_STRUCT();
+//	} my_unfilled_struct;
+//	=================
+#define RDE_UNIMPLEMENTED_STRUCT() short foo;
+
+
+/// =================================================================== GENERIC FUNCS AND STRUCTS ===================================================================
+
+#if RDE_IS_WINDOWS()
+// Macro: RDE_MAIN
+// Simple and direct entry point to use on main source file of a project. Everything done in macro can be done without it, this is just a "quicker/automatic" way to have an entry point for the game.
+//
+// Parameters:
+//	_window - output variable where the default window will be saved.
+//	_config_path - path to the config.rde file. This is REQUIRED to have to build an RDE application.
+//	_mandatory_callbacks - struct of callbacks that the user MUST fill for the application to run. Struct is <rde_end_user_mandatory_callbacks>.
+//	_init_func - function that will be executed after engine initialization.
+//	_end_func - function that will be executed before engine destruction.
+//
+//	======= C =======
+//	rde_window* default_window = NULL;
+//
+//	void on_event(rde_event* _event, rde_window* _window);
+//	void on_update(float _dt);
+//	void on_fixed_update(float _dt);
+//	void on_late_update(float _dt);
+//	void on_render(float _dt, rde_window* _window);
+//
+//	const rde_end_user_mandatory_callbacks mandatory_callbacks = {
+//		&on_update,
+//		&on_fixed_update,
+//		&on_late_update,
+//		&on_render
+//	};
+//
+//	void init_func(int _argc, char** _argv) {
+//		...	
+//	}
+//
+//	void end_func() {
+//		...	
+//	}
+//
+//	RDE_MAIN(default_window, "assets/config.rde_config", mandatory_callbacks, init_func, end_func);
+//	=================
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {												 	\
+		RDE_SHOW_WINDOWS_CONSOLE														\
+																						\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
+		rde_setup_initial_info(_mandatory_callbacks);								   	\
+																						\
+		_init_func(_argc, _argv);													   	\
+																						\
+		rde_engine_on_run();															\
+		_end_func();																	\
+		rde_engine_destroy_engine();													\
+																						\
+		return 0;																	   	\
+	}
+	
+#elif RDE_IS_ANDROID()
+
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_main.h"
+#define SDL_GESTURE_IMPLEMENTATION 1
+#include "SDL3/SDL_gesture.h"
+#include <jni.h>
+#include <android/native_window.h>
+#include <android/input.h>
+#include <android/keycodes.h>
+#include <android/log.h>
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   	\
+	int main(int _argc, char* _argv[]) {											   	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);					\
+		rde_setup_initial_info(_mandatory_callbacks);								  	\
+																						\
+		_init_func(_argc, _argv);													  	\
+																						\
+		rde_engine_on_run();														   	\
+		_end_func();																   	\
+		rde_engine_destroy_engine();												   	\
+																						\
+		return 0;																	  	\
+	}
+
+#else
+
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
+	int main(int _argc, char** _argv) {												 	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);				 	\
+		rde_setup_initial_info(_mandatory_callbacks);								   	\
+																						\
+		_init_func(_argc, _argv);													   	\
+																						\
+		rde_engine_on_run();															\
+		_end_func();																	\
+		rde_engine_destroy_engine();													\
+																						\
+		return 0;																	   	\
+	}
+
+#endif
+
+// Macro: RDE_SPECIALIZED_VEC2
+// Declares a struct for a Vec2 of an specific type. This struct has fields, x and y.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec2.
+// ======= C =======
+// 	RDE_SPECIALIZED_VEC2(int, int)
+// ==================
+#define RDE_SPECIALIZED_VEC2(_type, _name) 	\
+	typedef struct _name _name;				\
+	struct _name {							\
+		_type x;							\
+		_type y;							\
+	};
+
+// Macro: RDE_SPECIALIZED_VEC3
+// Declares a struct for a Vec3 of an specific type. This struct has fields, x, y and z.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec3.
+// ======= C =======
+// 	RDE_SPECIALIZED_VEC3(int, int)
+// ==================
+#define RDE_SPECIALIZED_VEC3(_type, _name) 	\
+	typedef struct _name _name;				\
+	struct _name {							\
+		_type x;							\
+		_type y;							\
+		_type z;							\
+	};
+
+// Macro: RDE_SPECIALIZED_VEC4
+// Declares a struct for a Vec4 of an specific type. This struct has fields, x, y, z and w.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_VEC4(int, int)
+// ==================
+#define RDE_SPECIALIZED_VEC4(_type, _name) 	\
+	typedef struct _name _name;				\
+	struct _name {							\
+		_type x;							\
+		_type y;							\
+		_type z;							\
+		_type w;							\
+	};
+
+// Macro: RDE_SPECIALIZED_MAT2
+// Declares a struct for a Mat2 of an specific type. This struct has 4 elements, that can be accessed as independent elements, as an array of 4 elements or an array of arrays.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_MAT2(int, int)
+// ==================
+#define RDE_SPECIALIZED_MAT2(_type, _name) 	\
+	typedef struct _name _name;				\
+	struct _name {							\
+		union {								\
+			struct {						\
+				float m00, m01;				\
+				float m10, m11;				\
+			};								\
+											\
+			float m[2][2];					\
+			float v[4];						\
+		};									\
+	};
+
+// Macro: RDE_SPECIALIZED_MAT3
+// Declares a struct for a Mat3 of an specific type. This struct has 9 elements, that can be accessed as independent elements, as an array of 9 elements or an array of arrays.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_MAT3(int, int)
+// ==================
+#define RDE_SPECIALIZED_MAT3(_type, _name) 	\
+	typedef struct _name _name;				\
+	struct _name {							\
+		union {								\
+			struct {						\
+				float m00, m01, m02;		\
+				float m10, m11, m12;		\
+				float m20, m21, m22;		\
+			};								\
+											\
+			float m[3][3];					\
+			float v[9];						\
+		};									\
+	};
+
+// Macro: RDE_SPECIALIZED_MAT4
+// Declares a struct for a Mat4 of an specific type. This struct has 16 elements, that can be accessed as independent elements, as an array of 16 elements or an array of arrays.
+//
+// Parameters:
+//	_type - the type of the fields.
+//	_name - the name of the specialized Vec4.
+// ======= C =======
+// 	RDE_SPECIALIZED_MAT4(int, int)
+// ==================
+#define RDE_SPECIALIZED_MAT4(_type, _name) 		\
+	typedef struct _name _name;					\
+	struct _name {								\
+		union {									\
+			struct {							\
+				float m00, m01, m02, m03;		\
+				float m10, m11, m12, m13;		\
+				float m20, m21, m22, m23;		\
+				float m30, m31, m32, m33;		\
+			};									\
+												\
+			float m[4][4];						\
+			float v[16];						\
+		};										\
+	};
 	
 // 											==============================================================================
 // 											=									ENUMS					 	   	 		 =
