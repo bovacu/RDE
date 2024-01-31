@@ -749,6 +749,13 @@ typedef struct {
 	} rde_posix_stacktrace;
 #endif
 	
+struct rde_thread {
+	SDL_Thread* native_thread;
+	bool detached;
+	rde_thread_fn fn;
+	void* params;
+};
+	
 /// Engine
 struct rde_engine {
 	float delta_time;
@@ -3031,6 +3038,50 @@ uint rde_util_hash_map_str_hash(const char** _key) {
     return _hash;
 }
 
+int rde_inner_thread_wrapper(void* _params) {
+	rde_thread* _t = (rde_thread*)_params;
+	((rde_thread_fn)_t->fn)(_t, _t->params);
+	rde_free(_t);
+	return 0;
+}
+
+rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
+	rde_malloc_init(_thread, rde_thread, 1);
+	_thread->detached = false;
+	_thread->native_thread = NULL;
+	_thread->fn = _fn;
+	_thread->params = _params;
+	
+	_thread->native_thread = SDL_CreateThread(rde_inner_thread_wrapper, NULL, (void*)_thread);
+	if(_thread->native_thread == NULL) {
+		rde_critical_error(true, "Could not create new thread %s\n", SDL_GetError());
+	}
+
+	return _thread;
+}
+
+void rde_thread_wait(rde_thread* _thread) {
+	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_wait - _thread");
+	rde_critical_error(_thread->detached, "Cannot wait on an already detached thread, this is undefined behaviour\n");
+	SDL_WaitThread(_thread->native_thread, NULL);
+}
+
+void rde_thread_detach(rde_thread* _thread) {
+	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_detach - _thread");
+	SDL_DetachThread(_thread->native_thread);
+	_thread->detached = true;
+}
+
+void rde_thread_end(rde_thread* _thread) {	
+	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_end - _thread");
+	_thread->native_thread = NULL;
+	_thread->fn = NULL;
+	_thread->params = NULL;
+	rde_free(_thread);
+	_thread = NULL;
+}
+
+
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
 		case RDE_LOG_COLOR_RED: {
@@ -3549,6 +3600,7 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 
 	// Use this to allow trackpad to use touch gestures
 	//SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "1");

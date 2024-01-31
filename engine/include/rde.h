@@ -2837,6 +2837,8 @@ typedef struct rde_physics_shape rde_physics_shape;
 typedef struct rde_physics_body rde_physics_body;
 #endif
 
+typedef struct rde_thread rde_thread;
+
 // =================================================================== UTIL ====================================================================
 
 // Type: rde_str
@@ -3063,6 +3065,8 @@ typedef void (*rde_update_func)(float);
 //	_dt - delta time passed between frames.
 //	_window - the pointer to the window that will render the scene.
 typedef void (*rde_render_func)(float, rde_window*);
+
+typedef void (*rde_thread_fn)(rde_thread*, void*);
 
 #ifdef RDE_PHYSICS_MODULE
 // Callback: rde_render_func
@@ -3901,6 +3905,11 @@ RDE_FUNC uint rde_util_hash_map_int_hash(int* _key);
 // Parameters:
 //	_key - poiner to const char* value.
 RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key);
+
+RDE_FUNC rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params);
+RDE_FUNC void rde_thread_wait(rde_thread* _thread);
+RDE_FUNC void rde_thread_detach(rde_thread* _thread);
+RDE_FUNC void rde_thread_end(rde_thread* _thread);
 
 // =================================================================== MATH ===================================================================
 
