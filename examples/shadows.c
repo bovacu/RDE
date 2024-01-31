@@ -14,6 +14,7 @@ rde_vec_3F shadows_camera_front = { -0.31f, -0.24f, -0.91f };
 rde_vec_3F shadows_camera_up = { 0.0, 1.0f, 0.0f };
 
 rde_vec_3F shadows_directional_light_direction = { -0.2f, -1.0f, -0.3f };
+rde_vec_3F shadows_directional_light_position = { 0.0f, 10.0f, 0.0f };
 rde_vec_3F shadows_directional_light_ambient_color = { 0.2f, 0.2f, 0.2f };
 rde_vec_3F shadows_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
 rde_vec_3F shadows_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
@@ -148,7 +149,7 @@ void shadows_draw_3d(rde_window* _window, float _dt) {
 	RDE_UNUSED(_dt)
 
 	rde_render_3d_with_shadows(_window, &shadows_camera, false, {
-		rde_rendering_3d_draw_model(shadows_transform_0, shadows_model, NULL);
+		rde_rendering_3d_draw_model(shadows_transform_0, shadows_model, rde_rendering_shader_get_by_name(RDE_SHADER_MESH_SHADOWS));
 	})
 }
 
@@ -167,11 +168,18 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 	{
 		rde_imgui_begin("Directional Lighting", NULL, RDE_IMGUI_WINDOW_FLAGS_AlwaysAutoResize);
 		rde_imgui_push_id(3);
-		float _vec[3] = { shadows_directional_light_direction.x, shadows_directional_light_direction.y, shadows_directional_light_direction.z };
+		float _vec[3] = { shadows_directional_light_position.x, shadows_directional_light_position.y, shadows_directional_light_position.z };
 		if (rde_imgui_drag_float_3("Position", _vec, 0.25f, 0, 0, "%.3f", 0)) {
-			shadows_directional_light_direction.x = _vec[0];
-			shadows_directional_light_direction.y = _vec[1];
-			shadows_directional_light_direction.z = _vec[2];
+			shadows_directional_light_position.x = _vec[0];
+			shadows_directional_light_position.y = _vec[1];
+			shadows_directional_light_position.z = _vec[2];
+		}
+		
+		float _vec_0[3] = { shadows_directional_light_direction.x, shadows_directional_light_direction.y, shadows_directional_light_direction.z };
+		if (rde_imgui_drag_float_3("Direction", _vec_0, 0.25f, 0, 0, "%.3f", 0)) {
+			shadows_directional_light_direction.x = _vec_0[0];
+			shadows_directional_light_direction.y = _vec_0[1];
+			shadows_directional_light_direction.z = _vec_0[2];
 		}
 	
 		float _vec_1[3] = { shadows_directional_light_ambient_color.x, shadows_directional_light_ambient_color.y, shadows_directional_light_ambient_color.z };
@@ -196,11 +204,11 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 		}
 		
 		rde_directional_light _directional_light = (rde_directional_light) {
-			.direction = model_viewer_directional_light_direction,
-			.position = model_viewer_directional_light_position,
-			.ambient_color = model_viewer_directional_light_ambient_color,
-			.diffuse_color = model_viewer_directional_light_diffuse_color,
-			.specular_color = model_viewer_directional_light_specular_color
+			.direction = shadows_directional_light_direction,
+			.position = shadows_directional_light_position,
+			.ambient_color = shadows_directional_light_ambient_color,
+			.diffuse_color = shadows_directional_light_diffuse_color,
+			.specular_color = shadows_directional_light_specular_color
 		};
 		rde_rendering_lighting_set_directional_light(_directional_light);
 		rde_imgui_pop_id();

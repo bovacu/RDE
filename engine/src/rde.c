@@ -783,6 +783,7 @@ struct rde_engine {
 	rde_shader* text_shader_2d;
 	rde_shader* framebuffer_shader;
 	rde_shader* mesh_shader;
+	rde_shader* mesh_shadows_shader;
 	rde_shader* render_texture_shader;
 	rde_shader* skybox_shader;
 	rde_shader* shadows_shader;
@@ -1356,6 +1357,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.text_shader_2d = NULL;
 	_e.framebuffer_shader = NULL;
 	_e.mesh_shader = NULL;
+	_e.mesh_shadows_shader = NULL;
 	_e.render_texture_shader = NULL;
 	_e.skybox_shader = NULL;
 	_e.skybox = rde_struct_create_skybox();
@@ -4039,9 +4041,10 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_FRAMEBUFFER, 	.shader = &ENGINE.framebuffer_shader }
 	};
 
-	#define SHADERS_3D_COUNT 4
+	#define SHADERS_3D_COUNT 5
 	char* _3d_shaders_vert[SHADERS_3D_COUNT] = {
 		"shaders/"SHADER_TYPE"/mesh_vert.glsl",
+		"shaders/"SHADER_TYPE"/mesh_shadows_vert.glsl",
 		"shaders/"SHADER_TYPE"/render_texture_vert.glsl",
 		"shaders/"SHADER_TYPE"/skybox_vert.glsl",
 		"shaders/"SHADER_TYPE"/shadows_vert.glsl"
@@ -4049,6 +4052,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	char* _3d_shaders_frag[SHADERS_3D_COUNT] = {
 		"shaders/"SHADER_TYPE"/mesh_frag.glsl",
+		"shaders/"SHADER_TYPE"/mesh_shadows_frag.glsl",
 		"shaders/"SHADER_TYPE"/render_texture_frag.glsl",
 		"shaders/"SHADER_TYPE"/skybox_frag.glsl",
 		"shaders/"SHADER_TYPE"/shadows_frag.glsl"
@@ -4056,6 +4060,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 	rde_shader_ptr__name_pair _3d_shaders[SHADERS_3D_COUNT] = {
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_MESH, 			.shader = &ENGINE.mesh_shader },
+		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_MESH_SHADOWS, 	.shader = &ENGINE.mesh_shadows_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_RENDER_TEXTURE,.shader = &ENGINE.render_texture_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_SKYBOX, 		.shader = &ENGINE.skybox_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_DEPTH_SHADOWS, .shader = &ENGINE.shadows_shader }
