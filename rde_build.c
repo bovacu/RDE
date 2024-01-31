@@ -1638,6 +1638,7 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
 		ADD_FLAG("-O0");
+		ADD_FLAG("-gcodeview");
 		ADD_FLAG("-DRDE_DEBUG");
 	} else {
 		ADD_FLAG("-O3");
@@ -1769,6 +1770,7 @@ bool compile_windows_rde() {
 		printf("--- BUILDING EXAMPLES --- \n");
 		COMPILE_EXAMPLE("windows", ".exe",
 		{
+			ADD_FLAG("-gcodeview");
 			ADD_FLAG("-limgui");
 			ADD_FLAG("-lwinmm");
 			ADD_FLAG("-lgdi32");
