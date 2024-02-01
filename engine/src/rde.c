@@ -3081,6 +3081,50 @@ void rde_thread_end(rde_thread* _thread) {
 	_thread = NULL;
 }
 
+typedef struct {
+	void* arr;
+	uint init_included;
+	uint end_excluded;
+	rde_thread_foreach_fn fn;
+	size_t size_of_type;
+} rde_thread_foreach_params;
+
+void rde_inner_thread_foreach(rde_thread* _thread, void* _params) {	
+	rde_thread_foreach_params* _p = (rde_thread_foreach_params*)_params;
+	for(uint _i = _p->init_included; _i < _p->end_excluded; _i++) {
+		void* _value = (void*)(_p->arr + _i * _p->size_of_type);
+		_p->fn(_thread, _value, _i);
+	}
+}
+
+void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads) {
+	rde_critical_error(_max_threads <= 0, "Threaded foreach cannot take _max_threads <= 0 \n");
+	rde_critical_error(_init_index_included == _end_index_included, "Threaded foreach cannot take _init_index_included == _end_index_included \n");
+	rde_critical_error(_arr_ptr == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _arr_ptr\n");
+	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _fn\n");
+	uint _amount = RDE_ABS(_end_index_included - _init_index_included) + 1;
+	uint _chunk_size = _amount / _max_threads;
+	uint _current_min = 0;
+	
+	rde_thread* _threads[256];
+	rde_thread_foreach_params _params[256];
+	for(uint _i = 0; _i < _max_threads; _i++) {
+		rde_thread_foreach_params* _param = &_params[_i];
+		_param->arr = _arr_ptr;
+		_param->init_included = _current_min;
+		_param->end_excluded = _current_min + _chunk_size + 1;
+		_param->end_excluded = rde_math_clamp_uint(_param->end_excluded, _current_min, _end_index_included + 1);
+		_param->fn = _fn;
+		_param->size_of_type = _size_of_arr_type;
+		_threads[_i] = rde_thread_run(rde_inner_thread_foreach, (void*)_param);
+		_current_min += _chunk_size;
+	}
+	
+	for(uint _i = 0; _i < _max_threads; _i++) {
+		rde_thread_wait(_threads[_i]);
+	}
+}
+
 
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
@@ -4489,10 +4533,6 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 	}
 
 	_data->material = _material;
-
-	if(_material != NULL) {
-		
-	}
 	
 	//rde_engine_supress_logs(true);
 	if(_material != NULL && _material->map_Ka.path != NULL && strlen(_material->map_Ka.path) > 0) {
@@ -4522,8 +4562,8 @@ void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _me
 	_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 1), _mesh->indices, _mesh->index_count * 3, "Face Index");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 3, rde_arr_s_get_float(_face_index.p * 3 + 0, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 4, rde_arr_s_get_float(_face_index.p * 3 + 1, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
-	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 5, rde_arr_s_get_float(_face_index.p * 3 + 2, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
-
+	rd->arr_s_set_float(_obj_mesh_data->positions_pointer + 5, rde_arr_s_get_float(_face_index.p * 3 + 2, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
+   ->
 	_face_index = rde_arr_s_get_fastObjIndex(_offset + (_v + 2), _mesh->indices, _mesh->index_count * 3, "Face Index");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 6, rde_arr_s_get_float(_face_index.p * 3 + 0, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 7, rde_arr_s_get_float(_face_index.p * 3 + 1, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");

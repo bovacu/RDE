@@ -716,9 +716,9 @@ typedef unsigned int uint;
 //	=================
 	#define rde_calloc(_ptr, _type, _amount) 																							\
 		do {																															\
-			rde_critical_error(_ptr != NULL, "rde_calloc -> Tried to allocate to _ptr, but it was not NULL, check if _ptr has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
-			_ptr = (_type*)calloc(sizeof(_type), (_amount));																			\
-			if(_ptr == NULL) {																											\
+			rde_critical_error((_ptr) != NULL, "rde_calloc -> Tried to allocate to _ptr, but it was not NULL, check if _ptr has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+			(_ptr) = (_type*)calloc(sizeof(_type), (_amount));																			\
+			if((_ptr) == NULL) {																										\
 				rde_critical_error(true, "rde_calloc -> Could not allocate enough memory (%d bytes) \n", sizeof(_type) * (_amount));	\
 			}																															\
 		} while(0)
@@ -753,11 +753,11 @@ typedef unsigned int uint;
 //	=================
 #define rde_realloc(_ptr_src, _ptr_dst, _type, _amount)																				\
 	do {																															\
-		rde_critical_error(_ptr_src == NULL, "rde_realloc -> _ptr_src cannot be NULL \n");											\
-		rde_critical_error(_ptr != NULL, "rde_realloc -> Tried to allocate to _ptr_dst, but it was not NULL, check if _ptr_dst has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
-		_type* _new_memory = (_type*)realloc(_ptr_src, sizeof(_type) * (_amount));													\
+		rde_critical_error((_ptr_src) == NULL, "rde_realloc -> _ptr_src cannot be NULL \n");										\
+		rde_critical_error((_ptr_dst) != NULL, "rde_realloc -> Tried to allocate to _ptr_dst, but it was not NULL, check if _ptr_dst has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+		_type* _new_memory = (_type*)realloc((_ptr_src), sizeof(_type) * (_amount));												\
 		if(_new_memory == NULL) {																									\
-			free(_ptr_src);																											\
+			free((_ptr_src));																										\
 			rde_critical_error(true, "rde_realloc -> Could not allocate enough memory (%d bytes) \n", sizeof(_type) * (_amount));	\
 		}																															\
 		_ptr_dst = _new_memory;																										\
@@ -775,7 +775,7 @@ typedef unsigned int uint;
 //	rde_calloc_init(_my_string, sizeof(char), 128);
 //	rde_free(_my_string);
 //	=================
-	#define rde_free(_ptr) do { free(_ptr); _ptr = NULL; } while(0)
+	#define rde_free(_ptr) do { free((_ptr)); (_ptr) = NULL; } while(0)
 #endif
 
 // Macro: rde_flags_has
@@ -1510,12 +1510,6 @@ typedef struct {			\
 	do {							\
 		_rde_str.size = 0;			\
 		rde_free(_rde_str.str);		\
-	} while(0)
-	
-#define rde_thread_for_arr(_type, _init_index, _end_index, _out_var, _num_threads, _block_of_code)	\
-	do {																							\
-		int _amount = RDE_ABS(_end_index - _init_index);											\
-																									\
 	} while(0)
 
 /// =================================================================== WARNING SILENCER ===================================================================
@@ -3067,6 +3061,7 @@ typedef void (*rde_update_func)(float);
 typedef void (*rde_render_func)(float, rde_window*);
 
 typedef void (*rde_thread_fn)(rde_thread*, void*);
+typedef void (*rde_thread_foreach_fn)(rde_thread*, void*, uint);
 
 #ifdef RDE_PHYSICS_MODULE
 // Callback: rde_render_func
@@ -3910,6 +3905,7 @@ RDE_FUNC rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params);
 RDE_FUNC void rde_thread_wait(rde_thread* _thread);
 RDE_FUNC void rde_thread_detach(rde_thread* _thread);
 RDE_FUNC void rde_thread_end(rde_thread* _thread);
+RDE_FUNC void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads);
 
 // =================================================================== MATH ===================================================================
 
