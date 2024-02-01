@@ -5680,14 +5680,23 @@ rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rd
 	return _tex_params;
 }
 
-rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params) {
+typedef struct {
+	char sanitized_path[RDE_MAX_PATH];
+	char extension[10];
+	int width;
+	int height;
+	int channels;
+	stbi_uc* data;
+} rde_texture_load_data;
+
+rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_texture_load_data* _in_out_data) {
 	const char* _extension = rde_util_file_get_file_extension(_file_path);
 	char _extension_lower[10];
 	memset(_extension_lower, 0, 10);
 	rde_util_string_to_lower(_extension_lower, _extension);
 	rde_critical_error(strcmp(_extension_lower, "jpeg") != 0 && strcmp(_extension_lower, "jpg") != 0 &&
 	                   strcmp(_extension_lower, "png") != 0, RDE_ERROR_RENDERING_TEXTURE_UNSUPPORTED_FORMAT, _file_path, _extension);
-
+	
 	rde_texture* _texture = NULL;
 
 	char _sanitized_path[RDE_MAX_PATH];
@@ -5711,15 +5720,12 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 
 	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "textures", ENGINE.total_amount_of_textures);
 
-	int _width, _height, _channels;
 	stbi_set_flip_vertically_on_load(1);
 
 #if RDE_IS_IOS()
 	stbi_convert_iphone_png_to_rgb(1);
 	stbi_set_unpremultiply_on_load(1);
 #endif
-
-	stbi_uc* _data = NULL;
 	
 #if RDE_IS_MOBILE()
 	while(rde_util_string_contains_sub_str(_sanitized_path, "../", false)) {
@@ -5757,17 +5763,27 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 	uint _total_size = 0;
 	rde_file_handle* _file_handle = rde_file_open(_sanitized_path, RDE_FILE_MODE_READ);
 	const unsigned char* _texture_data = rde_file_read_full_file_bytes(_file_handle, &_total_size);
-	_data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	_in_out_data->data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	rde_file_close(_file_handle);
 #else
-	_data = stbi_load(_sanitized_path, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	_in_out_data->data = stbi_load(_sanitized_path, &_in_out_data->width, &_in_out_data->height, &_in_out_data->channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
 #endif
 
-	rde_critical_error(_data == NULL, "Could not load texture at '%s'", _sanitized_path);
+	rde_critical_error(_in_out_data->data == NULL, "Could not load texture at '%s'", _sanitized_path);
+	
+	memset(_in_out_data->sanitized_path, 0, RDE_MAX_PATH);
+	rde_strcpy(_in_out_data->sanitized_path, RDE_MAX_PATH, _sanitized_path);
+	memset(_in_out_data->extension, 0, 10);
+	rde_strcpy(_in_out_data->extension, 10, _extension);
+	
+	return _texture;
+}
 
+void rde_inner_rendering_texture_load_data_to_opengl(rde_texture* _texture, rde_texture_load_data* _in_data, const rde_texture_parameters* _params) {
 	RDE_CHECK_GL(glPixelStorei, GL_UNPACK_ALIGNMENT, 4);
 	GLenum _internal_format = 0;
 	GLenum _data_format = 0;
-	if (strcmp(_extension, "png") == 0) {
+	if (strcmp(_in_data->extension, "png") == 0) {
 		_internal_format = GL_RGBA8;
 		_data_format = GL_RGBA;
 	} else {
@@ -5791,34 +5807,36 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 		RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _tex_params.mipmap_min_filter);
 	}
 
-	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, _internal_format, _width, _height, 0, _data_format, GL_UNSIGNED_BYTE, _data);
+	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, _internal_format, _in_data->width, _in_data->height, 0, _data_format, GL_UNSIGNED_BYTE, _in_data->data);
 
 	if(_tex_params.mipmap_min_filter != RDE_TEXTURE_PARAMETER_TYPE_MIPMAP_NONE) {
 		RDE_CHECK_GL(glGenerateMipmap, GL_TEXTURE_2D);
 	}
-	
-	stbi_image_free(_data);
 
 	_texture->opengl_texture_id = _texture_id;
-	_texture->size = (rde_vec_2UI){ (uint)_width, (uint)_height };
-	_texture->channels = _channels;
+	_texture->size = (rde_vec_2UI){ (uint)_in_data->width, (uint)_in_data->height };
+	_texture->channels = _in_data->channels;
 	_texture->internal_format = _internal_format;
 	_texture->data_format = _data_format;
-	rde_strcpy(_texture->file_path, RDE_MAX_PATH, _sanitized_path);
+	rde_strcpy(_texture->file_path, RDE_MAX_PATH, _in_data->sanitized_path);
 
-	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _sanitized_path);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _width, _height);
-	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _channels);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Texture at '%s' loaded correctly: ", _in_data->sanitized_path);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Size: %dx%d: ", _in_data->width, _in_data->height);
+	rde_log_color(RDE_LOG_COLOR_GREEN, "	- Channels: %d: ", _in_data->channels);
 	rde_log_color(RDE_LOG_COLOR_GREEN, "	- OpenGL ID: %u: ", _texture_id);
 	
 	if(!rde_engine_logs_supressed()) {
 		printf("\n");
 	}
+}
 
-#if RDE_IS_MOBILE()
-	rde_file_close(_file_handle);
-#endif
-
+rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params) {
+	rde_texture_load_data _data = {0};
+	rde_texture* _texture = red_inner_rendering_texture_load_data(_file_path, &_data);
+	if(_data.data != NULL) {
+		rde_inner_rendering_texture_load_data_to_opengl(_texture, &_data, _params);
+		stbi_image_free(_data.data);
+	}
 	return _texture;
 }
 
