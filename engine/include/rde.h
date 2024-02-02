@@ -941,7 +941,7 @@ typedef struct {			\
 		rde_critical_error((_dyn_arr)->memory == NULL, "Uninitialized rde_arr");												\
 		if((_dyn_arr)->used + 1 == (_dyn_arr)->capacity) {																		\
 			(_dyn_arr)->capacity = (_dyn_arr)->capacity RDE_ARR_OPERAND_INCREASE RDE_ARR_AMOUNT_INCREASE;						\
-			size_t _size = sizeof(typeof((_dyn_arr)->memory));																	\
+			size_t _size = sizeof(typeof(*(_dyn_arr)->memory));																	\
 			void* _new_memory = (void*)realloc((_dyn_arr)->memory, _size * (_dyn_arr)->capacity);								\
 			if(_new_memory == NULL) {																							\
 				free((_dyn_arr)->memory);																						\
