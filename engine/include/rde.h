@@ -4936,6 +4936,7 @@ RDE_FUNC void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated
 // Parameters:
 //	_model_path - path to the 3D model.
 RDE_FUNC rde_model* rde_rendering_model_load(const char* _model_path);
+RDE_FUNC rde_model* rde_rendering_model_load_threaded(const char* _model_path, uint _threads);
 
 // Function: rde_rendering_model_get_vertices_count
 // Returns the total amount of vertices. If the model is made by several sub-meshes, all sub-meshes vertices are count.

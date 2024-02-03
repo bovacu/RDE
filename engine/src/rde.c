@@ -621,6 +621,24 @@ struct rde_atlas {
 	rde_texture* texture;
 	rde_atlas_sub_textures* sub_textures;
 };
+
+typedef enum {
+	RDE_THREADED_TEXTURE_LOAD_TYPE_NONE,
+	RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KA,
+	RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KD,
+	RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KS,
+	RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_BUMP,
+} RDE_THREADED_TEXTURE_LOAD_TYPE_;
+
+typedef struct {
+	char sanitized_path[RDE_MAX_PATH];
+	char extension[10];
+	int width;
+	int height;
+	int channels;
+	stbi_uc* data;
+	RDE_THREADED_TEXTURE_LOAD_TYPE_ texture_type;
+} rde_texture_load_data;
 	
 struct rde_font {
 	rde_texture* texture;
@@ -647,7 +665,6 @@ struct rde_mesh {
 	
 struct rde_model {
 	rde_arr_rde_mesh mesh_array;
-	uint mesh_array_size;
 	char file_path[RDE_MAX_PATH];
 };
 	
@@ -718,6 +735,14 @@ typedef struct {
 	rde_obj_mesh_data value;
 	int key;
 } rde_obj_map_entry;
+
+#define RDE_MAX_THREADED_TEXTURE_LOAD_TYPE_COUNT 4
+typedef struct {
+	fastObjMaterial* material;
+	rde_obj_mesh_data mesh_data;
+	rde_thread* thread;
+	rde_texture_load_data texture_load_data[RDE_MAX_THREADED_TEXTURE_LOAD_TYPE_COUNT];
+} rde_obj_texture_load_params;
 #endif
 
 /// Audio
@@ -750,7 +775,11 @@ typedef struct {
 #endif
 	
 struct rde_thread {
-	SDL_Thread* native_thread;
+#if RDE_IS_WINDOWS()
+	HANDLE native_thread;
+#else
+	pthread_t native_handle;
+#endif
 	bool detached;
 	rde_thread_fn fn;
 	void* params;
@@ -1207,7 +1236,6 @@ rde_model rde_struct_create_model() {
 	rde_model _m;
 	rde_arr_init(&_m.mesh_array);
 	rde_arr_new(&_m.mesh_array);
-	_m.mesh_array_size = 0;
 	memset(_m.file_path, 0, RDE_MAX_PATH);
 	return _m;
 }
@@ -1596,8 +1624,10 @@ void rde_inner_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_textu
 #ifdef RDE_OBJ_MODULE
 rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data();
 void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fastObjMaterial* _material, bool _has_t, bool _has_n);
+void rde_inner_fill_obj_mesh_data_threaded(rde_obj_texture_load_params* _obj_texture_load_data, fastObjGroup* _group, bool _has_t, bool _has_n);
 void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data);
 rde_model* rde_inner_obj_load_model(const char* _obj_path);
+rde_model* rde_inner_obj_load_model_threaded(const char* _obj_path, uint _threads);
 #endif
 
 #ifdef RDE_FBX_MODULE
@@ -1624,6 +1654,12 @@ void rde_inner_rendering_end_3d();
 void rde_inner_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat4 _mat);
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices);
 bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
+
+rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_texture_load_data* _in_out_data);
+void rde_inner_rendering_texture_load_data_with_texture_provided(const char* _file_path, rde_texture_load_data* _in_out_data);
+void rde_inner_rendering_texture_load_data_to_opengl(rde_texture* _texture, rde_texture_load_data* _in_data, const rde_texture_parameters* _params);
+rde_texture* rde_inner_rendering_get_first_available_texture();
+rde_texture* rde_inner_rendering_texture_already_loaded(const char* _file_path);
 
 /// ******************************************* PHYSICS *********************************************
 
@@ -3038,12 +3074,21 @@ uint rde_util_hash_map_str_hash(const char** _key) {
     return _hash;
 }
 
-int rde_inner_thread_wrapper(void* _params) {
+#if RDE_IS_WINDOWS()
+DWORD rde_inner_thread_wrapper(void* _params) {
 	rde_thread* _t = (rde_thread*)_params;
 	((rde_thread_fn)_t->fn)(_t, _t->params);
 	rde_free(_t);
 	return 0;
 }
+#else
+void* rde_inner_thread_wrapper(void* _params) {
+	rde_thread* _t = (rde_thread*)_params;
+	((rde_thread_fn)_t->fn)(_t, _t->params);
+	rde_free(_t);
+	return NULL;
+}
+#endif
 
 rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
 	rde_malloc_init(_thread, rde_thread, 1);
@@ -3052,9 +3097,14 @@ rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
 	_thread->fn = _fn;
 	_thread->params = _params;
 	
-	_thread->native_thread = SDL_CreateThread(rde_inner_thread_wrapper, NULL, (void*)_thread);
+#if RDE_IS_WINDOWS()
+	_thread->native_thread = CreateThread(NULL, 0, rde_inner_thread_wrapper, (void*)_thread, 0, NULL);
+#else
+	pthread_create(&_thread->native_handle, NULL, rde_inner_thread_wrapper, (void*)_thread);
+#endif
+	
 	if(_thread->native_thread == NULL) {
-		rde_critical_error(true, "Could not create new thread %s\n", SDL_GetError());
+		rde_critical_error(true, "Could not create new thread\n");
 	}
 
 	return _thread;
@@ -3062,13 +3112,29 @@ rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
 
 void rde_thread_wait(rde_thread* _thread) {
 	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_wait - _thread");
-	rde_critical_error(_thread->detached, "Cannot wait on an already detached thread, this is undefined behaviour\n");
-	SDL_WaitThread(_thread->native_thread, NULL);
+#if RDE_IS_WINDOWS()
+	DWORD _res = WaitForSingleObject(_thread->native_thread, INFINITE);
+	switch(_res) {
+      case WAIT_ABANDONED: 	break;
+      case WAIT_OBJECT_0: 	break;
+      case WAIT_TIMEOUT: 	break;
+      case WAIT_FAILED: 	rde_log_level(RDE_LOG_LEVEL_ERROR, "Thread exited with WAIT_FAILED\n"); break;
+	}
+	CloseHandle(_thread->native_thread);
+#else
+	int _res = pthread_join(_thread->native_handle);
+	rde_critical_error(_res != 0, "Thread exited with code %d\n", _res);
+#endif
 }
 
 void rde_thread_detach(rde_thread* _thread) {
 	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_detach - _thread");
-	SDL_DetachThread(_thread->native_thread);
+#if RDE_IS_WINDOWS()
+	CloseHandle(_thread->native_thread);
+#else
+	int _res = pthread_detach(_thread->native_handle);
+	rde_critical_error(_res != 0, "Thread detached with code %d\n", _res);
+#endif
 	_thread->detached = true;
 }
 
@@ -3102,27 +3168,32 @@ void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_ind
 	rde_critical_error(_init_index_included == _end_index_included, "Threaded foreach cannot take _init_index_included == _end_index_included \n");
 	rde_critical_error(_arr_ptr == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _arr_ptr\n");
 	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _fn\n");
-	uint _amount = RDE_ABS(_end_index_included - _init_index_included) + 1;
+	uint _amount = RDE_ABS(_end_index_included - _init_index_included);
+	_max_threads = rde_math_clamp_uint(_max_threads, 1, _amount - 1);
 	uint _chunk_size = _amount / _max_threads;
 	uint _current_min = 0;
 	
-	rde_thread* _threads[256];
-	rde_thread_foreach_params _params[256];
+	rde_calloc_init(_threads, rde_thread*, _amount);
+	rde_calloc_init(_params, rde_thread_foreach_params, _amount);
+	
 	for(uint _i = 0; _i < _max_threads; _i++) {
 		rde_thread_foreach_params* _param = &_params[_i];
 		_param->arr = _arr_ptr;
 		_param->init_included = _current_min;
-		_param->end_excluded = _current_min + _chunk_size + 1;
-		_param->end_excluded = rde_math_clamp_uint(_param->end_excluded, _current_min, _end_index_included + 1);
+		_param->end_excluded = (_i == _max_threads - 1 && _current_min + 1 < _amount) ? _current_min + (_amount - _current_min) : _current_min + _chunk_size;
+		_param->end_excluded = rde_math_clamp_uint(_param->end_excluded, _current_min, _end_index_included);
 		_param->fn = _fn;
 		_param->size_of_type = _size_of_arr_type;
-		_threads[_i] = rde_thread_run(rde_inner_thread_foreach, (void*)_param);
 		_current_min += _chunk_size;
+		_threads[_i] = rde_thread_run(rde_inner_thread_foreach, (void*)_param);
 	}
 	
 	for(uint _i = 0; _i < _max_threads; _i++) {
 		rde_thread_wait(_threads[_i]);
 	}
+	
+	rde_free(_threads);
+	rde_free(_params);
 }
 
 
@@ -4514,6 +4585,61 @@ void rde_inner_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_textu
 }
 
 #ifdef RDE_OBJ_MODULE
+void rde_inner_fill_obj_textures_threaded(rde_thread* _thread, void* _value, uint _arr_index) {
+	RDE_UNUSED(_thread);
+	RDE_UNUSED(_arr_index);
+	
+	rde_obj_texture_load_params* _p = (rde_obj_texture_load_params*)_value;
+	uint _index = 0;
+	
+	for(uint _i = 0; _i < RDE_MAX_THREADED_TEXTURE_LOAD_TYPE_COUNT; _i++) {
+		_p->texture_load_data[_i].texture_type = RDE_THREADED_TEXTURE_LOAD_TYPE_NONE;
+	}
+	
+	if(_p->material != NULL && _p->material->map_Ka.path != NULL && strlen(_p->material->map_Ka.path) > 0) {
+		rde_inner_rendering_texture_load_data_with_texture_provided(_p->material->map_Ka.path, &_p->texture_load_data[_index]);
+		_p->texture_load_data[_index].texture_type = RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KA;
+		_index++;
+	} 
+	
+	if(_p->material != NULL && _p->material->map_Kd.path != NULL && strlen(_p->material->map_Kd.path) > 0) {
+		rde_inner_rendering_texture_load_data_with_texture_provided(_p->material->map_Kd.path, &_p->texture_load_data[_index]);
+		_p->texture_load_data[_index].texture_type = RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KD;
+		_index++;
+	} 
+	
+	if(_p->material != NULL && _p->material->map_Ks.path != NULL && strlen(_p->material->map_Ks.path) > 0) {
+		rde_inner_rendering_texture_load_data_with_texture_provided(_p->material->map_Ks.path, &_p->texture_load_data[_index]);
+		_p->texture_load_data[_index].texture_type = RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KS;
+		_index++;
+	} 
+	
+	if(_p->material != NULL && _p->material->map_bump.path != NULL && strlen(_p->material->map_bump.path) > 0) {
+		rde_inner_rendering_texture_load_data_with_texture_provided(_p->material->map_bump.path, &_p->texture_load_data[_index]);
+		_p->texture_load_data[_index].texture_type = RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_BUMP;
+		_index++;
+	}
+}
+
+void rde_inner_fill_obj_mesh_data_threaded(rde_obj_texture_load_params* _obj_texture_load_data, fastObjGroup* _group, bool _has_t, bool _has_n) {
+	_obj_texture_load_data->mesh_data.name = _group->name;
+
+	_obj_texture_load_data->mesh_data.material = _obj_texture_load_data->material;
+
+	_obj_texture_load_data->mesh_data.positions_size = _obj_texture_load_data->mesh_data.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION;
+	rde_malloc(_obj_texture_load_data->mesh_data.positions, float, _obj_texture_load_data->mesh_data.positions_size);
+
+	if(_has_t) {
+		_obj_texture_load_data->mesh_data.texcoords_size = _obj_texture_load_data->mesh_data.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_TEXTURE_COORD;
+		rde_malloc(_obj_texture_load_data->mesh_data.texcoords, float, _obj_texture_load_data->mesh_data.texcoords_size);
+	}
+
+	if(_has_n) {
+		_obj_texture_load_data->mesh_data.normals_size = _obj_texture_load_data->mesh_data.vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
+		rde_malloc(_obj_texture_load_data->mesh_data.normals, float, _obj_texture_load_data->mesh_data.normals_size);
+	}
+}
+
 void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fastObjMaterial* _material, bool _has_t, bool _has_n) {
 	_data->name = _group->name;
 
@@ -4531,10 +4657,8 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 		_data->normals_size = _data->vertex_count * RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_NORMAL;
 		rde_malloc(_data->normals, float, _data->normals_size);
 	}
-
-	_data->material = _material;
 	
-	//rde_engine_supress_logs(true);
+	rde_engine_supress_logs(true);
 	if(_material != NULL && _material->map_Ka.path != NULL && strlen(_material->map_Ka.path) > 0) {
 		_data->map_ka = rde_rendering_texture_load(_material->map_Ka.path, NULL);
 	}
@@ -4550,7 +4674,7 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 	if(_material != NULL && _material->map_bump.path != NULL && strlen(_material->map_bump.path) > 0) {
 		_data->map_bump = rde_rendering_texture_load(_material->map_bump.path, NULL);
 	}
-	//rde_engine_supress_logs(false);
+	rde_engine_supress_logs(false);
 }
 
 void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data) {
@@ -4628,6 +4752,208 @@ unsigned long rde_inner_obj_file_size(void* _file, void* _user_data) {
 	(void)_user_data;
 	SDL_RWops* _sdl_file = (SDL_RWops*)_file;
 	return SDL_RWsize(_sdl_file);
+}
+
+rde_model* rde_inner_obj_load_model_threaded(const char* _obj_path, uint _threads) {
+	clock_t _t_start, _t_end;
+	_t_start = clock();
+
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading OBJ '%s':", _obj_path);
+
+	rde_model* _model = NULL;
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
+		rde_model* _m = &ENGINE.models[_i];
+
+		if (rde_arr_get_length(&_m->mesh_array) != 0) {
+			continue;
+		}
+
+		_model = _m;
+		break;
+	}
+
+	rde_critical_error(_model == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "models", ENGINE.init_info.heap_allocs_config.max_amount_of_models);
+
+	fastObjCallbacks _callbacks = {
+		.file_open  = rde_inner_obj_file_open,
+		.file_close = rde_inner_obj_file_close,
+		.file_read  = rde_inner_obj_file_read,
+		.file_size  = rde_inner_obj_file_size
+	};
+	fastObjMesh* _mesh = fast_obj_read_with_callbacks(_obj_path, &_callbacks, NULL);
+
+	rde_critical_error(_mesh == NULL, "OBJ Mesh read from fast_obj is NULL, '%s' \n", _obj_path);
+
+	size_t _material_count = _mesh->material_count == 0 ? 1 : _mesh->material_count;
+	rde_calloc_init(_threads_data, rde_obj_texture_load_params, _material_count);
+	for(unsigned int _i = 0; _i < _material_count; _i++) {
+		_threads_data[_i].mesh_data = rde_inner_struct_create_obj_mesh_data();
+	}
+
+	fastObjGroup* _group_or_obj = _mesh->objects;
+	uint _group_or_object_count = _mesh->object_count;
+	if(_group_or_obj[0].name == NULL && _mesh->groups[0].name != NULL) {
+		_group_or_obj = _mesh->groups;
+		_group_or_object_count = _mesh->group_count;
+	}
+
+	for(unsigned int _i = 0; _i < _group_or_object_count; _i++) {
+		rde_obj_mesh_data* _obj_mesh_data = NULL;
+		fastObjGroup* _o_or_g_inner = &_group_or_obj[_i];
+		for (size_t _j = 0; _j < _o_or_g_inner->face_count; _j++) {
+			uint _material_key = _mesh->face_materials[_o_or_g_inner->face_offset + _j];
+			_obj_mesh_data = &(_threads_data[_material_key].mesh_data);
+			
+			uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g_inner->face_offset + _j];
+			if (_amount_of_elements_on_face_vertex == 3) {
+				_obj_mesh_data->vertex_count += 3;
+			} else {
+				for (size_t _v = 0; _v < _amount_of_elements_on_face_vertex - 2; _v++) {
+					_obj_mesh_data->vertex_count += 3;
+				}
+			}
+		}
+	}
+
+	uint _offset = 0;
+	for(unsigned int _i = 0; _i < _group_or_object_count; _i++) {
+		fastObjGroup* _o_or_g = &_group_or_obj[_i];
+
+		for (size_t _j = 0; _j < _o_or_g->face_count; _j++) {
+			uint _material_key = _mesh->face_materials[_o_or_g->face_offset + _j];
+
+			if(_threads_data[_material_key].mesh_data.positions == NULL) {
+				fastObjIndex _index = _mesh->indices[_o_or_g->index_offset + _j];
+				rde_obj_texture_load_params* _obj_texture_load_data = &_threads_data[_material_key];
+				_obj_texture_load_data->material = &_mesh->materials[_material_key];
+				_obj_texture_load_data->thread = NULL;
+				for(uint _i = 0; _i < RDE_MAX_THREADED_TEXTURE_LOAD_TYPE_COUNT; _i++) _obj_texture_load_data->texture_load_data[_i].data = NULL;
+				rde_inner_fill_obj_mesh_data_threaded(_obj_texture_load_data, 
+				                       _o_or_g, 
+				                       _index.t != 0,
+				                       _index.n != 0);
+			}
+
+			uint _amount_of_elements_on_face_vertex = _mesh->face_vertices[_o_or_g->face_offset + _j];
+			if (_amount_of_elements_on_face_vertex == 3) {
+				rde_inner_parse_3_vertices_face_obj(0, _offset, _mesh, &_threads_data[_material_key].mesh_data);
+			} else {
+				for (size_t _v = 0; _v < _amount_of_elements_on_face_vertex - 2; _v++) {
+					rde_inner_parse_3_vertices_face_obj(_v, _offset, _mesh, &_threads_data[_material_key].mesh_data);
+				}
+			}
+			_offset += _amount_of_elements_on_face_vertex;
+		}
+	}
+	
+	rde_thread_foreach(_threads_data, sizeof(rde_obj_texture_load_params), 0, _material_count, rde_inner_fill_obj_textures_threaded, _threads);
+	
+	for(unsigned int _i = 0; _i < _material_count; _i++) {
+		rde_obj_texture_load_params* _p = &_threads_data[_i];
+		rde_texture* _already_laoded_texture = NULL;
+		
+		rde_engine_supress_logs(true);
+		for(uint _j = 0; _j < RDE_MAX_THREADED_TEXTURE_LOAD_TYPE_COUNT; _j++) {
+			rde_texture* _texture = rde_inner_rendering_get_first_available_texture();
+			if(_p->texture_load_data[_j].texture_type == RDE_THREADED_TEXTURE_LOAD_TYPE_NONE) continue;
+			
+			switch (_p->texture_load_data[_j].texture_type) {
+				case RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KA: {
+					if((_already_laoded_texture = rde_inner_rendering_texture_already_loaded(_p->texture_load_data[_j].sanitized_path)) != NULL) {
+						_p->mesh_data.map_ka = _already_laoded_texture;
+						continue;
+					}
+					rde_inner_rendering_texture_load_data_to_opengl(_texture, &_p->texture_load_data[_j], NULL);
+					_p->mesh_data.map_ka = _texture;
+					break;
+				}
+				case RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KD: {
+					if((_already_laoded_texture = rde_inner_rendering_texture_already_loaded(_p->texture_load_data[_j].sanitized_path)) != NULL) {
+						_p->mesh_data.map_kd = _already_laoded_texture;
+						continue;
+					}
+					rde_inner_rendering_texture_load_data_to_opengl(_texture, &_p->texture_load_data[_j], NULL);
+					_p->mesh_data.map_kd = _texture;
+					break;
+				}
+				case RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_KS: {
+					if((_already_laoded_texture = rde_inner_rendering_texture_already_loaded(_p->texture_load_data[_j].sanitized_path)) != NULL) {
+						_p->mesh_data.map_ks = _already_laoded_texture;
+						continue;
+					}
+					rde_inner_rendering_texture_load_data_to_opengl(_texture, &_p->texture_load_data[_j], NULL);
+					_p->mesh_data.map_ks = _texture;
+					break;
+				}
+				case RDE_THREADED_TEXTURE_LOAD_TYPE_MAP_BUMP: {
+					if((_already_laoded_texture = rde_inner_rendering_texture_already_loaded(_p->texture_load_data[_j].sanitized_path)) != NULL) {
+						_p->mesh_data.map_bump = _already_laoded_texture;
+						continue;
+					}
+					rde_inner_rendering_texture_load_data_to_opengl(_texture, &_p->texture_load_data[_j], NULL);
+					_p->mesh_data.map_bump = _texture;
+					break;
+				}
+				default: {
+					rde_critical_error(true, "Unkown type for texture loadind threaded \n");
+				}
+			}
+			if(_p->texture_load_data[_j].data != NULL) {
+				stbi_image_free(_p->texture_load_data[_j].data);
+			}
+		}
+		rde_engine_supress_logs(false);
+	}
+
+	for(unsigned int _i = 0; _i < _material_count; _i++) {
+		rde_obj_mesh_data* _obj_mesh_data = &_threads_data[_i].mesh_data;
+
+		if(_obj_mesh_data->vertex_count <= 0) {
+			continue;
+		}
+
+		rde_mesh_gen_data _data = {
+			.name = _obj_mesh_data->name,
+			.vertex_count = _obj_mesh_data->vertex_count,
+			.positions = _obj_mesh_data->positions,
+			.positions_size = _obj_mesh_data->positions_size,
+			.texcoords = _obj_mesh_data->texcoords,
+			.texcoords_size = _obj_mesh_data->texcoords_size,
+			.normals = _obj_mesh_data->normals,
+			.normals_size = _obj_mesh_data->normals_size,
+			.material = {
+				.map_ka = _obj_mesh_data->map_ka,
+				.map_kd = _obj_mesh_data->map_kd,
+				.map_ks = _obj_mesh_data->map_ks,
+				.map_bump = _obj_mesh_data->map_bump,
+			}
+		};
+
+		if(_obj_mesh_data->material != NULL) {
+			_data.material.material_light_data = (rde_material_light_data) {
+				.shininess = _obj_mesh_data->material->Ns,
+				.ka = { _obj_mesh_data->material->Ka[0], _obj_mesh_data->material->Ka[1], _obj_mesh_data->material->Ka[2] },
+				.kd = { _obj_mesh_data->material->Kd[0], _obj_mesh_data->material->Kd[1], _obj_mesh_data->material->Kd[2] },
+				.ks = { _obj_mesh_data->material->Ks[0], _obj_mesh_data->material->Ks[1], _obj_mesh_data->material->Ks[2] }
+			};
+		} else {
+			_data.material.material_light_data = rde_struct_create_material_light_data();
+		}
+		
+		rde_engine_supress_logs(true);
+		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
+		rde_engine_supress_logs(false);
+		rde_arr_add(&_model->mesh_array, _mesh);
+	}
+
+	rde_strcpy(_model->file_path, RDE_MAX_PATH, _obj_path);
+	fast_obj_destroy(_mesh);
+	rde_free(_threads_data);
+	_t_end = clock();
+
+	rde_log_color(RDE_LOG_COLOR_GREEN, "Model loaded in %f""s", (_t_end - _t_start) / 1000.f);
+
+	return _model;
 }
 
 rde_model* rde_inner_obj_load_model(const char* _obj_path) {
@@ -4761,7 +5087,6 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
 		rde_engine_supress_logs(false);
 		rde_arr_add(&_model->mesh_array, _mesh);
-		_model->mesh_array_size++;
 	}
 
 	rde_strcpy(_model->file_path, RDE_MAX_PATH, _obj_path);
@@ -4835,7 +5160,6 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 	uint _nodes_size = _scene->nodes.count;
 
 	_model->mesh_array = NULL;
-	_model->mesh_array_size = 0;
 	
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Loading FBX '%s' with %u nodes:", _fbx_path, _nodes_size);
 
@@ -4913,7 +5237,6 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 			rde_log_color(RDE_LOG_COLOR_GREEN, "	- vertices: %u, indices: %u, texcoords: %u \n", _mesh_positions_size, _mesh_indices_size, _mesh_texcoords_size);
 
 			stbds_arrput(_model->mesh_array, _m);
-			_model->mesh_array_size++;
 		}
     }
 
@@ -5559,8 +5882,6 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 		_shader->tessellation_es_program_id = _tessellation_es_program_id;
 		_shader->compiled_program_id = _program_id;
 		rde_strcat(_shader->name, RDE_SHADER_MAX_NAME, _name);
-
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded shader '%s' with index '%d' successfully", _shader->name, _shader->compiled_program_id);
 		return _shader;
 	}
 
@@ -5680,14 +6001,104 @@ rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rd
 	return _tex_params;
 }
 
-typedef struct {
-	char sanitized_path[RDE_MAX_PATH];
-	char extension[10];
-	int width;
-	int height;
-	int channels;
-	stbi_uc* data;
-} rde_texture_load_data;
+rde_texture* rde_inner_rendering_get_first_available_texture() {
+	rde_texture* _texture = NULL;
+	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
+		if (ENGINE.textures[_i].opengl_texture_id >= 0 || strlen(ENGINE.textures[_i].file_path) > 0) {
+			continue;
+		}
+		
+		_texture = &ENGINE.textures[_i];
+		break;
+	}
+
+	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "textures", ENGINE.total_amount_of_textures);
+	
+	return _texture;
+}
+
+rde_texture* rde_inner_rendering_texture_already_loaded(const char* _file_path) {
+	char _sanitized_path[RDE_MAX_PATH];
+	memset(_sanitized_path, 0, RDE_MAX_PATH);
+	rde_util_file_sanitaize_path(_file_path, _sanitized_path, RDE_MAX_PATH);
+	
+	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
+		if (strlen(ENGINE.textures[_i].file_path) != 0 && strcmp(ENGINE.textures[_i].file_path, _sanitized_path) == 0) {
+			return &ENGINE.textures[_i];
+		}
+	}
+	
+	return NULL;
+}
+
+void rde_inner_rendering_texture_load_data_with_texture_provided(const char* _file_path, rde_texture_load_data* _in_out_data) {
+	const char* _extension = rde_util_file_get_file_extension(_file_path);
+	char _extension_lower[10];
+	memset(_extension_lower, 0, 10);
+	rde_util_string_to_lower(_extension_lower, _extension);
+	rde_critical_error(strcmp(_extension_lower, "jpeg") != 0 && strcmp(_extension_lower, "jpg") != 0 &&
+	                   strcmp(_extension_lower, "png") != 0, RDE_ERROR_RENDERING_TEXTURE_UNSUPPORTED_FORMAT, _file_path, _extension);
+
+	char _sanitized_path[RDE_MAX_PATH];
+	memset(_sanitized_path, 0, RDE_MAX_PATH);
+	rde_util_file_sanitaize_path(_file_path, _sanitized_path, RDE_MAX_PATH);
+	
+		stbi_set_flip_vertically_on_load(1);
+
+#if RDE_IS_IOS()
+	stbi_convert_iphone_png_to_rgb(1);
+	stbi_set_unpremultiply_on_load(1);
+#endif
+	
+#if RDE_IS_MOBILE()
+	while(rde_util_string_contains_sub_str(_sanitized_path, "../", false)) {
+		size_t _sp_size = strlen(_sanitized_path);
+		size_t _init_point = 0;
+		size_t _end_point = 0;
+
+		for(unsigned int _i = 0; _i < _sp_size; _i++) {
+			if(_sanitized_path[_i] == '/' &&
+			   _i + 1 < _sp_size && _sanitized_path[_i + 1] != '.' &&
+			   _i + 2 < _sp_size && _sanitized_path[_i + 2] != '.' ) {
+				_init_point = _i;
+			}
+
+			if(_sanitized_path[_i] == '.' &&
+			   _i + 1 < _sp_size && _sanitized_path[_i + 1] == '.' &&
+			   _i + 2 < _sp_size && _sanitized_path[_i + 2] == '/') {
+				_end_point = _i + 2;
+				break;
+			}
+		}
+
+		rde_critical_error(_init_point == _end_point, "Error converting path");
+
+		char _new_path[RDE_MAX_PATH];
+		memset(_new_path, 0, RDE_MAX_PATH);
+		rde_strncat(_new_path, RDE_MAX_PATH, _sanitized_path, _init_point);
+		rde_strncat(_new_path, RDE_MAX_PATH, _sanitized_path + _end_point, _sp_size - _end_point);
+		memset(_sanitized_path, 0, RDE_MAX_PATH);
+		rde_strcpy(_sanitized_path, RDE_MAX_PATH, _new_path);
+		rde_log_level(RDE_LOG_LEVEL_INFO, "Removed a .. from path: %s", _sanitized_path);
+	}
+
+	rde_log_level(RDE_LOG_LEVEL_INFO, "This is the new path: %s", _sanitized_path);
+	uint _total_size = 0;
+	rde_file_handle* _file_handle = rde_file_open(_sanitized_path, RDE_FILE_MODE_READ);
+	const unsigned char* _texture_data = rde_file_read_full_file_bytes(_file_handle, &_total_size);
+	_in_out_data->data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	rde_file_close(_file_handle);
+#else
+	_in_out_data->data = stbi_load(_sanitized_path, &_in_out_data->width, &_in_out_data->height, &_in_out_data->channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+#endif
+
+	rde_critical_error(_in_out_data->data == NULL, "Could not load texture at '%s'", _sanitized_path);
+	
+	memset(_in_out_data->sanitized_path, 0, RDE_MAX_PATH);
+	rde_strcpy(_in_out_data->sanitized_path, RDE_MAX_PATH, _sanitized_path);
+	memset(_in_out_data->extension, 0, 10);
+	rde_strcpy(_in_out_data->extension, 10, _extension);
+}
 
 rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_texture_load_data* _in_out_data) {
 	const char* _extension = rde_util_file_get_file_extension(_file_path);
@@ -5696,8 +6107,6 @@ rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_t
 	rde_util_string_to_lower(_extension_lower, _extension);
 	rde_critical_error(strcmp(_extension_lower, "jpeg") != 0 && strcmp(_extension_lower, "jpg") != 0 &&
 	                   strcmp(_extension_lower, "png") != 0, RDE_ERROR_RENDERING_TEXTURE_UNSUPPORTED_FORMAT, _file_path, _extension);
-	
-	rde_texture* _texture = NULL;
 
 	char _sanitized_path[RDE_MAX_PATH];
 	memset(_sanitized_path, 0, RDE_MAX_PATH);
@@ -5709,17 +6118,9 @@ rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_t
 		}
 	}
 
-	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
-		if (ENGINE.textures[_i].opengl_texture_id >= 0) {
-			continue;
-		}
-
-		_texture = &ENGINE.textures[_i];
-		break;
-	}
-
-	rde_critical_error(_texture == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "textures", ENGINE.total_amount_of_textures);
-
+	rde_texture* _texture = rde_inner_rendering_get_first_available_texture();
+	rde_strcpy(_texture->file_path, RDE_MAX_PATH, _sanitized_path);
+	
 	stbi_set_flip_vertically_on_load(1);
 
 #if RDE_IS_IOS()
@@ -7070,6 +7471,32 @@ rde_model* rde_rendering_model_load(const char* _model_path) {
 	return NULL;
 }
 
+rde_model* rde_rendering_model_load_threaded(const char* _model_path, uint _threads) {
+	const char* _extension = rde_util_file_get_file_extension(_model_path);
+
+	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
+		if (strlen(ENGINE.models[_i].file_path) != 0 && strcmp(ENGINE.models[_i].file_path, _model_path) == 0) {
+			return &ENGINE.models[_i];
+		}
+	}
+
+	if(strcmp(_extension, RDE_FBX_EXTENSION) == 0) {
+		rde_critical_error(true, RDE_ERROR_FEATURE_NOT_SUPPORTED_YET, "rde_rendering_model_load for FBX");
+	} else if(strcmp(_extension, RDE_OBJ_EXTENSION) == 0) {
+#if defined(RDE_OBJ_MODULE)
+		return rde_inner_obj_load_model_threaded(_model_path, _threads);
+#else
+		rde_critical_error(true, RDE_ERROR_RENDERING_MODEL_MODULE_FORMAT_NOT_COMPILED, _model_path, _extension);
+#endif
+	} else if(strcmp(_extension, RDE_GLTF_EXTENSION) == 0) {
+		rde_critical_error(true, RDE_ERROR_FEATURE_NOT_SUPPORTED_YET, "rde_rendering_model_load for GLTF");
+	} else {
+		rde_critical_error(true, RDE_ERROR_RENDERING_MODEL_UNSUPPORTED_FORMAT, _model_path, _extension);
+	}
+
+	return NULL;
+}
+
 void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers) {
 	rde_critical_error(_mesh == NULL, RDE_ERROR_NO_NULL_ALLOWED, "mesh");
 
@@ -7187,7 +7614,7 @@ void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh
 }
 
 void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
-	for(uint _i = 0; _i < _model->mesh_array_size; _i++) {
+	for(uint _i = 0; _i < rde_arr_get_length(&_model->mesh_array); _i++) {
 		rde_mesh* _mesh = NULL;
 		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
 		rde_rendering_3d_draw_mesh(_transform, _mesh, _shader);
@@ -7259,7 +7686,7 @@ rde_mesh_data rde_rendering_mesh_get_data(rde_mesh* _mesh) {
 uint rde_rendering_model_get_vertices_count(rde_model* _model) {
 	uint _total_vertices = 0;
 	
-	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
+	for(unsigned int _i = 0; _i < rde_arr_get_length(&_model->mesh_array); _i++) {
 		rde_mesh* _mesh = NULL;
 		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
 		_total_vertices += rde_rendering_mesh_get_data(_mesh).amount_of_vertices;
@@ -7270,7 +7697,7 @@ uint rde_rendering_model_get_vertices_count(rde_model* _model) {
 
 void rde_rendering_model_set_light_data(rde_model* _model, rde_material_light_data _light_data) {
 	rde_critical_error(_model == NULL, RDE_ERROR_NO_NULL_ALLOWED, "model");
-	for(unsigned int _i = 0; _i < _model->mesh_array_size; _i++) {
+	for(unsigned int _i = 0; _i < rde_arr_get_length(&_model->mesh_array); _i++) {
 		rde_mesh* _mesh = NULL;
 		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
 		_mesh->material.material_light_data = _light_data;
@@ -7285,7 +7712,7 @@ rde_material_light_data rde_rendering_model_get_light_data(rde_model* _model) {
 
 rde_model_data rde_rendering_model_get_data(rde_model* _model) {
 	rde_model_data _m;
-	_m.amount_of_meshes = _model->mesh_array_size;
+	_m.amount_of_meshes = rde_arr_get_length(&_model->mesh_array);
 	_m.meshes = NULL;
 	rde_malloc(_m.meshes, rde_mesh*, _m.amount_of_meshes);
 
@@ -7308,7 +7735,6 @@ void rde_rendering_model_unload(rde_model* _model) {
 	}
 
 	rde_arr_clear(&_model->mesh_array);
-	_model->mesh_array_size = 0;
 	memset(_model->file_path, 0, RDE_MAX_PATH);
 }
 
@@ -8423,6 +8849,8 @@ ANativeWindow* rde_android_get_native_window() {
 				rde_log_level(RDE_LOG_LEVEL_ERROR, "UNHANDLED ERROR: Got an unhadled signal with value %lu", _sigfault_info->ExceptionRecord->ExceptionCode);
 			} break;
 		}
+		
+		// rde_log_level(RDE_LOG_LEVEL_ERROR, "Error on Thread: %lu", SDL_ThreadID());
 
 		#ifdef RDE_DEBUG
 			rde_inner_print_stack_trace(stdout);

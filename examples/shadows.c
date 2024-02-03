@@ -268,7 +268,7 @@ void shadows_init() {
 	// cube_mesh = rde_rendering_mesh_create_cube(1, NULL);
 	// plain_mesh = rde_rendering_mesh_create_prism((rde_vec_3F) { 15, 1, 15 }, NULL);
 
-	shadows_model = rde_rendering_model_load("../../../../../skate_or_dice/assets/skatepark/park.obj");
+	shadows_model = rde_rendering_model_load_threaded("../../../../../skate_or_dice/assets/skatepark/park.obj", 12);
 
 	// rde_rendering_lighting_set_directional_light_position((rde_vec_3F) { 0.0f, 112.0f, 38.0f });
 	// shadows_directional_light_direction = rde_rendering_lighting_get_directional_light().position;

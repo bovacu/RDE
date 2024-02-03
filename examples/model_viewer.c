@@ -156,7 +156,7 @@ void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 				rde_rendering_model_unload(model_viewer_model);
 				free(model_viewer_model_data.meshes);
 			}
-			model_viewer_model = rde_rendering_model_load(_event->data.drag_and_drop_data.file_path);
+			model_viewer_model = rde_rendering_model_load_threaded(_event->data.drag_and_drop_data.file_path, 2);
 			model_viewer_model_data = rde_rendering_model_get_data(model_viewer_model);
 			model_viewer_max_meshes_to_render = model_viewer_model_data.amount_of_meshes;
 		}
