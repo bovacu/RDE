@@ -784,6 +784,32 @@ struct rde_thread {
 	rde_thread_fn fn;
 	void* params;
 };
+
+struct rde_thread_task {
+	rde_thread_task_fn fn;
+	void* args;
+};
+
+struct rde_thread_pool {
+#if RDE_IS_WINDOWS()
+	CRITICAL_SECTION critical_section;
+	HANDLE lock;
+	CONDITION_VARIABLE notify;
+#else
+	pthread_mutex_t lock;
+	pthread_condt_t notify;
+#endif
+	rde_thread* threads;
+	rde_thread_task* tasks;
+	uint threads_count;
+	uint tasks_size;
+	uint head;
+	uint tail;
+	uint count;
+	uint shutdown;
+	uint started;
+	rde_window* window;
+};
 	
 /// Engine
 struct rde_engine {
@@ -3075,6 +3101,72 @@ uint rde_util_hash_map_str_hash(const char** _key) {
 }
 
 #if RDE_IS_WINDOWS()
+	#define RDE_INIT_MUTEX_AND_COND_VAR(_pool) (_pool)->lock = CreateMutex(NULL, FALSE, NULL); InitializeConditionVariable(&(_pool)->notify)
+#else
+	#define RDE_INIT_MUTEX_AND_COND_VAR(_pool) pthread_mutex_init(&((_pool)->lock), NULL); pthread_cond_init(&((_pool)->notify), NULL)
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_CREATE_THREAD(_native_thread, _fn, _args) (_native_thread) = CreateThread(NULL, 0, _fn, (void*)_args, 0, NULL)
+#else
+	#define RDE_CREATE_THREAD(_native_thread, _fn, _args) pthread_create(&(_native_thread), NULL, _fn, (void*)_args)
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_WAIT_THREAD(_native_thread) WaitForSingleObject((_native_thread), INFINITE)
+#else
+	#define RDE_WAIT_THREAD(_native_thread) pthread_join(&(_native_thread), NULL)
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_LOCK_MUTEX(_pool) WaitForSingleObject((_pool)->lock, INFINITE)
+#else
+	#define RDE_LOCK_MUTEX(_pool) pthread_mutex_lock(&((_pool)->lock))
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_UNLOCK_MUTEX(_pool) ReleaseMutex((_pool)->lock)
+#else
+	#define RDE_UNLOCK_MUTEX(_pool) pthread_mutex_unlock(&((_pool)->lock))
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_SLEEP_CONDITIONAL_VAR(_pool) SleepConditionVariableCS(&(_pool)->notify, &((_pool)->critical_section), INFINITE)
+#else
+	#define RDE_SLEEP_CONDITIONAL_VAR(_pool) pthread_cond_wait(&((_pool)->notify), &((_pool)->lock))
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_WAKE_CONDITIONAL_VAR(_pool) WakeConditionVariable(&(_pool)->notify)
+#else
+	#define RDE_WAKE_CONDITIONAL_VAR(_pool) pthread_cond_signal(&((_pool)->notify))
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_WAKE_CONDITIONAL_ALL_VAR(_pool) WakeAllConditionVariable(&(_pool)->notify)
+#else
+	#define RDE_WAKE_CONDITIONAL_ALL_VAR(_pool) pthread_cond_broadcast(&((_pool)->notify))
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool) CloseHandle((_pool)->lock)
+#else
+	#define RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool) pthread_mutex_destroy(&(_pool->lock)); pthread_cond_destroy(&((_pool)->notify))
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_DESTROY_THREAD(_pool) ReleaseMutex((_pool)->lock); ExitThread(0)
+#else
+	#define RDE_DESTROY_THREAD(_pool) pthread_mutex_unlock(&((_pool)->lock)); pthread_exit(NULL)
+#endif
+
+#if RDE_IS_WINDOWS()
+	#define RDE_SLEEP(_ms) Sleep(_ms)
+#else
+	#define RDE_SLEEP(_ms) usleep(_ms * 1000) 
+#endif
+
+#if RDE_IS_WINDOWS()
 DWORD rde_inner_thread_wrapper(void* _params) {
 	rde_thread* _t = (rde_thread*)_params;
 	((rde_thread_fn)_t->fn)(_t, _t->params);
@@ -3196,6 +3288,149 @@ void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_ind
 	rde_free(_params);
 }
 
+#if RDE_IS_WINDOWS()
+DWORD rde_inner_thread_pool_caller_fn(void* _params) {
+#else
+void* rde_inner_thread_pool_caller_fn(void* _params) {
+#endif
+	
+	rde_thread_pool* _pool = (rde_thread_pool*)_params;
+	rde_thread_task _task;
+	
+	while(true) {
+		RDE_LOCK_MUTEX(_pool);
+		
+		while(_pool->count == 0 && _pool->shutdown == 0) {
+			RDE_SLEEP_CONDITIONAL_VAR(_pool);
+		}
+		
+		if(_pool->shutdown != 0 && _pool->count == 0) {
+			break;
+		}
+		
+		SDL_GL_MakeCurrent(_pool->window->sdl_window, _pool->window->sdl_gl_context);
+		
+		_task = _pool->tasks[_pool->head];
+		_pool->head = (_pool->head + 1) % _pool->tasks_size;
+		_pool->count--;
+		
+		#if RDE_IS_WINDOWS()
+			LeaveCriticalSection(&_pool->critical_section);
+		#endif
+		RDE_UNLOCK_MUTEX(_pool);
+		
+		rde_critical_error(_task.fn == NULL, "rde_inner_thread_pool_caller_fn - Tried to execute a NULL function as a task on the thread_pool\n");
+		_task.fn(_task.args);
+	}
+	
+	_pool->started--;
+	
+	RDE_DESTROY_THREAD(_pool);
+	
+	#if RDE_IS_WINDOWS()
+		return 0;
+	#else
+		return NULL;
+	#endif
+}
+
+rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window) {
+	rde_calloc_init(_pool, rde_thread_pool, 1);
+	
+	_pool->threads_count = 0;
+	_pool->tasks_size = _tasks_size;
+	_pool->head = 0;
+	_pool->tail = 0;
+	_pool->count = 0;
+	_pool->started = 0;
+	_pool->shutdown = 0;
+	_pool->window = _window;
+	
+	rde_calloc(_pool->threads, rde_thread, _thread_count);
+	rde_calloc(_pool->tasks, rde_thread_task, _tasks_size);
+	
+	(_pool)->lock = CreateMutex(NULL, FALSE, NULL); 
+	InitializeConditionVariable(&(_pool)->notify);
+	
+	if(_pool->lock == NULL) {
+		rde_thread_pool_destroy(_pool);
+		rde_critical_error(true, "Could not initialize MUTEX or CONDITIONAL on thread pool\n");
+	}
+	
+	for(uint _i = 0; _i < _thread_count; _i++) {
+		RDE_CREATE_THREAD(_pool->threads[_i].native_thread, rde_inner_thread_pool_caller_fn, _pool);
+		if(_pool->threads[_i].native_thread == NULL) {
+			rde_critical_error(true, "Could not create new thread\n");
+		}
+		
+		_pool->threads_count++;
+		_pool->started++;
+	}
+	
+	return _pool;
+}
+
+bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args) {
+	RDE_LOCK_MUTEX(_pool);
+		
+	uint _next = (_pool->tail + 1) % _pool->tasks_size;
+	
+	if(_pool->count == _pool->tasks_size) {
+		RDE_UNLOCK_MUTEX(_pool);
+		return false;
+	}
+	
+	if(_pool->shutdown) {
+		RDE_UNLOCK_MUTEX(_pool);
+		return false;
+	}
+	
+	_pool->tasks[_pool->tail].fn = _fn;
+	_pool->tasks[_pool->tail].args = _args;
+	_pool->tail = _next;
+	_pool->count++;
+	
+	RDE_WAKE_CONDITIONAL_VAR(_pool);
+	RDE_UNLOCK_MUTEX(_pool);
+	return true;
+}
+
+bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
+	
+	if(_pool->threads_count > 0) {
+		RDE_LOCK_MUTEX(_pool);
+	}
+	
+	if(_pool->shutdown != 0) {
+		return false;
+	}
+	
+	_pool->shutdown = 1;
+	_pool->window = NULL;
+	
+	if(_pool->threads_count > 0) {
+		RDE_WAKE_CONDITIONAL_ALL_VAR(_pool);
+		RDE_UNLOCK_MUTEX(_pool);
+		
+		for(uint _i = 0; _i < _pool->threads_count; _i++) {
+			RDE_WAIT_THREAD(_pool->threads[_i].native_thread);
+			#if RDE_IS_WINDOWS()
+				CloseHandle(_pool->threads[_i].native_thread);
+			#endif
+		}
+	}
+	
+	rde_free(_pool->threads);
+	rde_free(_pool->tasks);
+	
+	if(_pool->lock != NULL) {
+		RDE_LOCK_MUTEX(_pool);
+		RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
+	}
+	
+	rde_free(_pool);
+	return true;
+}
 
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
