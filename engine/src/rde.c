@@ -4943,6 +4943,9 @@ rde_model* rde_inner_obj_load_model_threaded(const char* _obj_path, uint _thread
 		rde_engine_supress_logs(true);
 		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
 		rde_engine_supress_logs(false);
+		rde_free(_mesh.vertex_positions);
+		rde_free(_mesh.vertex_texcoords);
+		rde_free(_mesh.vertex_normals);
 		rde_arr_add(&_model->mesh_array, _mesh);
 	}
 
@@ -5086,6 +5089,9 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		rde_engine_supress_logs(true);
 		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
 		rde_engine_supress_logs(false);
+		rde_free(_mesh.vertex_positions);
+		rde_free(_mesh.vertex_texcoords);
+		rde_free(_mesh.vertex_normals);
 		rde_arr_add(&_model->mesh_array, _mesh);
 	}
 
@@ -5318,11 +5324,7 @@ void rde_inner_rendering_transform_to_glm_mat4_3d(const rde_transform* _transfor
 }
 
 bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh) {
-	if(_mesh->vertex_positions == NULL) {
-		rde_log_level(RDE_LOG_LEVEL_ERROR, "Tried to render a mesh without positions, skipping rendering for this mesh");
-		return false;
-	}
-
+	RDE_UNUSED(_mesh);
 	return true;
 }
 
@@ -7532,9 +7534,17 @@ void rde_rendering_mesh_destroy(rde_mesh* _mesh, bool _delete_allocated_buffers)
 	_mesh->vao = RDE_UINT_MAX;
 	
 	if(_delete_allocated_buffers) {
-		rde_free(_mesh->vertex_positions);
-		rde_free(_mesh->vertex_normals);
-		rde_free(_mesh->vertex_texcoords);
+		if(_mesh->vertex_positions != NULL) {
+			rde_free(_mesh->vertex_positions);
+		}
+		
+		if(_mesh->vertex_normals != NULL) {
+			rde_free(_mesh->vertex_normals);
+		}
+		
+		if(_mesh->vertex_texcoords != NULL) {
+			rde_free(_mesh->vertex_texcoords);
+		}
 	}
 
 	if(_mesh->material.map_ka != NULL && _mesh->material.map_ka != DEFAULT_TEXTURE) {
