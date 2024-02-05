@@ -224,7 +224,7 @@ void rde_inner_set_posix_signal_handler();
 //			- [] Function to convert any kind of skybox to a cubemap
 //			- [DONE] Custom dyn array
 //			- [] Unit tests for dyn array
-//			- [] Custom hashmap
+//			- [DONE] Custom hashmap
 //			- [] Custom stack
 //			- [] Custom queue
 //			- [] Unit tests for hashmap
@@ -8000,6 +8000,10 @@ void rde_rendering_shadows_end() {
 	rde_mesh* _mesh = current_batch_3d.mesh;
 	rde_shader* _shader = current_batch_3d.shader;
 
+	if(_shader == NULL) {
+		goto end;
+	}
+
 	RDE_CHECK_GL(glUseProgram, _shader->compiled_program_id);
 
 	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
@@ -8009,13 +8013,11 @@ void rde_rendering_shadows_end() {
 
 	RDE_CHECK_GL(glDrawArraysInstanced, GL_TRIANGLES, 0, _mesh->vertex_count, current_batch_3d.amount_of_models_per_draw);
 
+end:
 	RDE_CHECK_GL(glViewport, 0, 0, DEFAULT_RENDER_TEXTURE->size.x, DEFAULT_RENDER_TEXTURE->size.y);
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
-
 	rde_inner_rendering_reset_batch_3d();
-
 	glEnable(GL_CULL_FACE);
-	
 	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_NORMAL;
 }
 
