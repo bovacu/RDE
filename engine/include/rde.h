@@ -4600,6 +4600,7 @@ RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 //	_file_path - path to the image to load.
 //	_params - data to load the image correctly, NULL can be passed for default values.
 RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params);
+RDE_FUNC void rde_rendering_texture_load_async(const char* _file_path, const rde_texture_parameters* _params, void(*_callback)(void*));
 
 // Function: rde_rendering_texture_text_load
 // Loads a text atlas into the GPU and returns a pointer to it.
