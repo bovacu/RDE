@@ -99,6 +99,7 @@
 #include <signal.h>
 #if RDE_IS_WINDOWS()
 #include <dbghelp.h>
+#include "pthreads_win/include/pthread.h"
 void rde_inner_print_stack_trace(FILE* _f);
 LONG WINAPI rde_inner_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info);
 #endif
@@ -775,14 +776,31 @@ typedef struct {
 #endif
 	
 struct rde_thread {
-#if RDE_IS_WINDOWS()
-	HANDLE native_thread;
-#else
-	pthread_t native_handle;
-#endif
+	pthread_t native_thread;
 	bool detached;
 	rde_thread_fn fn;
 	void* params;
+};
+
+struct rde_thread_task {
+	rde_thread_task_fn fn;
+	void* args;
+};
+
+struct rde_thread_pool {;
+	pthread_mutex_t lock;
+	pthread_cond_t notify;
+	rde_thread* threads;
+	rde_thread_task* tasks;
+	uint threads_count;
+	uint tasks_size;
+	uint head;
+	uint tail;
+	uint count;
+	uint shutdown;
+	uint started;
+	rde_window* window;
+	SDL_GLContext* contexts;
 };
 	
 /// Engine
@@ -856,6 +874,8 @@ size_t total_amount_of_textures;
 #if RDE_IS_WINDOWS()
 	HANDLE console_handle;
 #endif
+	
+	rde_thread_pool* threads_pool;
 };
 
 
@@ -2004,6 +2024,8 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 	srand(time(NULL));
 
 	_instantiated = true;
+	
+	ENGINE.threads_pool = rde_thread_pool_create(10, 10, _default_window);
 
 	return _default_window;
 }
@@ -2218,6 +2240,8 @@ void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, cons
 }
 
 void rde_engine_destroy_engine() {
+	rde_thread_pool_destroy(ENGINE.threads_pool);
+	
 	rde_inner_rendering_end_2d();
 	rde_inner_rendering_end_3d();
 	rde_inner_rendering_destroy_current_antialiasing_config();
@@ -3074,73 +3098,55 @@ uint rde_util_hash_map_str_hash(const char** _key) {
     return _hash;
 }
 
+#define RDE_INIT_MUTEX_AND_COND_VAR(_pool) pthread_mutex_init(&((_pool)->lock), NULL); pthread_cond_init(&((_pool)->notify), NULL)
+#define RDE_CREATE_THREAD(_native_thread, _fn, _args) pthread_create(&(_native_thread), NULL, _fn, (void*)_args)
+#define RDE_WAIT_THREAD(_native_thread) pthread_join((_native_thread), NULL)
+#define RDE_LOCK_MUTEX(_pool) pthread_mutex_lock(&((_pool)->lock))
+#define RDE_UNLOCK_MUTEX(_pool) pthread_mutex_unlock(&((_pool)->lock))
+#define RDE_SLEEP_CONDITIONAL_VAR(_pool) pthread_cond_wait(&((_pool)->notify), &((_pool)->lock))
+#define RDE_WAKE_CONDITIONAL_VAR(_pool) pthread_cond_signal(&((_pool)->notify))
+#define RDE_WAKE_CONDITIONAL_ALL_VAR(_pool) pthread_cond_broadcast(&((_pool)->notify))
+#define RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool) pthread_mutex_destroy(&(_pool->lock)); pthread_cond_destroy(&((_pool)->notify))
+#define RDE_DESTROY_THREAD(_pool) pthread_mutex_unlock(&((_pool)->lock)); pthread_exit(NULL)
 #if RDE_IS_WINDOWS()
-DWORD rde_inner_thread_wrapper(void* _params) {
-	rde_thread* _t = (rde_thread*)_params;
-	((rde_thread_fn)_t->fn)(_t, _t->params);
-	rde_free(_t);
-	return 0;
-}
+	#define RDE_SLEEP(_ms) Sleep(_ms)
 #else
+	#define RDE_SLEEP(_ms) usleep(_ms * 1000) 
+#endif
+
+typedef struct {
+	rde_thread_pool* pool;
+	SDL_GLContext context;
+} rde_thread_pool_caller_data;
+
 void* rde_inner_thread_wrapper(void* _params) {
 	rde_thread* _t = (rde_thread*)_params;
 	((rde_thread_fn)_t->fn)(_t, _t->params);
 	rde_free(_t);
 	return NULL;
 }
-#endif
 
 rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
 	rde_malloc_init(_thread, rde_thread, 1);
 	_thread->detached = false;
-	_thread->native_thread = NULL;
 	_thread->fn = _fn;
 	_thread->params = _params;
-	
-#if RDE_IS_WINDOWS()
-	_thread->native_thread = CreateThread(NULL, 0, rde_inner_thread_wrapper, (void*)_thread, 0, NULL);
-#else
-	pthread_create(&_thread->native_handle, NULL, rde_inner_thread_wrapper, (void*)_thread);
-#endif
-	
-	if(_thread->native_thread == NULL) {
-		rde_critical_error(true, "Could not create new thread\n");
-	}
-
+	RDE_CREATE_THREAD(_thread->native_thread, rde_inner_thread_wrapper, _thread);
 	return _thread;
 }
 
 void rde_thread_wait(rde_thread* _thread) {
 	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_wait - _thread");
-#if RDE_IS_WINDOWS()
-	DWORD _res = WaitForSingleObject(_thread->native_thread, INFINITE);
-	switch(_res) {
-      case WAIT_ABANDONED: 	break;
-      case WAIT_OBJECT_0: 	break;
-      case WAIT_TIMEOUT: 	break;
-      case WAIT_FAILED: 	rde_log_level(RDE_LOG_LEVEL_ERROR, "Thread exited with WAIT_FAILED\n"); break;
-	}
-	CloseHandle(_thread->native_thread);
-#else
-	int _res = pthread_join(_thread->native_handle);
-	rde_critical_error(_res != 0, "Thread exited with code %d\n", _res);
-#endif
+	RDE_WAIT_THREAD(_thread->native_thread);
 }
 
 void rde_thread_detach(rde_thread* _thread) {
-	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_detach - _thread");
-#if RDE_IS_WINDOWS()
-	CloseHandle(_thread->native_thread);
-#else
-	int _res = pthread_detach(_thread->native_handle);
-	rde_critical_error(_res != 0, "Thread detached with code %d\n", _res);
-#endif
-	_thread->detached = true;
+	RDE_UNUSED(_thread)
 }
 
-void rde_thread_end(rde_thread* _thread) {	
+void rde_thread_end(rde_thread* _thread) {
+	RDE_UNUSED(_thread)
 	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_end - _thread");
-	_thread->native_thread = NULL;
 	_thread->fn = NULL;
 	_thread->params = NULL;
 	rde_free(_thread);
@@ -3196,6 +3202,144 @@ void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_ind
 	rde_free(_params);
 }
 
+void* rde_inner_thread_pool_caller_fn(void* _params) {
+	rde_thread_pool_caller_data* _data = (rde_thread_pool_caller_data*)_params;
+	rde_thread_pool* _pool = _data->pool;
+	SDL_GLContext _gl_context = _data->context;
+	rde_thread_task _task;
+	
+	while(true) {
+		RDE_LOCK_MUTEX(_pool);
+		
+		while(_pool->count == 0 && _pool->shutdown == 0) {
+			RDE_SLEEP_CONDITIONAL_VAR(_pool);
+		}
+		
+		SDL_GL_MakeCurrent(_pool->window->sdl_window, _gl_context);
+		
+		if(_pool->shutdown != 0 && _pool->count == 0) {
+			break;
+		}
+		
+		_task = _pool->tasks[_pool->head];
+		_pool->head = (_pool->head + 1) % _pool->tasks_size;
+		_pool->count--;
+		
+		RDE_UNLOCK_MUTEX(_pool);
+		
+		rde_critical_error(_task.fn == NULL, "rde_inner_thread_pool_caller_fn - Tried to execute a NULL function as a task on the thread_pool\n");
+		_task.fn(_task.args);
+	}
+	
+	_pool->started--;
+	
+	rde_free(_data);
+	RDE_DESTROY_THREAD(_pool);
+	
+	return NULL;
+}
+
+rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window) {
+	rde_calloc_init(_pool, rde_thread_pool, 1);
+	
+	_pool->threads_count = 0;
+	_pool->tasks_size = _tasks_size;
+	_pool->head = 0;
+	_pool->tail = 0;
+	_pool->count = 0;
+	_pool->started = 0;
+	_pool->shutdown = 0;
+	_pool->window = _window;
+	
+	rde_calloc(_pool->threads, rde_thread, _thread_count);
+	rde_calloc(_pool->tasks, rde_thread_task, _tasks_size);
+	rde_calloc(_pool->contexts, SDL_GLContext, _thread_count);
+	
+	pthread_mutex_init(&(_pool->lock), NULL);
+	pthread_cond_init(&(_pool->notify), NULL);
+	
+	if(_pool->lock == NULL) {
+		rde_thread_pool_destroy(_pool);
+		rde_critical_error(true, "Could not initialize MUTEX or CONDITIONAL on thread pool\n");
+	}
+	
+	for(uint _i = 0; _i < _thread_count; _i++) {
+		_pool->contexts[_i] = SDL_GL_CreateContext(_window->sdl_window);
+		
+		rde_calloc_init(_data, rde_thread_pool_caller_data, 1);
+		_data->pool = _pool;
+		_data->context = _pool->contexts[_i];
+		
+		RDE_CREATE_THREAD(_pool->threads[_i].native_thread, rde_inner_thread_pool_caller_fn, _data);
+		
+		_pool->threads_count++;
+		_pool->started++;
+	}
+	
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+	
+	return _pool;
+}
+
+bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args) {
+	RDE_LOCK_MUTEX(_pool);
+		
+	uint _next = (_pool->tail + 1) % _pool->tasks_size;
+	
+	if(_pool->count == _pool->tasks_size) {
+		RDE_UNLOCK_MUTEX(_pool);
+		return false;
+	}
+	
+	if(_pool->shutdown) {
+		RDE_UNLOCK_MUTEX(_pool);
+		return false;
+	}
+	
+	_pool->tasks[_pool->tail].fn = _fn;
+	_pool->tasks[_pool->tail].args = _args;
+	_pool->tail = _next;
+	_pool->count++;
+	
+	RDE_WAKE_CONDITIONAL_VAR(_pool);
+	RDE_UNLOCK_MUTEX(_pool);
+	return true;
+}
+
+bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
+	
+	if(_pool->threads_count > 0) {
+		RDE_LOCK_MUTEX(_pool);
+	}
+	
+	if(_pool->shutdown != 0) {
+		return false;
+	}
+	
+	_pool->shutdown = 1;
+	
+	if(_pool->threads_count > 0) {
+		RDE_WAKE_CONDITIONAL_ALL_VAR(_pool);
+		RDE_UNLOCK_MUTEX(_pool);
+		
+		for(uint _i = 0; _i < _pool->threads_count; _i++) {
+			RDE_WAIT_THREAD(_pool->threads[_i].native_thread);
+			SDL_GL_DeleteContext(_pool->contexts[_i]);
+		}
+	}
+	
+	rde_free(_pool->threads);
+	rde_free(_pool->tasks);
+	
+	if(_pool->lock != NULL) {
+		RDE_LOCK_MUTEX(_pool);
+		RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
+	}
+	
+	_pool->window = NULL;
+	rde_free(_pool);
+	return true;
+}
 
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
@@ -3716,6 +3860,7 @@ rde_window* rde_inner_window_create_windows_window(size_t _free_window_index) {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_PING, 0);
 
 	// Use this to allow trackpad to use touch gestures
 	//SDL_SetHint(SDL_HINT_TRACKPAD_IS_TOUCH_ONLY, "1");
@@ -6241,6 +6386,37 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 		stbi_image_free(_data.data);
 	}
 	return _texture;
+}
+
+typedef struct {
+	const char* file_path;
+	const rde_texture_parameters* texture_params;
+	void(*callback)(void*);
+} rde_texture_async_data;
+
+void rde_inner_rendering_texture_load_async(void* _params) {
+	rde_texture_async_data* _async_data = (rde_texture_async_data*)_params;
+
+	rde_texture_load_data _data = {0};
+	rde_texture* _texture = red_inner_rendering_texture_load_data(_async_data->file_path, &_data);
+	
+	if(_data.data != NULL) {
+		rde_inner_rendering_texture_load_data_to_opengl(_texture, &_data, _async_data->texture_params);
+		glFinish();
+		stbi_image_free(_data.data);
+	}
+	
+	if(_async_data->callback != NULL) {
+		_async_data->callback(_texture);
+	}
+}
+
+void rde_rendering_texture_load_async(const char* _file_path, const rde_texture_parameters* _params, void(*_callback)(void*)) {
+	rde_calloc_init(_data, rde_texture_async_data, 1);
+	_data->file_path =_file_path;
+	_data->texture_params = _params;
+	_data->callback = _callback;
+	rde_thread_pool_run(ENGINE.threads_pool, rde_inner_rendering_texture_load_async, _data);
 }
 
 rde_texture* rde_rendering_texture_text_load(const char* _file_path) {

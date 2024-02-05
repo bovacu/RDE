@@ -2832,6 +2832,8 @@ typedef struct rde_physics_body rde_physics_body;
 #endif
 
 typedef struct rde_thread rde_thread;
+typedef struct rde_thread_task rde_thread_task;
+typedef struct rde_thread_pool rde_thread_pool;
 
 // =================================================================== UTIL ====================================================================
 
@@ -3062,6 +3064,7 @@ typedef void (*rde_render_func)(float, rde_window*);
 
 typedef void (*rde_thread_fn)(rde_thread*, void*);
 typedef void (*rde_thread_foreach_fn)(rde_thread*, void*, uint);
+typedef void(*rde_thread_task_fn)(void*);
 
 #ifdef RDE_PHYSICS_MODULE
 // Callback: rde_render_func
@@ -3906,6 +3909,9 @@ RDE_FUNC void rde_thread_wait(rde_thread* _thread);
 RDE_FUNC void rde_thread_detach(rde_thread* _thread);
 RDE_FUNC void rde_thread_end(rde_thread* _thread);
 RDE_FUNC void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads);
+RDE_FUNC rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window);
+RDE_FUNC bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args);
+RDE_FUNC bool rde_thread_pool_destroy(rde_thread_pool* _pool);
 
 // =================================================================== MATH ===================================================================
 
@@ -4594,6 +4600,7 @@ RDE_FUNC void rde_rendering_shader_unload(rde_shader* _shader);
 //	_file_path - path to the image to load.
 //	_params - data to load the image correctly, NULL can be passed for default values.
 RDE_FUNC rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_texture_parameters* _params);
+RDE_FUNC void rde_rendering_texture_load_async(const char* _file_path, const rde_texture_parameters* _params, void(*_callback)(void*));
 
 // Function: rde_rendering_texture_text_load
 // Loads a text atlas into the GPU and returns a pointer to it.
