@@ -390,8 +390,8 @@ RDE_IMPLEMENT_SAFE_ARR_SET(double)
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
 #endif
 
-#define RDE_SHADOW_MAP_SIZE_WIDTH 1024
-#define RDE_SHADOW_MAP_SIZE_HEIGHT 1024
+#define RDE_SHADOW_MAP_SIZE_WIDTH 2048
+#define RDE_SHADOW_MAP_SIZE_HEIGHT 2048
 
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_POSITION 3
 #define RDE_NUMBER_OF_ELEMENTS_PER_VERTEX_COLOR 1
@@ -8014,7 +8014,9 @@ void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
 	mat4 _light_view;
 	mat4 _light_space_matrix;
 	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection);
-	glm_lookat((vec3) { ENGINE.illumination.directional_light.position.x, ENGINE.illumination.directional_light.position.y, ENGINE.illumination.directional_light.position.z },
+	vec3 _dir = (vec3) { -ENGINE.illumination.directional_light.direction.x, -ENGINE.illumination.directional_light.direction.y, -ENGINE.illumination.directional_light.direction.z };
+	glm_normalize(_dir);
+	glm_lookat(_dir,
 				(vec3) { 0.0f, 0.0f, 0.0f },
 				(vec3) { 0.0f, 1.0f, 0.0f },
 				_light_view

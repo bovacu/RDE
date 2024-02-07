@@ -111,19 +111,14 @@ vec3 directional_light_calc(float _shadow) {
 #endif
 
 float ShadowCalculation(vec4 frag_pos_light_space) {
-    // perform perspective divide
     vec3 _proj_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
-    // transform to [0,1] range
     _proj_coords = _proj_coords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
     float _closest_depth = texture(shadow_map, _proj_coords.xy).r;
-    // get depth of current fragment from light's perspective
     float _current_depth = _proj_coords.z;
-    // check whether current frag pos is in shadow
 
-	vec3 _light_dir = normalize(directional_light.position - fs_in.frag_pos);
+	vec3 _light_dir = normalize(directional_light.direction - fs_in.frag_pos);
 	vec3 _norm = normalize(fs_in.normal);
-	float _bias = mix(0.005, 0.0, dot(_norm, -_light_dir));
+	float _bias = mix(0.0005, 0.0, dot(_norm, -_light_dir));
 
     float _shadow = 0.0;
     vec2 _texel_size = 1.0 / textureSize(shadow_map, 0);
