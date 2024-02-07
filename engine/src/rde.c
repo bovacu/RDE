@@ -355,6 +355,23 @@ void rde_inner_set_posix_signal_handler();
 		_extra_code																\
 	}
 
+#define RDE_INIT_MUTEX_AND_COND_VAR(_pool) pthread_mutex_init(&((_pool)->lock), NULL); pthread_cond_init(&((_pool)->notify), NULL)
+#define RDE_CREATE_THREAD(_native_thread, _fn, _args) pthread_create(&(_native_thread), NULL, _fn, (void*)_args)
+#define RDE_WAIT_THREAD(_native_thread) pthread_join((_native_thread), NULL)
+#define RDE_DETACH_THREAD(_native_thread) pthread_detach((_native_thread))
+#define RDE_LOCK_MUTEX(_pool) pthread_mutex_lock(&((_pool)->lock))
+#define RDE_UNLOCK_MUTEX(_pool) pthread_mutex_unlock(&((_pool)->lock))
+#define RDE_SLEEP_CONDITIONAL_VAR(_pool) pthread_cond_wait(&((_pool)->notify), &((_pool)->lock))
+#define RDE_WAKE_CONDITIONAL_VAR(_pool) pthread_cond_signal(&((_pool)->notify))
+#define RDE_WAKE_CONDITIONAL_ALL_VAR(_pool) pthread_cond_broadcast(&((_pool)->notify))
+#define RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool) pthread_mutex_destroy(&(_pool->lock)); pthread_cond_destroy(&((_pool)->notify))
+#define RDE_DESTROY_THREAD(_pool) pthread_mutex_unlock(&((_pool)->lock)); pthread_exit(NULL)
+#if RDE_IS_WINDOWS()
+	#define RDE_SLEEP(_ms) Sleep(_ms)
+#else
+	#define RDE_SLEEP(_ms) usleep(_ms * 1000)
+#endif
+
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(int)
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(uint)
 RDE_IMPLEMENT_SAFE_ARR_ACCESS(size_t)
@@ -780,6 +797,7 @@ struct rde_thread {
 	bool detached;
 	rde_thread_fn fn;
 	void* params;
+	void(*callback)(rde_thread*, void*);
 };
 
 struct rde_thread_task {
@@ -787,7 +805,7 @@ struct rde_thread_task {
 	void* args;
 };
 
-struct rde_thread_pool {;
+struct rde_thread_pool {
 	pthread_mutex_t lock;
 	pthread_cond_t notify;
 	rde_thread* threads;
@@ -802,7 +820,26 @@ struct rde_thread_pool {;
 	rde_window* window;
 	SDL_GLContext* contexts;
 };
+
+typedef struct {
+	const char* file_path;
+	const rde_texture_parameters* texture_params;
+	void(*callback)(void*);
+} rde_texture_async_data;
 	
+typedef struct {
+	rde_thread_pool* pool;
+	SDL_GLContext context;
+} rde_thread_pool_caller_data;
+
+typedef struct {
+	void* arr;
+	uint init_included;
+	uint end_excluded;
+	rde_thread_foreach_fn fn;
+	size_t size_of_type;
+} rde_thread_foreach_params;
+
 /// Engine
 struct rde_engine {
 	float delta_time;
@@ -883,7 +920,7 @@ size_t total_amount_of_textures;
 /// *                                INNER STRUCT CONSTRUCTORS                         			 *
 /// *************************************************************************************************
 
-rde_transform rde_struct_create_transform() {
+rde_transform rde_struct_create_transform(void) {
 	rde_transform _t;
 	_t.position = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
 	_t.rotation = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
@@ -897,14 +934,14 @@ rde_transform rde_struct_create_transform() {
 	return _t;
 }
 
-rde_probability rde_struct_create_probability() {
+rde_probability rde_struct_create_probability(void) {
 	rde_probability _p;
 	_p.probability_rolled = 0.f;
 	_p.happened = false;
 	return _p;
 }
 
-rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks() {
+rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks(void) {
 	rde_end_user_mandatory_callbacks _e;
 	_e.on_update = NULL;
 	_e.on_fixed_update = NULL;
@@ -913,7 +950,7 @@ rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks(
 	return _e;
 }
 	
-rde_event_window rde_struct_create_event_window() {
+rde_event_window rde_struct_create_event_window(void) {
 	rde_event_window _e;
 	_e.position.x = -1;
 	_e.position.y = -1;
@@ -924,14 +961,14 @@ rde_event_window rde_struct_create_event_window() {
 	return _e;
 }
 
-rde_event_display rde_struct_create_event_display() {
+rde_event_display rde_struct_create_event_display(void) {
 	rde_event_display _e;
 	_e.orientation = -1;
 	_e.display_index = -1;
 	return _e;
 }
 
-rde_event_key rde_struct_create_event_key() {
+rde_event_key rde_struct_create_event_key(void) {
 	rde_event_key _e;
 	_e.key = RDE_KEYBOARD_KEY_NONE;
 	_e.typed_char = '\0';
@@ -939,7 +976,7 @@ rde_event_key rde_struct_create_event_key() {
 	return _e;
 }
 
-rde_event_mouse rde_struct_create_event_mouse() {
+rde_event_mouse rde_struct_create_event_mouse(void) {
 	rde_event_mouse _e;
 	_e.button = RDE_MOUSE_BUTTON_NONE;
 	_e.position.x = -1;
@@ -949,7 +986,7 @@ rde_event_mouse rde_struct_create_event_mouse() {
 	return _e;
 }
 
-rde_event_controller rde_struct_create_event_controller() {
+rde_event_controller rde_struct_create_event_controller(void) {
 	rde_event_controller _e;
 	_e.controller_id = -1;
 	_e.left_joystick.x = -1.f;
@@ -963,7 +1000,7 @@ rde_event_controller rde_struct_create_event_controller() {
 	return _e;
 }
 
-rde_event_mobile_pinch rde_struct_create_event_mobile_pinch() {
+rde_event_mobile_pinch rde_struct_create_event_mobile_pinch(void) {
 	rde_event_mobile_pinch _m;
 	_m.rotation_of_fingers = 0.f;
 	_m.distance_moved_between_fingers = 0.f;
@@ -971,7 +1008,7 @@ rde_event_mobile_pinch rde_struct_create_event_mobile_pinch() {
 	return _m;
 }
 
-rde_event_mobile rde_struct_create_event_mobile() {
+rde_event_mobile rde_struct_create_event_mobile(void) {
 	rde_event_mobile _e;
 	_e.init_touch_position.x = -1;
 	_e.init_touch_position.y = -1;
@@ -985,14 +1022,14 @@ rde_event_mobile rde_struct_create_event_mobile() {
 	return _e;
 }
 
-rde_event_drag_and_drop rde_struct_create_event_drag_and_drop() {
+rde_event_drag_and_drop rde_struct_create_event_drag_and_drop(void) {
 	rde_event_drag_and_drop _e;
 	_e.window_id = 0;
 	_e.file_path = NULL;
 	return _e;
 }
 
-rde_event_data rde_struct_create_event_data() {
+rde_event_data rde_struct_create_event_data(void) {
 	rde_event_data _e;
 	_e.window_event_data = rde_struct_create_event_window();
 	_e.key_event_data = rde_struct_create_event_key();
@@ -1019,7 +1056,7 @@ rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
 	return _c;
 }
 
-rde_color rde_struct_create_color() {
+rde_color rde_struct_create_color(void) {
 	rde_color _c;
 	_c.r = 255;
 	_c.g = 255;
@@ -1028,7 +1065,7 @@ rde_color rde_struct_create_color() {
 	return _c;
 }
 
-rde_event rde_struct_create_event() {
+rde_event rde_struct_create_event(void) {
 	rde_event _e;
 	_e.type = RDE_EVENT_TYPE_NONE;
 	_e.time_stamp = 0;
@@ -1041,7 +1078,7 @@ rde_event rde_struct_create_event() {
 
 
 
-rde_window rde_struct_create_window() {
+rde_window rde_struct_create_window(void) {
 	rde_window _w;
 	_w.sdl_window = NULL;
 	_w.mouse_position = (rde_vec_2I) { 0, 0 };
@@ -1062,7 +1099,7 @@ rde_window rde_struct_create_window() {
 	return _w;
 }
 
-rde_material_light_data rde_struct_create_material_light_data() {
+rde_material_light_data rde_struct_create_material_light_data(void) {
 	rde_material_light_data _m;
 	_m.shininess = 1.0f;
 	_m.ka = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
@@ -1071,7 +1108,7 @@ rde_material_light_data rde_struct_create_material_light_data() {
 	return _m;
 }
 
-rde_material rde_struct_create_material() {
+rde_material rde_struct_create_material(void) {
 	rde_material _m;
 	_m.map_ka = NULL;
 	_m.map_kd = NULL;
@@ -1082,7 +1119,7 @@ rde_material rde_struct_create_material() {
 	return _m;
 }
 
-rde_directional_light rde_struct_create_directional_light() {
+rde_directional_light rde_struct_create_directional_light(void) {
 	rde_directional_light _d;
 	_d.direction = (rde_vec_3F) { -0.2f, -1.0f, -0.3f };
 	_d.position = (rde_vec_3F) { 0, 0, 0 };
@@ -1092,7 +1129,7 @@ rde_directional_light rde_struct_create_directional_light() {
 	return _d;
 }
 
-rde_point_light rde_struct_create_point_light() {
+rde_point_light rde_struct_create_point_light(void) {
 	rde_point_light _p;
 	_p.position = (rde_vec_3F) { 0.0, 0.0f, 0.0f };
 	_p.ambient_color = (rde_vec_3F) { 0.2f, 0.2f, 0.2f };
@@ -1104,7 +1141,7 @@ rde_point_light rde_struct_create_point_light() {
 	return _p;
 }
 
-rde_spot_light rde_struct_create_spot_light() {
+rde_spot_light rde_struct_create_spot_light(void) {
 	rde_spot_light _s;
 	_s.position = (rde_vec_3F) { 0.0, 0.0f, 0.0f };
 	_s.direction = (rde_vec_3F) { 0.0, -1.0f, 0.0f };
@@ -1119,7 +1156,7 @@ rde_spot_light rde_struct_create_spot_light() {
 	return _s;
 }
 
-rde_shader rde_struct_create_shader() {
+rde_shader rde_struct_create_shader(void) {
 	rde_shader _s;
 	_s.vertex_program_id = 0;
 	_s.fragment_program_id = 0;
@@ -1130,7 +1167,7 @@ rde_shader rde_struct_create_shader() {
 	memset(_s.name, 0 , RDE_SHADER_MAX_NAME);
 	return _s;
 }
-rde_texture rde_struct_create_texture() {
+rde_texture rde_struct_create_texture(void) {
 	rde_texture _t;
 	_t.opengl_texture_id = -1;
 	_t.size.x = 0;
@@ -1147,7 +1184,7 @@ rde_texture rde_struct_create_texture() {
 	return _t;
 }
 
-rde_texture_parameters rde_struct_create_texture_parameters() {
+rde_texture_parameters rde_struct_create_texture_parameters(void) {
 	rde_texture_parameters _t;
 	_t.min_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR;
 	_t.mag_filter = RDE_TEXTURE_PARAMETER_TYPE_FILTER_LINEAR;
@@ -1179,7 +1216,7 @@ rde_atlas rde_struct_create_atlas() {
 	return _a;
 }
 
-rde_font_char_info rde_struct_create_font_char_info() {
+rde_font_char_info rde_struct_create_font_char_info(void) {
 	rde_font_char_info _f;
 	_f.advance = (rde_vec_2I) { 0, 0 };
 	_f.bearing = (rde_vec_2I) { 0, 0 };
@@ -1197,7 +1234,7 @@ rde_font rde_struct_create_font() {
 	return _f;
 }
 
-rde_vertex_2d rde_struct_create_vertex_2d() {
+rde_vertex_2d rde_struct_create_vertex_2d(void) {
 	rde_vertex_2d _v;
 	_v.position.x = 0.f;
 	_v.position.y = 0.f;
@@ -1208,7 +1245,7 @@ rde_vertex_2d rde_struct_create_vertex_2d() {
 	return _v;
 }
 
-rde_batch_2d rde_struct_create_2d_batch() {
+rde_batch_2d rde_struct_create_2d_batch(void) {
 	rde_batch_2d _b;
 	_b.shader = NULL;
 	_b.texture = rde_struct_create_texture();
@@ -1223,14 +1260,14 @@ rde_batch_2d rde_struct_create_2d_batch() {
 }
 
 
-rde_line_vertex rde_struct_create_line_vertex() {
+rde_line_vertex rde_struct_create_line_vertex(void) {
 	rde_line_vertex _l;
 	_l.position = (rde_vec_3F) { 0, 0, 0 };
 	_l.color = 0xFFFFFFFF;
 	return _l;
 }
 
-rde_line_batch rde_struct_create_line_batch() {
+rde_line_batch rde_struct_create_line_batch(void) {
 	rde_line_batch _b;
 	_b.vertices = NULL;
 	_b.amount_of_vertices = 0;
@@ -1241,7 +1278,7 @@ rde_line_batch rde_struct_create_line_batch() {
 	return _b;
 }
 
-rde_batch_3d rde_struct_create_batch_3d() {
+rde_batch_3d rde_struct_create_batch_3d(void) {
 	rde_batch_3d _b;
 	_b.mesh = NULL;
 	_b.shader = NULL;
@@ -1252,7 +1289,7 @@ rde_batch_3d rde_struct_create_batch_3d() {
 	return _b;
 }
 
-rde_model rde_struct_create_model() {
+rde_model rde_struct_create_model(void) {
 	rde_model _m;
 	rde_arr_init(&_m.mesh_array);
 	rde_arr_new(&_m.mesh_array);
@@ -1260,7 +1297,7 @@ rde_model rde_struct_create_model() {
 	return _m;
 }
 
-rde_skybox rde_struct_create_skybox() {
+rde_skybox rde_struct_create_skybox(void) {
 	rde_skybox _s;
 	_s.vao = RDE_UINT_MAX;
 	_s.vbo = RDE_UINT_MAX;
@@ -1268,7 +1305,7 @@ rde_skybox rde_struct_create_skybox() {
 	return _s;
 }
 
-rde_antialiasing rde_struct_create_antialiasing() {
+rde_antialiasing rde_struct_create_antialiasing(void) {
 	rde_antialiasing _a;
 	_a.frame_buffer_id = RDE_UINT_MAX;
 	_a.render_buffer_id = RDE_UINT_MAX;
@@ -1277,21 +1314,21 @@ rde_antialiasing rde_struct_create_antialiasing() {
 	return _a;
 }
 
-rde_polygon rde_struct_create_polygon() {
+rde_polygon rde_struct_create_polygon(void) {
 	rde_polygon _p;
 	_p.vertices = NULL;
 	_p.vertices_count = 0;
 	return _p;
 }
 
-rde_shadows rde_struct_create_shadows() {
+rde_shadows rde_struct_create_shadows(void) {
 	rde_shadows _s;
 	_s.render_texture = NULL;
 	return _s;
 }
 
 #ifdef RDE_OBJ_MODULE
-rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data() {
+rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data(void) {
 	rde_obj_mesh_data _o;
 	_o.name = NULL;
 	_o.vertex_count = 0;
@@ -1319,7 +1356,7 @@ rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data() {
 #endif
 
 #ifdef RDE_AUDIO_MODULE
-rde_sound rde_struct_create_sound() {
+rde_sound rde_struct_create_sound(void) {
 	rde_sound _s;
 	_s.used = false;
 	_s.playing = false;
@@ -1329,7 +1366,7 @@ rde_sound rde_struct_create_sound() {
 	return _s;
 }
 
-rde_sound_config rde_struct_create_audio_config() {
+rde_sound_config rde_struct_create_audio_config(void) {
 	rde_sound_config _s;
 	_s.user_data = NULL;
 	_s.channels = 2;
@@ -1621,28 +1658,28 @@ int rde_events_mobile_consume_events_callback_wrapper(void* _user_data, SDL_Even
 /// ******************************************* RENDERING  ***********************************************
 
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
-rde_vec_2F rde_inner_rendering_get_aspect_ratio();
+rde_vec_2F rde_inner_rendering_get_aspect_ratio(void);
 void rde_inner_rendering_set_rendering_configuration(rde_window* _window);
 rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rde_texture_parameters* _params);
-void rde_inner_rendering_flush_render_texture_3d();
-void rde_inner_rendering_destroy_current_antialiasing_config();
-void rde_inner_rendering_create_shadows();
+void rde_inner_rendering_flush_render_texture_3d(void);
+void rde_inner_rendering_destroy_current_antialiasing_config(void);
+void rde_inner_rendering_create_shadows(void);
 void rde_inner_rendering_draw_scene_shadows(rde_window* _window, rde_camera* _camera);
-void rde_inner_rendering_destroy_shadows();
+void rde_inner_rendering_destroy_shadows(void);
 void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window);
 void rde_inner_engine_on_render(float _dt, rde_window* _window);
 
-void rde_inner_rendering_init_2d();
-void rde_inner_rendering_end_2d();
+void rde_inner_rendering_init_2d(void);
+void rde_inner_rendering_end_2d(void);
 void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat);
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch);
-void rde_inner_rendering_reset_batch_2d();
+void rde_inner_rendering_reset_batch_2d(void);
 void rde_inner_rendering_try_create_batch_2d(rde_shader* _shader, const rde_texture* _texture);
-void rde_inner_rendering_flush_batch_2d();
+void rde_inner_rendering_flush_batch_2d(void);
 void rde_inner_rendering_try_flush_batch_2d(rde_shader* _shader, const rde_texture* _texture, size_t _extra_vertices);
 
 #ifdef RDE_OBJ_MODULE
-rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data();
+rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data(void);
 void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group, fastObjMaterial* _material, bool _has_t, bool _has_n);
 void rde_inner_fill_obj_mesh_data_threaded(rde_obj_texture_load_params* _obj_texture_load_data, fastObjGroup* _group, bool _has_t, bool _has_n);
 void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data);
@@ -1663,14 +1700,14 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 void rde_inner_rendering_try_flush_line_batch(rde_shader* _shader, unsigned short _thickness, size_t _extra_floats);
 void rde_inner_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh);
 void rde_inner_rendering_try_create_line_batch(rde_shader* _shader, unsigned short _thickness);
-void rde_inner_rendering_flush_batch_3d();
-void rde_inner_rendering_flush_line_batch();
-void rde_inner_rendering_reset_batch_3d();
-void rde_inner_rendering_reset_line_batch();
-void rde_inner_create_line_batch_buffers();
-void rde_inner_destroy_line_batch_buffers();
-void rde_inner_rendering_init_3d();
-void rde_inner_rendering_end_3d();
+void rde_inner_rendering_flush_batch_3d(void);
+void rde_inner_rendering_flush_line_batch(void);
+void rde_inner_rendering_reset_batch_3d(void);
+void rde_inner_rendering_reset_line_batch(void);
+void rde_inner_create_line_batch_buffers(void);
+void rde_inner_destroy_line_batch_buffers(void);
+void rde_inner_rendering_init_3d(void);
+void rde_inner_rendering_end_3d(void);
 void rde_inner_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat4 _mat);
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices);
 bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
@@ -1692,12 +1729,12 @@ void rde_inner_physics_draw_debug_shapes(rde_window* _window, rde_camera* _camer
 
 /// ******************************************* EVENTS *********************************************
 
-void rde_inner_events_window_create_events();
-void rde_inner_events_display_create_events();
-void rde_inner_events_key_create_events();
-void rde_inner_events_mouse_button_create_events();
-void rde_inner_events_drag_and_drop_create_events();
-void rde_inner_events_mobile_create_events();
+void rde_inner_events_window_create_events(void);
+void rde_inner_events_display_create_events(void);
+void rde_inner_events_key_create_events(void);
+void rde_inner_events_mouse_button_create_events(void);
+void rde_inner_events_drag_and_drop_create_events(void);
+void rde_inner_events_mobile_create_events(void);
 void rde_inner_event_sdl_to_rde_helper_transform_window_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_display_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_keyboard_event(SDL_Event* _sdl_event, rde_event* _rde_event);
@@ -1716,26 +1753,27 @@ void data_callback(ma_device* _device, void* _output, const void* _input, ma_uin
 /// ******************************************* MOBILE *********************************************
 
 #if RDE_IS_ANDROID()
-ANativeWindow* rde_android_get_native_window();
+ANativeWindow* rde_android_get_native_window(void);
 #endif
 
 /// ******************************************* ENGINE *********************************************
 
-void rde_inner_engine_on_event();
+void rde_inner_engine_on_event(void);
 void rde_inner_engine_on_update(float _dt);
 #if defined(RDE_PHYSICS_MODULE) || defined(RDE_PHYSICS_2D_MODULE)
 void rde_inner_engine_on_fixed_update(float _fixed_dt);
 #endif
 void rde_inner_engine_on_late_update(float _dt);
-void rde_inner_engine_sync_events();
-void rde_inner_transform_update();
+void rde_inner_engine_sync_events(void);
+void rde_inner_transform_update(void);
 void rde_inner_transform_get_matrix(rde_transform* _t, mat4 _mat);
 void rde_inner_transform_parse_parent(rde_transform* _transform, mat4 _mat);
 void rde_inner_transform_remove_transform_from_parent_children(rde_transform* _transform);
 
-
-
-
+void* rde_inner_thread_pool_caller_fn(void* _params);
+void* rde_inner_thread_wrapper(void* _params);
+void* rde_inner_detached_thread_wrapper(void* _params);
+void* rde_inner_thread_foreach(rde_thread* _thread, void* _params);
 
 
 
@@ -1744,7 +1782,7 @@ void rde_inner_transform_remove_transform_from_parent_children(rde_transform* _t
 // =							PRIVATE API - ENGINE					 	   =
 // ==============================================================================
 
-void rde_inner_engine_on_event() {
+void rde_inner_engine_on_event(void) {
 
 	SDL_Event _event;
         
@@ -1935,7 +1973,7 @@ void rde_inner_transform_remove_transform_from_parent_children(rde_transform* _t
 	_transform->parent = -1;
 }
 
-void rde_inner_transform_update() {
+void rde_inner_transform_update(void) {
 	for(int _i = 0; _i <= ENGINE.last_transform_used; _i++) {
 		rde_transform* _t = &ENGINE.transforms[_i];
 		if(_t->parent > -1) {
@@ -1966,6 +2004,73 @@ void rde_inner_transform_update() {
 		ENGINE.transforms[_i].updated_this_frame = false;
 	}
 }
+
+void* rde_inner_thread_pool_caller_fn(void* _params) {
+	rde_thread_pool_caller_data* _data = (rde_thread_pool_caller_data*)_params;
+	rde_thread_pool* _pool = _data->pool;
+	SDL_GLContext _gl_context = _data->context;
+	rde_thread_task _task;
+
+	while(true) {
+		RDE_LOCK_MUTEX(_pool);
+
+		while(_pool->count == 0 && _pool->shutdown == 0) {
+			RDE_SLEEP_CONDITIONAL_VAR(_pool);
+		}
+
+		SDL_GL_MakeCurrent(_pool->window->sdl_window, _gl_context);
+
+		if(_pool->shutdown != 0 && _pool->count == 0) {
+			break;
+		}
+
+		_task = _pool->tasks[_pool->head];
+		_pool->head = (_pool->head + 1) % _pool->tasks_size;
+		_pool->count--;
+
+		RDE_UNLOCK_MUTEX(_pool);
+
+		rde_critical_error(_task.fn == NULL, "rde_inner_thread_pool_caller_fn - Tried to execute a NULL function as a task on the thread_pool\n");
+		_task.fn(_task.args);
+	}
+
+	_pool->started--;
+
+	rde_free(_data);
+	RDE_DESTROY_THREAD(_pool);
+
+	return NULL;
+}
+
+void* rde_inner_thread_foreach(rde_thread* _thread, void* _params) {
+	rde_thread_foreach_params* _p = (rde_thread_foreach_params*)_params;
+	for(uint _i = _p->init_included; _i < _p->end_excluded; _i++) {
+		void* _value = (void*)(_p->arr + _i * _p->size_of_type);
+		_p->fn(_thread, _value, _i);
+	}
+
+	return NULL;
+}
+
+void* rde_inner_thread_wrapper(void* _params) {
+	rde_thread* _t = (rde_thread*)_params;
+	((rde_thread_fn)_t->fn)(_t, _t->params);
+	rde_free(_t);
+	pthread_exit(NULL);
+	return NULL;
+}
+
+void* rde_inner_detached_thread_wrapper(void* _params) {
+	rde_thread* _t = (rde_thread*)_params;
+	void* _res = ((rde_thread_fn)_t->fn)(_t, _t->params);
+	if(_t->callback != NULL) {
+		_t->callback(_t, _res);
+	}
+	rde_free(_t);
+	pthread_exit(NULL);
+	return NULL;
+}
+
 
 // ==============================================================================
 // =							PUBLIC API - ENGINE					 		=
@@ -2110,7 +2215,7 @@ void rde_engine_set_event_user_callback(rde_event_func _user_event_callback) {
 	ENGINE.user_event_callback = _user_event_callback;
 }
 
-bool rde_engine_logs_supressed() {
+bool rde_engine_logs_supressed(void) {
 	return ENGINE.supress_engine_logs;	
 }
 
@@ -2118,11 +2223,11 @@ void rde_engine_supress_logs(bool _supress) {
 	ENGINE.supress_engine_logs = _supress;
 }
 
-RDE_PLATFORM_TYPE_ rde_engine_get_platform() {
+RDE_PLATFORM_TYPE_ rde_engine_get_platform(void) {
 	return ENGINE.platform_type;
 }
 
-float rde_engine_get_fixed_delta() {
+float rde_engine_get_fixed_delta(void) {
 	return ENGINE.fixed_delta_time;
 }
 
@@ -2131,7 +2236,7 @@ void rde_engine_set_fixed_delta(float _delta_time) {
 	RDE_UNIMPLEMENTED()
 }
 
-void rde_engine_on_run() {
+void rde_engine_on_run(void) {
 
 	rde_critical_error(ENGINE.mandatory_callbacks.on_update == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_update");
 	rde_critical_error(ENGINE.mandatory_callbacks.on_fixed_update == NULL, RDE_ERROR_NULL_MANDATORY_CALLBACK, "rde_engine_user_on_fixed_update");
@@ -2200,7 +2305,7 @@ void rde_engine_on_run() {
 	}
 }
 
-bool rde_engine_is_running() {
+bool rde_engine_is_running(void) {
 	return ENGINE.running;
 }
 
@@ -2208,12 +2313,12 @@ void rde_engine_set_running(bool _running) {
 	ENGINE.running = _running;
 }
 
-rde_vec_2I rde_engine_get_display_size() {
+rde_vec_2I rde_engine_get_display_size(void) {
 	const SDL_DisplayMode* _displayMode = SDL_GetCurrentDisplayMode(0);
 	return (rde_vec_2I){ _displayMode->w, _displayMode->h };
 }
 
-bool rde_engine_is_vsync_active() {
+bool rde_engine_is_vsync_active(void) {
 	int _interval = 0;
 	// TODO: Handle returned error code by SDL_GL_GetSwapInterval
 	SDL_GL_GetSwapInterval(&_interval);
@@ -2239,7 +2344,7 @@ void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _title, cons
 	SDL_ShowSimpleMessageBox(_sdl_level, _title, _content, _window->sdl_window);
 }
 
-void rde_engine_destroy_engine() {
+void rde_engine_destroy_engine(void) {
 	rde_thread_pool_destroy(ENGINE.threads_pool);
 	
 	rde_inner_rendering_end_2d();
@@ -2370,7 +2475,7 @@ rde_window* rde_engine_get_focused_window() {
 	return NULL;
 }
 
-rde_transform* rde_transform_load() {
+rde_transform* rde_transform_load(void) {
 	rde_critical_error(ENGINE.last_transform_used == RDE_MAX_TRANSFORMS - 1, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "Transforms", RDE_MAX_TRANSFORMS);
 	
 	rde_transform* _t = NULL;
@@ -2487,6 +2592,193 @@ void rde_transform_unload(rde_transform* _transform) {
 	int _index = _transform->index;
 	*_transform = rde_struct_create_transform();
 	_transform->index = _index;
+}
+
+rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
+	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_run - _fn");
+	rde_malloc_init(_thread, rde_thread, 1);
+	_thread->detached = false;
+	_thread->fn = _fn;
+	_thread->params = _params;
+	_thread->callback = NULL;
+	int _error = RDE_CREATE_THREAD(_thread->native_thread, rde_inner_thread_wrapper, _thread);
+	rde_critical_error(_error != 0, "rde_thread_run - Error creating thread, error code %d\n", _error);
+	return _thread;
+}
+
+void rde_thread_run_detached(rde_thread_fn _fn, void* _params, void(*_callback)(rde_thread*, void*)) {
+	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_run - _fn");
+	rde_malloc_init(_thread, rde_thread, 1);
+	_thread->detached = true;
+	_thread->fn = _fn;
+	_thread->params = _params;
+	_thread->callback = _callback;
+	int _error = RDE_CREATE_THREAD(_thread->native_thread, rde_inner_detached_thread_wrapper, _thread);
+	rde_critical_error(_error != 0, "rde_thread_run - Error creating thread, error code %d\n", _error);
+	RDE_DETACH_THREAD(_thread->native_thread);
+}
+
+void rde_thread_wait(rde_thread* _thread) {
+	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_wait - _thread");
+	RDE_WAIT_THREAD(_thread->native_thread);
+}
+
+void rde_thread_detach(rde_thread* _thread) {
+	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_detach - _thread");
+	RDE_DETACH_THREAD(_thread->native_thread);
+	_thread->detached = true;
+}
+
+void rde_thread_end(rde_thread* _thread) {
+	RDE_UNUSED(_thread)
+	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_end - _thread");
+	_thread->fn = NULL;
+	_thread->params = NULL;
+	rde_free(_thread);
+	_thread = NULL;
+}
+
+void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads) {
+	rde_critical_error(_max_threads <= 0, "rde_thread_foreach - Threaded foreach cannot take _max_threads <= 0 \n");
+	rde_critical_error(_init_index_included == _end_index_included, "rde_thread_foreach - Threaded foreach cannot take _init_index_included == _end_index_included \n");
+	rde_critical_error(_arr_ptr == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _arr_ptr\n");
+	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _fn\n");
+	uint _amount = RDE_ABS(_end_index_included - _init_index_included);
+	_max_threads = rde_math_clamp_uint(_max_threads, 1, _amount - 1);
+	uint _chunk_size = _amount / _max_threads;
+	uint _current_min = 0;
+
+	rde_calloc_init(_threads, rde_thread*, _amount);
+	rde_calloc_init(_params, rde_thread_foreach_params, _amount);
+
+	for(uint _i = 0; _i < _max_threads; _i++) {
+		rde_thread_foreach_params* _param = &_params[_i];
+		_param->arr = _arr_ptr;
+		_param->init_included = _current_min;
+		_param->end_excluded = (_i == _max_threads - 1 && _current_min + 1 < _amount) ? _current_min + (_amount - _current_min) : _current_min + _chunk_size;
+		_param->end_excluded = rde_math_clamp_uint(_param->end_excluded, _current_min, _end_index_included);
+		_param->fn = _fn;
+		_param->size_of_type = _size_of_arr_type;
+		_current_min += _chunk_size;
+		_threads[_i] = rde_thread_run(rde_inner_thread_foreach, (void*)_param);
+	}
+
+	for(uint _i = 0; _i < _max_threads; _i++) {
+		rde_thread_wait(_threads[_i]);
+	}
+
+	rde_free(_threads);
+	rde_free(_params);
+}
+
+rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window) {
+	rde_critical_error(_window == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_pool_create - _window");
+	rde_critical_error(_thread_count <= 0, "rde_thread_pool_create - _thread_count must be > 0 \n");
+	rde_critical_error(_tasks_size <= 0, "rde_thread_pool_create - _tasks_size must be > 0 \n");
+	rde_calloc_init(_pool, rde_thread_pool, 1);
+
+	_pool->threads_count = 0;
+	_pool->tasks_size = _tasks_size;
+	_pool->head = 0;
+	_pool->tail = 0;
+	_pool->count = 0;
+	_pool->started = 0;
+	_pool->shutdown = 0;
+	_pool->window = _window;
+
+	rde_calloc(_pool->threads, rde_thread, _thread_count);
+	rde_calloc(_pool->tasks, rde_thread_task, _tasks_size);
+	rde_calloc(_pool->contexts, SDL_GLContext, _thread_count);
+
+	pthread_mutex_init(&(_pool->lock), NULL);
+	pthread_cond_init(&(_pool->notify), NULL);
+
+	if(_pool->lock == NULL) {
+		rde_thread_pool_destroy(_pool);
+		rde_critical_error(true, "Could not initialize MUTEX or CONDITIONAL on thread pool\n");
+	}
+
+	for(uint _i = 0; _i < _thread_count; _i++) {
+		_pool->contexts[_i] = SDL_GL_CreateContext(_window->sdl_window);
+
+		rde_calloc_init(_data, rde_thread_pool_caller_data, 1);
+		_data->pool = _pool;
+		_data->context = _pool->contexts[_i];
+
+		int _error = RDE_CREATE_THREAD(_pool->threads[_i].native_thread, rde_inner_thread_pool_caller_fn, _data);
+		rde_critical_error(_error != 0, "rde_thread_run - Error creating thread, error code %d\n", _error);
+
+		_pool->threads_count++;
+		_pool->started++;
+	}
+
+	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
+
+	return _pool;
+}
+
+bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args) {
+	rde_critical_error(_pool == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_pool_run - _pool");
+	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_pool_run - _fn");
+	RDE_LOCK_MUTEX(_pool);
+
+	uint _next = (_pool->tail + 1) % _pool->tasks_size;
+
+	if(_pool->count == _pool->tasks_size) {
+		RDE_UNLOCK_MUTEX(_pool);
+		return false;
+	}
+
+	if(_pool->shutdown) {
+		RDE_UNLOCK_MUTEX(_pool);
+		return false;
+	}
+
+	_pool->tasks[_pool->tail].fn = _fn;
+	_pool->tasks[_pool->tail].args = _args;
+	_pool->tail = _next;
+	_pool->count++;
+
+	RDE_WAKE_CONDITIONAL_VAR(_pool);
+	RDE_UNLOCK_MUTEX(_pool);
+	return true;
+}
+
+bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
+	rde_critical_error(_pool == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_pool_destroy - _pool");
+
+	if(_pool->threads_count > 0) {
+		RDE_LOCK_MUTEX(_pool);
+	}
+
+	if(_pool->shutdown != 0) {
+		return false;
+	}
+
+	_pool->shutdown = 1;
+
+	if(_pool->threads_count > 0) {
+		RDE_WAKE_CONDITIONAL_ALL_VAR(_pool);
+		RDE_UNLOCK_MUTEX(_pool);
+
+		for(uint _i = 0; _i < _pool->threads_count; _i++) {
+			RDE_WAIT_THREAD(_pool->threads[_i].native_thread);
+			SDL_GL_DeleteContext(_pool->contexts[_i]);
+		}
+	}
+
+	rde_free(_pool->threads);
+	rde_free(_pool->tasks);
+	rde_free(_pool->contexts);
+
+	if(_pool->lock != NULL) {
+		RDE_LOCK_MUTEX(_pool);
+		RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
+	}
+
+	_pool->window = NULL;
+	rde_free(_pool);
+	return true;
 }
 
 #if RDE_IS_MAC()
@@ -3098,249 +3390,6 @@ uint rde_util_hash_map_str_hash(const char** _key) {
     return _hash;
 }
 
-#define RDE_INIT_MUTEX_AND_COND_VAR(_pool) pthread_mutex_init(&((_pool)->lock), NULL); pthread_cond_init(&((_pool)->notify), NULL)
-#define RDE_CREATE_THREAD(_native_thread, _fn, _args) pthread_create(&(_native_thread), NULL, _fn, (void*)_args)
-#define RDE_WAIT_THREAD(_native_thread) pthread_join((_native_thread), NULL)
-#define RDE_LOCK_MUTEX(_pool) pthread_mutex_lock(&((_pool)->lock))
-#define RDE_UNLOCK_MUTEX(_pool) pthread_mutex_unlock(&((_pool)->lock))
-#define RDE_SLEEP_CONDITIONAL_VAR(_pool) pthread_cond_wait(&((_pool)->notify), &((_pool)->lock))
-#define RDE_WAKE_CONDITIONAL_VAR(_pool) pthread_cond_signal(&((_pool)->notify))
-#define RDE_WAKE_CONDITIONAL_ALL_VAR(_pool) pthread_cond_broadcast(&((_pool)->notify))
-#define RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool) pthread_mutex_destroy(&(_pool->lock)); pthread_cond_destroy(&((_pool)->notify))
-#define RDE_DESTROY_THREAD(_pool) pthread_mutex_unlock(&((_pool)->lock)); pthread_exit(NULL)
-#if RDE_IS_WINDOWS()
-	#define RDE_SLEEP(_ms) Sleep(_ms)
-#else
-	#define RDE_SLEEP(_ms) usleep(_ms * 1000) 
-#endif
-
-typedef struct {
-	rde_thread_pool* pool;
-	SDL_GLContext context;
-} rde_thread_pool_caller_data;
-
-void* rde_inner_thread_wrapper(void* _params) {
-	rde_thread* _t = (rde_thread*)_params;
-	((rde_thread_fn)_t->fn)(_t, _t->params);
-	rde_free(_t);
-	return NULL;
-}
-
-rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params) {
-	rde_malloc_init(_thread, rde_thread, 1);
-	_thread->detached = false;
-	_thread->fn = _fn;
-	_thread->params = _params;
-	RDE_CREATE_THREAD(_thread->native_thread, rde_inner_thread_wrapper, _thread);
-	return _thread;
-}
-
-void rde_thread_wait(rde_thread* _thread) {
-	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_wait - _thread");
-	RDE_WAIT_THREAD(_thread->native_thread);
-}
-
-void rde_thread_detach(rde_thread* _thread) {
-	RDE_UNUSED(_thread)
-}
-
-void rde_thread_end(rde_thread* _thread) {
-	RDE_UNUSED(_thread)
-	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_end - _thread");
-	_thread->fn = NULL;
-	_thread->params = NULL;
-	rde_free(_thread);
-	_thread = NULL;
-}
-
-typedef struct {
-	void* arr;
-	uint init_included;
-	uint end_excluded;
-	rde_thread_foreach_fn fn;
-	size_t size_of_type;
-} rde_thread_foreach_params;
-
-void rde_inner_thread_foreach(rde_thread* _thread, void* _params) {	
-	rde_thread_foreach_params* _p = (rde_thread_foreach_params*)_params;
-	for(uint _i = _p->init_included; _i < _p->end_excluded; _i++) {
-		void* _value = (void*)(_p->arr + _i * _p->size_of_type);
-		_p->fn(_thread, _value, _i);
-	}
-}
-
-void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads) {
-	rde_critical_error(_max_threads <= 0, "Threaded foreach cannot take _max_threads <= 0 \n");
-	rde_critical_error(_init_index_included == _end_index_included, "Threaded foreach cannot take _init_index_included == _end_index_included \n");
-	rde_critical_error(_arr_ptr == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _arr_ptr\n");
-	rde_critical_error(_fn == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_foreach - _fn\n");
-	uint _amount = RDE_ABS(_end_index_included - _init_index_included);
-	_max_threads = rde_math_clamp_uint(_max_threads, 1, _amount - 1);
-	uint _chunk_size = _amount / _max_threads;
-	uint _current_min = 0;
-	
-	rde_calloc_init(_threads, rde_thread*, _amount);
-	rde_calloc_init(_params, rde_thread_foreach_params, _amount);
-	
-	for(uint _i = 0; _i < _max_threads; _i++) {
-		rde_thread_foreach_params* _param = &_params[_i];
-		_param->arr = _arr_ptr;
-		_param->init_included = _current_min;
-		_param->end_excluded = (_i == _max_threads - 1 && _current_min + 1 < _amount) ? _current_min + (_amount - _current_min) : _current_min + _chunk_size;
-		_param->end_excluded = rde_math_clamp_uint(_param->end_excluded, _current_min, _end_index_included);
-		_param->fn = _fn;
-		_param->size_of_type = _size_of_arr_type;
-		_current_min += _chunk_size;
-		_threads[_i] = rde_thread_run(rde_inner_thread_foreach, (void*)_param);
-	}
-	
-	for(uint _i = 0; _i < _max_threads; _i++) {
-		rde_thread_wait(_threads[_i]);
-	}
-	
-	rde_free(_threads);
-	rde_free(_params);
-}
-
-void* rde_inner_thread_pool_caller_fn(void* _params) {
-	rde_thread_pool_caller_data* _data = (rde_thread_pool_caller_data*)_params;
-	rde_thread_pool* _pool = _data->pool;
-	SDL_GLContext _gl_context = _data->context;
-	rde_thread_task _task;
-	
-	while(true) {
-		RDE_LOCK_MUTEX(_pool);
-		
-		while(_pool->count == 0 && _pool->shutdown == 0) {
-			RDE_SLEEP_CONDITIONAL_VAR(_pool);
-		}
-		
-		SDL_GL_MakeCurrent(_pool->window->sdl_window, _gl_context);
-		
-		if(_pool->shutdown != 0 && _pool->count == 0) {
-			break;
-		}
-		
-		_task = _pool->tasks[_pool->head];
-		_pool->head = (_pool->head + 1) % _pool->tasks_size;
-		_pool->count--;
-		
-		RDE_UNLOCK_MUTEX(_pool);
-		
-		rde_critical_error(_task.fn == NULL, "rde_inner_thread_pool_caller_fn - Tried to execute a NULL function as a task on the thread_pool\n");
-		_task.fn(_task.args);
-	}
-	
-	_pool->started--;
-	
-	rde_free(_data);
-	RDE_DESTROY_THREAD(_pool);
-	
-	return NULL;
-}
-
-rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window) {
-	rde_calloc_init(_pool, rde_thread_pool, 1);
-	
-	_pool->threads_count = 0;
-	_pool->tasks_size = _tasks_size;
-	_pool->head = 0;
-	_pool->tail = 0;
-	_pool->count = 0;
-	_pool->started = 0;
-	_pool->shutdown = 0;
-	_pool->window = _window;
-	
-	rde_calloc(_pool->threads, rde_thread, _thread_count);
-	rde_calloc(_pool->tasks, rde_thread_task, _tasks_size);
-	rde_calloc(_pool->contexts, SDL_GLContext, _thread_count);
-	
-	pthread_mutex_init(&(_pool->lock), NULL);
-	pthread_cond_init(&(_pool->notify), NULL);
-	
-	if(_pool->lock == NULL) {
-		rde_thread_pool_destroy(_pool);
-		rde_critical_error(true, "Could not initialize MUTEX or CONDITIONAL on thread pool\n");
-	}
-	
-	for(uint _i = 0; _i < _thread_count; _i++) {
-		_pool->contexts[_i] = SDL_GL_CreateContext(_window->sdl_window);
-		
-		rde_calloc_init(_data, rde_thread_pool_caller_data, 1);
-		_data->pool = _pool;
-		_data->context = _pool->contexts[_i];
-		
-		RDE_CREATE_THREAD(_pool->threads[_i].native_thread, rde_inner_thread_pool_caller_fn, _data);
-		
-		_pool->threads_count++;
-		_pool->started++;
-	}
-	
-	SDL_GL_MakeCurrent(_window->sdl_window, _window->sdl_gl_context);
-	
-	return _pool;
-}
-
-bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args) {
-	RDE_LOCK_MUTEX(_pool);
-		
-	uint _next = (_pool->tail + 1) % _pool->tasks_size;
-	
-	if(_pool->count == _pool->tasks_size) {
-		RDE_UNLOCK_MUTEX(_pool);
-		return false;
-	}
-	
-	if(_pool->shutdown) {
-		RDE_UNLOCK_MUTEX(_pool);
-		return false;
-	}
-	
-	_pool->tasks[_pool->tail].fn = _fn;
-	_pool->tasks[_pool->tail].args = _args;
-	_pool->tail = _next;
-	_pool->count++;
-	
-	RDE_WAKE_CONDITIONAL_VAR(_pool);
-	RDE_UNLOCK_MUTEX(_pool);
-	return true;
-}
-
-bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
-	
-	if(_pool->threads_count > 0) {
-		RDE_LOCK_MUTEX(_pool);
-	}
-	
-	if(_pool->shutdown != 0) {
-		return false;
-	}
-	
-	_pool->shutdown = 1;
-	
-	if(_pool->threads_count > 0) {
-		RDE_WAKE_CONDITIONAL_ALL_VAR(_pool);
-		RDE_UNLOCK_MUTEX(_pool);
-		
-		for(uint _i = 0; _i < _pool->threads_count; _i++) {
-			RDE_WAIT_THREAD(_pool->threads[_i].native_thread);
-			SDL_GL_DeleteContext(_pool->contexts[_i]);
-		}
-	}
-	
-	rde_free(_pool->threads);
-	rde_free(_pool->tasks);
-	
-	if(_pool->lock != NULL) {
-		RDE_LOCK_MUTEX(_pool);
-		RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
-	}
-	
-	_pool->window = NULL;
-	rde_free(_pool);
-	return true;
-}
-
 void rde_log_color_inner(RDE_LOG_COLOR_ _color, const char* _fmt, ...) {
 	switch(_color) {
 		case RDE_LOG_COLOR_RED: {
@@ -3468,7 +3517,6 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 // =							PRIVATE API - FILE SYSTEM					   =
 // ==============================================================================
 
-rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas);
 rde_atlas_sub_textures* rde_inner_file_system_read_atlas_config(const char* _atlas_path, rde_texture* _atlas) {
 	FILE* _file = NULL;
 
@@ -4051,7 +4099,7 @@ rde_window* rde_window_create_wasm_window(size_t _free_window_index) {
 // =							PUBLIC API - WINDOW					 	    =
 // ==============================================================================
 
-rde_window* rde_window_create_window_os() {
+rde_window* rde_window_create_window_os(void) {
 
 	size_t _free_window_index = 0;
 	rde_window* _window = NULL;
@@ -4151,7 +4199,7 @@ float rde_window_get_aspect_ratio(rde_window* _window) {
 	return _window_size.x / (float)_window_size.y;
 }
 
-bool rde_window_is_mouse_out_of_window_allowed() {
+bool rde_window_is_mouse_out_of_window_allowed(void) {
 	return SDL_GetRelativeMouseMode();
 }
 
@@ -4226,7 +4274,7 @@ void rde_window_destroy_window(rde_window* _window) {
 // =							PRIVATE API - RENDERING					 	=
 // ==============================================================================
 
-rde_vec_2F rde_inner_rendering_get_aspect_ratio() {
+rde_vec_2F rde_inner_rendering_get_aspect_ratio(void) {
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
 	bool _is_horizontal = rde_window_orientation_is_horizontal(current_drawing_window);
 	float _aspect_ratio = _window_size.x / (float)_window_size.y;
@@ -4524,7 +4572,7 @@ void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
 	glm_mat4_identity(ENGINE.shadows.light_space_matrix);
 }
 
-void rde_inner_rendering_destroy_current_antialiasing_config() {
+void rde_inner_rendering_destroy_current_antialiasing_config(void) {
 	if(ENGINE.antialiasing.opengl_texture_id == -1 || ENGINE.antialiasing.frame_buffer_id == RDE_UINT_MAX) {
 		return;
 	}
@@ -4539,7 +4587,7 @@ void rde_inner_rendering_destroy_current_antialiasing_config() {
 	ENGINE.antialiasing.render_buffer_id = RDE_UINT_MAX;
 }
 
-void rde_inner_rendering_create_shadows() {
+void rde_inner_rendering_create_shadows(void) {
 	rde_malloc(ENGINE.shadows.render_texture, rde_render_texture, 1);
 	RDE_CHECK_GL(glGenFramebuffers, 1, &ENGINE.shadows.render_texture->opengl_framebuffer_id);
 	
@@ -4583,7 +4631,7 @@ void rde_inner_rendering_create_shadows() {
 	// SHADOWS_RENDER_TEXTURE->vbo = _vbo;
 }
 
-void rde_inner_rendering_destroy_shadows() {
+void rde_inner_rendering_destroy_shadows(void) {
 	RDE_CHECK_GL(glDeleteTextures, 1, &ENGINE.shadows.render_texture->opengl_texture_id);
 	RDE_CHECK_GL(glDeleteFramebuffers, 1, &ENGINE.shadows.render_texture->opengl_framebuffer_id);
 
@@ -4599,14 +4647,14 @@ void rde_inner_engine_on_render(float _dt, rde_window* _window) {
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.antialiasing.samples > 0 ? ENGINE.antialiasing.frame_buffer_id : DEFAULT_RENDER_TEXTURE->opengl_framebuffer_id);
 }
 
-void rde_inner_rendering_init_2d() {
+void rde_inner_rendering_init_2d(void) {
 	current_batch_2d = rde_struct_create_2d_batch();
 	rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(&current_batch_2d);
 
 	rde_malloc(current_batch_2d.vertices, rde_vertex_2d, ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch);
 }
 
-void rde_inner_rendering_end_2d() {
+void rde_inner_rendering_end_2d(void) {
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
 	RDE_CHECK_GL(glBindVertexArray, 0);
@@ -4666,7 +4714,7 @@ void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _ba
 	RDE_CHECK_GL(glBindVertexArray, 0);
 }
 
-void rde_inner_rendering_reset_batch_2d() {
+void rde_inner_rendering_reset_batch_2d(void) {
 	current_batch_2d.shader = NULL;
 	current_batch_2d.texture = rde_struct_create_texture();
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch; _i++) {
@@ -4685,7 +4733,7 @@ void rde_inner_rendering_try_create_batch_2d(rde_shader* _shader, const rde_text
 	}
 }
 
-void rde_inner_rendering_flush_batch_2d() {
+void rde_inner_rendering_flush_batch_2d(void) {
 	if(current_batch_2d.shader == NULL) {
 		return;
 	}
@@ -5396,7 +5444,7 @@ rde_model* rde_rendering_model_fbx_load(const char* _fbx_path, const char* _text
 }
 #endif
 
-void rde_inner_create_line_batch_buffers() {
+void rde_inner_create_line_batch_buffers(void) {
 	RDE_CHECK_GL(glGenVertexArrays, 1, &current_batch_3d.line_batch.vertex_array_object);
 	RDE_CHECK_GL(glBindVertexArray, current_batch_3d.line_batch.vertex_array_object);
 	
@@ -5414,7 +5462,7 @@ void rde_inner_create_line_batch_buffers() {
 	RDE_CHECK_GL(glBindVertexArray, 0);
 }
 
-void rde_inner_destroy_line_batch_buffers() {
+void rde_inner_destroy_line_batch_buffers(void) {
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	RDE_CHECK_GL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0);
 	RDE_CHECK_GL(glBindVertexArray, 0);
@@ -5425,7 +5473,7 @@ void rde_inner_destroy_line_batch_buffers() {
 	current_batch_3d.line_batch.vertices = NULL;
 }
 
-void rde_inner_rendering_init_3d() {
+void rde_inner_rendering_init_3d(void) {
 	DEFAULT_TEXTURE = rde_rendering_memory_texture_create(RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_SIZE, RDE_DEFAULT_TEXTURE_CHANNELS);
 	
 	for(int _y = 0; _y < RDE_DEFAULT_TEXTURE_SIZE; _y++) {
@@ -5440,7 +5488,7 @@ void rde_inner_rendering_init_3d() {
 	rde_inner_create_line_batch_buffers();
 }
 
-void rde_inner_rendering_end_3d() {
+void rde_inner_rendering_end_3d(void) {
 	if(DEFAULT_TEXTURE != NULL) {
 		rde_rendering_memory_texture_destroy(DEFAULT_TEXTURE);
 	}
@@ -5616,7 +5664,7 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	return _mesh;
 }
 
-void rde_inner_rendering_reset_line_batch() {
+void rde_inner_rendering_reset_line_batch(void) {
 	for(unsigned int _i = 0; _i < RDE_MAX_LINES_PER_DRAW; _i++) {
 		current_batch_3d.line_batch.vertices[_i] = rde_struct_create_line_vertex();
 	}
@@ -5626,7 +5674,7 @@ void rde_inner_rendering_reset_line_batch() {
 	current_batch_3d.line_batch.thickness = 0;
 }
 
-void rde_inner_rendering_reset_batch_3d() {
+void rde_inner_rendering_reset_batch_3d(void) {
 	current_batch_3d.shader = NULL;
 
 	if(current_batch_3d.mesh != NULL) {
@@ -5659,7 +5707,7 @@ void rde_inner_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mes
 	}
 }
 
-void rde_inner_rendering_flush_line_batch() {
+void rde_inner_rendering_flush_line_batch(void) {
 	if(current_batch_3d.line_batch.shader == NULL || current_batch_3d.line_batch.amount_of_vertices == 0) {
 		return;
 	}
@@ -5698,7 +5746,7 @@ void rde_inner_rendering_flush_line_batch() {
 	RDE_CHECK_GL(glDrawArrays, GL_LINES, 0, current_batch_3d.line_batch.amount_of_vertices);
 }
 
-void rde_inner_rendering_flush_batch_3d() {
+void rde_inner_rendering_flush_batch_3d(void) {
 	if(current_batch_3d.shader == NULL || current_batch_3d.mesh == NULL || current_batch_3d.amount_of_models_per_draw == 0) {
 		return;
 	}
@@ -5934,7 +5982,7 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 	rde_inner_rendering_try_create_batch_3d(_shader, _mesh);
 }
 
-void rde_inner_rendering_flush_render_texture_3d() {
+void rde_inner_rendering_flush_render_texture_3d(void) {
 	rde_inner_rendering_flush_batch_3d();
 	rde_inner_rendering_reset_batch_3d();
 	rde_inner_rendering_flush_line_batch();
@@ -6148,7 +6196,7 @@ rde_texture_parameters rde_innner_rendering_validate_texture_parameters(const rd
 	return _tex_params;
 }
 
-rde_texture* rde_inner_rendering_get_first_available_texture() {
+rde_texture* rde_inner_rendering_get_first_available_texture(void) {
 	rde_texture* _texture = NULL;
 	for (size_t _i = 0; _i < ENGINE.total_amount_of_textures; _i++) {
 		if (ENGINE.textures[_i].opengl_texture_id >= 0 || strlen(ENGINE.textures[_i].file_path) > 0) {
@@ -6387,12 +6435,6 @@ rde_texture* rde_rendering_texture_load(const char* _file_path, const rde_textur
 	}
 	return _texture;
 }
-
-typedef struct {
-	const char* file_path;
-	const rde_texture_parameters* texture_params;
-	void(*callback)(void*);
-} rde_texture_async_data;
 
 void rde_inner_rendering_texture_load_async(void* _params) {
 	rde_texture_async_data* _async_data = (rde_texture_async_data*)_params;
@@ -7047,7 +7089,7 @@ void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _anti
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
-RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing() {
+RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing(void) {
 	return (RDE_ANTIALIASING_)ENGINE.antialiasing.samples;
 }
 
@@ -7430,7 +7472,7 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 	}
 }
 
-void rde_rendering_2d_end_drawing() {
+void rde_rendering_2d_end_drawing(void) {
 	rde_inner_rendering_flush_batch_2d();
 	rde_inner_rendering_reset_batch_2d();
 }
@@ -7831,7 +7873,7 @@ void rde_rendering_lighting_set_directional_light(rde_directional_light _directi
 	ENGINE.illumination.directional_light = _directional_light;
 }
 
-rde_directional_light rde_rendering_lighting_get_directional_light() {
+rde_directional_light rde_rendering_lighting_get_directional_light(void) {
 	return ENGINE.illumination.directional_light;
 }
 
@@ -7992,7 +8034,7 @@ void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
 	glDisable(GL_CULL_FACE);
 }
 
-void rde_rendering_shadows_end() {
+void rde_rendering_shadows_end(void) {
 	RDE_CHECK_GL(glEnable, GL_DEPTH_TEST);
 	GLuint _framebuffer_id = ENGINE.shadows.render_texture->opengl_framebuffer_id;
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, _framebuffer_id);
@@ -8950,7 +8992,7 @@ void rde_audio_end() {
 // ==============================================================================
 
 #if RDE_IS_ANDROID()
-ANativeWindow* rde_android_get_native_window() {
+ANativeWindow* rde_android_get_native_window(void) {
 	return ENGINE.android_native_window;
 }
 #endif

@@ -3062,7 +3062,7 @@ typedef void (*rde_update_func)(float);
 //	_window - the pointer to the window that will render the scene.
 typedef void (*rde_render_func)(float, rde_window*);
 
-typedef void (*rde_thread_fn)(rde_thread*, void*);
+typedef void* (*rde_thread_fn)(rde_thread*, void*);
 typedef void (*rde_thread_foreach_fn)(rde_thread*, void*, uint);
 typedef void(*rde_thread_task_fn)(void*);
 
@@ -3621,7 +3621,7 @@ const rde_texture_parameters RDE_DEFAULT_TEXTURE_PARAMETERS = {
 // =================================================================== CONSTRUCTORS ===================================================================
 
 // Constructor: rde_struct_create_probability
-RDE_FUNC rde_probability rde_struct_create_probability();
+RDE_FUNC rde_probability rde_struct_create_probability(void);
 
 // Constructor: rde_struct_create_camera
 // 
@@ -3630,61 +3630,61 @@ RDE_FUNC rde_probability rde_struct_create_probability();
 RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
 
 // Constructor: rde_struct_create_event_window
-RDE_FUNC rde_event_window rde_struct_create_event_window();
+RDE_FUNC rde_event_window rde_struct_create_event_window(void);
 
 // Constructor: rde_struct_create_event_display
-RDE_FUNC rde_event_display rde_struct_create_event_display();
+RDE_FUNC rde_event_display rde_struct_create_event_display(void);
 
 // Constructor: rde_struct_create_event_key
-RDE_FUNC rde_event_key rde_struct_create_event_key();
+RDE_FUNC rde_event_key rde_struct_create_event_key(void);
 
 // Constructor: rde_struct_create_event_mouse
-RDE_FUNC rde_event_mouse rde_struct_create_event_mouse();
+RDE_FUNC rde_event_mouse rde_struct_create_event_mouse(void);
 
 // Constructor: rde_struct_create_event_controller
-RDE_FUNC rde_event_controller rde_struct_create_event_controller();
+RDE_FUNC rde_event_controller rde_struct_create_event_controller(void);
 
 // Constructor: rde_struct_create_event_mobile_pinch
-RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch();
+RDE_FUNC rde_event_mobile_pinch rde_struct_create_event_mobile_pinch(void);
 
 // Constructor: rde_struct_create_event_mobile
-RDE_FUNC rde_event_mobile rde_struct_create_event_mobile();
+RDE_FUNC rde_event_mobile rde_struct_create_event_mobile(void);
 
 // Constructor: rde_struct_create_event_drag_and_drop
-RDE_FUNC rde_event_drag_and_drop rde_struct_create_event_drag_and_drop();
+RDE_FUNC rde_event_drag_and_drop rde_struct_create_event_drag_and_drop(void);
 
 // Constructor: rde_struct_create_event_data
-RDE_FUNC rde_event_data rde_struct_create_event_data();
+RDE_FUNC rde_event_data rde_struct_create_event_data(void);
 
 // Constructor: rde_struct_create_event
-RDE_FUNC rde_event rde_struct_create_event();
+RDE_FUNC rde_event rde_struct_create_event(void);
 
 // Constructor: rde_struct_create_end_user_mandatory_callbacks
-RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks();
+RDE_FUNC rde_end_user_mandatory_callbacks rde_struct_create_end_user_mandatory_callbacks(void);
 
 // Constructor: rde_struct_create_texture_parameters
-RDE_FUNC rde_texture_parameters rde_struct_create_texture_parameters();
+RDE_FUNC rde_texture_parameters rde_struct_create_texture_parameters(void);
 
 // Constructor: rde_struct_create_material_light_data
-RDE_FUNC rde_material_light_data rde_struct_create_material_light_data();
+RDE_FUNC rde_material_light_data rde_struct_create_material_light_data(void);
 
 // Constructor: rde_struct_create_material
-RDE_FUNC rde_material rde_struct_create_material();
+RDE_FUNC rde_material rde_struct_create_material(void);
 
 // Constructor: rde_struct_create_directional_light
-RDE_FUNC rde_directional_light rde_struct_create_directional_light();
+RDE_FUNC rde_directional_light rde_struct_create_directional_light(void);
 
 // Constructor: rde_struct_create_point_light
-RDE_FUNC rde_point_light rde_struct_create_point_light();
+RDE_FUNC rde_point_light rde_struct_create_point_light(void);
 
 // Constructor: rde_struct_create_spot_light
-RDE_FUNC rde_spot_light rde_struct_create_spot_light();
+RDE_FUNC rde_spot_light rde_struct_create_spot_light(void);
 
 // Constructor: rde_struct_create_color
-RDE_FUNC rde_color rde_struct_create_color();
+RDE_FUNC rde_color rde_struct_create_color(void);
 
 // Constructor: rde_struct_create_polygon
-RDE_FUNC rde_polygon rde_struct_create_polygon();
+RDE_FUNC rde_polygon rde_struct_create_polygon(void);
 
 // =================================================================== LOG ===================================================================
 
@@ -3904,15 +3904,6 @@ RDE_FUNC uint rde_util_hash_map_int_hash(int* _key);
 //	_key - poiner to const char* value.
 RDE_FUNC uint rde_util_hash_map_str_hash(const char** _key);
 
-RDE_FUNC rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params);
-RDE_FUNC void rde_thread_wait(rde_thread* _thread);
-RDE_FUNC void rde_thread_detach(rde_thread* _thread);
-RDE_FUNC void rde_thread_end(rde_thread* _thread);
-RDE_FUNC void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads);
-RDE_FUNC rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window);
-RDE_FUNC bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args);
-RDE_FUNC bool rde_thread_pool_destroy(rde_thread_pool* _pool);
-
 // =================================================================== MATH ===================================================================
 
 // Function: rde_math_set_random_seed
@@ -4094,7 +4085,7 @@ RDE_FUNC void rde_engine_set_event_user_callback(rde_event_func _user_event_call
 
 // Function: rde_engine_logs_supressed
 // Returns if the logs are supressed.
-RDE_FUNC bool rde_engine_logs_supressed();
+RDE_FUNC bool rde_engine_logs_supressed(void);
 
 // Function: rde_engine_supress_logs
 // Enables or disables logging on the console.
@@ -4109,7 +4100,7 @@ RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
 
 // Function: rde_engine_get_fixed_delta
 // Returns the fixed update physics delta.
-RDE_FUNC float rde_engine_get_fixed_delta();
+RDE_FUNC float rde_engine_get_fixed_delta(void);
 
 // Function: rde_engine_set_fixed_delta
 // Sets the fixed update physics delta.
@@ -4120,11 +4111,11 @@ RDE_FUNC void rde_engine_set_fixed_delta(float _fixed_dt);
 
 // Function: rde_engine_on_run
 // Starts the engine main loop and also initializes some inner engine data. Will be running until the application is closed or crashes.
-RDE_FUNC void rde_engine_on_run();
+RDE_FUNC void rde_engine_on_run(void);
 
 // Function: rde_engine_is_running
 // Returns if the engine is currently running.
-RDE_FUNC bool rde_engine_is_running();
+RDE_FUNC bool rde_engine_is_running(void);
 
 // Function: rde_engine_set_running
 // Makes the engine stop if set to false.
@@ -4135,7 +4126,7 @@ RDE_FUNC void rde_engine_set_running(bool _running);
 
 // Function: rde_engine_get_display_size
 // Returns the size of the display where the current window is at.
-RDE_FUNC rde_vec_2I rde_engine_get_display_size();
+RDE_FUNC rde_vec_2I rde_engine_get_display_size(void);
 
 // Function: rde_engine_get_available_display_ids
 // Fills an array of uints with the ids of all the available displays.
@@ -4154,11 +4145,11 @@ RDE_FUNC void rde_engine_switch_window_display(rde_window* _window, uint _new_di
 
 // Function: rde_engine_get_focused_window
 // Returnst the currently focused window.
-RDE_FUNC rde_window* rde_engine_get_focused_window();
+RDE_FUNC rde_window* rde_engine_get_focused_window(void);
 
 // Function: rde_engine_is_vsync_active
 // Returns if VSync is active or not.
-RDE_FUNC bool rde_engine_is_vsync_active();
+RDE_FUNC bool rde_engine_is_vsync_active(void);
 
 // Function: rde_engine_set_vsync_active
 // Enables or disables VSync.
@@ -4179,12 +4170,12 @@ RDE_FUNC void rde_engine_show_message_box(RDE_LOG_LEVEL_ _level, const char* _ti
 
 // Function: rde_engine_destroy_engine
 // Destroys the engine and cleans every allocation and releases any asset used by the engine.
-RDE_FUNC void rde_engine_destroy_engine();
+RDE_FUNC void rde_engine_destroy_engine(void);
 
 // Function: rde_transform_load
 // Returns a <rde_transform> from the preloaded pool of transforms. Transforms are not allowed to be created nor modify by end-users as
 // there are engine-internal operations that must be notified when modifying a <rde_transform> fields, mainly for parenting purposes.
-RDE_FUNC rde_transform* rde_transform_load();
+RDE_FUNC rde_transform* rde_transform_load(void);
 
 // Function: rde_transform_unload
 // Unloads a previously loaded <rde_transform> and returns it to the pool.
@@ -4260,11 +4251,22 @@ RDE_FUNC void rde_transform_set_parent(rde_transform* _transform, rde_transform*
 //	_transform - transform to get the amount of children.
 RDE_FUNC uint rde_transform_get_children_count(rde_transform* _transform);
 
+RDE_FUNC rde_thread* rde_thread_run(rde_thread_fn _fn, void* _params);
+RDE_FUNC void rde_thread_run_detached(rde_thread_fn _fn, void* _params, void(*_callback)(rde_thread*, void*));
+RDE_FUNC void rde_thread_wait(rde_thread* _thread);
+RDE_FUNC void rde_thread_detach(rde_thread* _thread);
+RDE_FUNC void rde_thread_end(rde_thread* _thread);
+RDE_FUNC void rde_thread_foreach(void* _arr_ptr, size_t _size_of_arr_type, uint _init_index_included, uint _end_index_included, rde_thread_foreach_fn _fn, uint _max_threads);
+RDE_FUNC rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rde_window* _window);
+RDE_FUNC bool rde_thread_pool_run(rde_thread_pool* _pool, rde_thread_task_fn _fn, void* _args);
+RDE_FUNC bool rde_thread_pool_destroy(rde_thread_pool* _pool);
+
+
 // =================================================================== WINDOW ===================================================================
 
 // Function: rde_window_create_window_os
 // Creates a new window ready to work on any supported platform. This window must be destroyed by the user when not needed anymore.
-RDE_FUNC rde_window* rde_window_create_window_os();
+RDE_FUNC rde_window* rde_window_create_window_os(void);
 
 // Function: rde_window_get_window_size
 // Returns the size of a window.
@@ -4347,7 +4349,7 @@ RDE_FUNC float rde_window_get_aspect_ratio(rde_window* _window);
 
 // Function: rde_window_is_mouse_out_of_window_allowed
 // Returns if the mouse is allowed to move outside of a window.
-RDE_FUNC bool rde_window_is_mouse_out_of_window_allowed();
+RDE_FUNC bool rde_window_is_mouse_out_of_window_allowed(void);
 
 // Function: rde_window_allow_mouse_out_of_window
 // Sets if the mouse is allowed to move outside of a window.
@@ -4716,7 +4718,7 @@ RDE_FUNC void rde_rendering_render_texture_enable(rde_render_texture* _render_te
 
 // Function: rde_rendering_render_texture_disable
 // Flushes the current scene drawing onto the previously selected render texture. Must be an opening <rde_rendering_render_texture_enable>.
-RDE_FUNC void rde_rendering_render_texture_disable();
+RDE_FUNC void rde_rendering_render_texture_disable(void);
 
 // Function: rde_rendering_render_texture_update
 // Allows to resize the render texture to a different size.
@@ -4876,7 +4878,7 @@ RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const 
 
 // Function: rde_rendering_2d_end_drawing
 // Ends a drawing batch. A previous <rde_rendering_2d_begin_drawing> is mandatory to use this function. Flushes everything into the GPU.
-RDE_FUNC void rde_rendering_2d_end_drawing();
+RDE_FUNC void rde_rendering_2d_end_drawing(void);
 
 // Function: rde_struct_memory_mesh_create
 // Creates a 3D mesh with the specified data. For example, a quad mesh will have 4 vertices and 6 indices and uploads to GPU. This must be freed by the end-user.
@@ -5039,7 +5041,7 @@ RDE_FUNC void rde_rendering_3d_draw_skybox(rde_camera* _camera);
 
 // Function: rde_rendering_3d_end_drawing
 // Ends a drawing batch. A previous <rde_rendering_3d_begin_drawing> is mandatory to use this function. Flushes everything into the GPU.
-RDE_FUNC void rde_rendering_3d_end_drawing();
+RDE_FUNC void rde_rendering_3d_end_drawing(void);
 
 // Function: rde_rendering_lighting_set_directional_light
 // Sets the directional light data. Directiona light illuminates in all directions, infinitely.
@@ -5064,7 +5066,7 @@ RDE_FUNC void rde_rendering_lighting_add_spot_light(rde_spot_light* _spot_light)
 
 // Function: rde_rendering_lighting_get_directional_light
 // Returns the current data of the directional light.
-RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light();
+RDE_FUNC rde_directional_light rde_rendering_lighting_get_directional_light(void);
 
 // Function: rde_rendering_skybox_load
 // Loads a skybox into GPU. Returns an id to use it.
@@ -5097,7 +5099,7 @@ RDE_FUNC void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASI
 
 // Function: rde_rendering_get_current_antialiasing
 // Returns the level of antialiasing.
-RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing();
+RDE_FUNC RDE_ANTIALIASING_ rde_rendering_get_current_antialiasing(void);
 
 // Function: rde_rendering_shadows_begin
 // Works like <rde_rendering_3d_begin_drawing> but it renders shadows of everything inside.
@@ -5109,7 +5111,7 @@ RDE_FUNC void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _came
 
 // Function: rde_rendering_shadows_end
 // Works like <rde_rendering_3d_end_drawing> but it renders shadows of everything inside.
-RDE_FUNC void rde_rendering_shadows_end();
+RDE_FUNC void rde_rendering_shadows_end(void);
 
 // =================================================================== AUDIO ===================================================================
 
@@ -5129,7 +5131,7 @@ RDE_FUNC bool rde_audio_is_sound_playing(rde_sound* _sound);
 
 RDE_FUNC bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume);
 
-RDE_FUNC void rde_audio_end();
+RDE_FUNC void rde_audio_end(void);
 
 #endif
 
@@ -5260,20 +5262,20 @@ RDE_FUNC void rde_file_free_read_bytes(rde_file_handle* _file_handle);
 #ifdef RDE_IMGUI_MODULE
 RDE_FUNC void rde_imgui_init(void* _sdl_window, void* _opengl_context, const char* _gl_version);
 
-RDE_FUNC void rde_imgui_new_frame();
-RDE_FUNC void rde_imgui_draw();
+RDE_FUNC void rde_imgui_new_frame(void);
+RDE_FUNC void rde_imgui_draw(void);
 RDE_FUNC void rde_imgui_handle_events(void* _sdl_event);
 
 RDE_FUNC rde_imgui_id rde_imgui_get_id(const char* _str_id);
 RDE_FUNC void rde_imgui_push_id(int _id);
-RDE_FUNC void rde_imgui_pop_id();
+RDE_FUNC void rde_imgui_pop_id(void);
 RDE_FUNC void rde_imgui_dockspace(rde_imgui_id _id, rde_vec_2F _size, rde_imgui_dock_node_flags _flags);
 
 RDE_FUNC bool rde_imgui_begin(const char* _name, bool* _open, rde_imgui_window_flags _flags);
-RDE_FUNC void rde_imgui_end();
+RDE_FUNC void rde_imgui_end(void);
 
-RDE_FUNC void rde_imgui_new_line();
-RDE_FUNC void rde_imgui_separator();
+RDE_FUNC void rde_imgui_new_line(void);
+RDE_FUNC void rde_imgui_separator(void);
 RDE_FUNC void rde_imgui_same_line(float _offset_from_start_x, float _spacing);
 
 RDE_FUNC void rde_imgui_text(const char* _fmt, ...);
@@ -5298,7 +5300,7 @@ RDE_FUNC bool rde_imgui_button(const char* _label, rde_vec_2F _size);
 
 RDE_FUNC void rde_imgui_progress_bar(float _progess);
 
-RDE_FUNC void rde_imgui_shutdown();
+RDE_FUNC void rde_imgui_shutdown(void);
 #endif
 
 // =================================================================== PHYSICS ===================================================================
@@ -5371,7 +5373,7 @@ RDE_FUNC void rde_physics_iterate_over_bodies(rde_physics_body_iter_callback_fn 
 //	_camera - camera to render the debug shapes with.
 RDE_FUNC void rde_physics_draw_debug_shapes(rde_window* _window, rde_camera* _camera);
 
-RDE_FUNC void rde_physics_end();
+RDE_FUNC void rde_physics_end(void);
 #endif
 
 
@@ -5393,7 +5395,7 @@ RDE_FUNC void rde_critical_error(bool _condition, const char* _fmt, ...);
 #if RDE_IS_ANDROID()
 // Function: rde_android_get_native_window
 // Returns the Android native window.
-RDE_FUNC ANativeWindow* rde_android_get_native_window();
+RDE_FUNC ANativeWindow* rde_android_get_native_window(void);
 #endif
 
 
