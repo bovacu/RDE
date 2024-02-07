@@ -44,6 +44,7 @@ void draw_imgui_transform(const char* _name, rde_transform* _transform);
 #if !RDE_IS_ANDROID()
 #include "model_viewer.c"
 #include "hierarchy.c"
+#include "ui.c"
 #include "performance_test.c"
 #include "shadows.c"
 // #include "physics.c"
@@ -163,6 +164,13 @@ void on_imgui_hub_menu(float _dt) {
 				unload_callback();
 			}
 			shadows_init();
+		}
+
+		if(rde_imgui_radio_button("UI", &_option, 5)) {
+			if(unload_callback != NULL) {
+				unload_callback();
+			}
+			ui_init();
 		}
 #else
 		if(rde_imgui_radio_button("Android demo", &_option, 0)) {

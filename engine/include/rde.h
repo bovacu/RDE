@@ -502,6 +502,7 @@ typedef unsigned int uint;
 //	});
 //	=================
 #define rde_render_3d(_window, _camera, _draw_wireframe, _block_of_code)\
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_PERSPECTIVE, "Only perspective camera is allowed in render_3d"); \
 	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);	\
 	_block_of_code														\
 	rde_rendering_3d_end_drawing();
@@ -521,6 +522,7 @@ typedef unsigned int uint;
 //	});
 //	=================
 #define rde_render_3d_with_shadows(_window, _camera, _draw_wireframe, _block_of_code)	\
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_PERSPECTIVE, "Only perspective camera is allowed in render_3d_with_shadows");\
 	rde_rendering_3d_begin_drawing(_camera, _window, _draw_wireframe);					\
 	rde_rendering_shadows_begin(_window, _camera);										\
 	_block_of_code																		\
@@ -542,8 +544,15 @@ typedef unsigned int uint;
 //		rde_rendering_2d_texture(_my_transform, _my_texture, RDE_COLO_WHITE, NULL);
 //	});
 //	=================
-#define rde_render_2d(_window, _camera, _is_hud, _block_of_code)\
-	rde_rendering_2d_begin_drawing(_camera, _window, _is_hud);	\
+#define rde_render_2d(_window, _camera, _block_of_code)\
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_ORTHOGRAPHIC, "Only orthographic camera is allowed in render_2d");\
+	rde_rendering_2d_begin_drawing(_camera, _window, false);	\
+	_block_of_code												\
+	rde_rendering_2d_end_drawing();
+
+#define rde_render_ui_2d(_window, _camera, _block_of_code)		\
+	rde_critical_error((_camera)->camera_type != RDE_CAMERA_TYPE_ORTHOGRAPHIC, "Only orthographic camera is allowed in render_ui_2d"); \
+	rde_rendering_2d_begin_drawing(_camera, _window, true);   	\
 	_block_of_code												\
 	rde_rendering_2d_end_drawing();
 
@@ -2802,6 +2811,7 @@ typedef struct rde_model rde_model;
 // Type: rde_skybox_id
 // This is just an id to locate the skyboxes.
 typedef uint rde_skybox_id;
+typedef struct rde_ui_container rde_ui_container;
 
 // Type: rde_mesh
 // Represents a mesh, may be part of a model or not. This is just a pointer, implementation is in the source file.
@@ -2816,6 +2826,18 @@ typedef unsigned int rde_imgui_id;// A unique ID used by widgets (typically the 
 typedef void* rde_imgui_texture_id;
 #endif
 #endif
+
+typedef void (*rde_ui_container_callback_bd)(rde_ui_container* _container, int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_bu)(rde_ui_container* _container, int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_scroll)(rde_ui_container* _container, rde_vec_2F _scroll);
+typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container* _container);
+typedef struct {
+	rde_ui_container_callback_bd on_button_down;
+	rde_ui_container_callback_bd on_button_up;
+	rde_ui_container_callback_scroll on_scroll;
+	rde_ui_container_callback_mouse_entered_exited on_mouse_enter;
+	rde_ui_container_callback_mouse_entered_exited on_mouse_exit;
+} rde_ui_container_callbacks;
 
 #ifdef RDE_PHYSICS_MODULE
 // Type: rde_physics_body_id
@@ -3474,6 +3496,77 @@ typedef struct {
 	uint vertices_count;
 } rde_polygon;
 
+typedef struct {
+	rde_vec_2UI left_right;
+	rde_vec_2UI bottom_top;
+	rde_vec_2UI size;
+} rde_ui_nine_slice;
+RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice();
+
+typedef struct {
+	rde_ui_nine_slice nine_slice;
+	rde_texture* texture;
+	rde_vec_2UI size;
+} rde_ui_element_image_data;
+RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data();
+
+typedef struct {
+	rde_font* font;
+	char* text;
+	size_t font_size;
+} rde_ui_element_text_data;
+RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data();
+
+typedef struct {
+	rde_vec_2UI size;
+	rde_ui_element_image_data image_idle;
+	rde_ui_element_image_data image_pressed;
+	rde_ui_element_image_data image_selected;
+	rde_ui_element_text_data text;
+} rde_ui_button_data;
+RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data();
+
+typedef enum {
+	RDE_UI_ELEMENT_TYPE_IMAGE,
+	RDE_UI_ELEMENT_TYPE_TEXT
+} RDE_UI_ELEMENT_TYPE_;
+
+typedef enum {
+	RDE_UI_CONTAINER_STATE_MOUSE_NONE = 1,
+	RDE_UI_CONTAINER_STATE_MOUSE_ENTERED = 2,
+	RDE_UI_CONTAINER_STATE_MOUSE_EXITED = 4,
+	RDE_UI_CONTAINER_STATE_MOUSE_DOWN = 8,
+	RDE_UI_CONTAINER_STATE_MOUSE_UP = 16
+} RDE_UI_CONTAINER_STATE_;
+
+typedef struct {
+	rde_transform* transform;
+	RDE_UI_ELEMENT_TYPE_ type;
+	RDE_UI_STRETCH_ stretch;
+	RDE_UI_ANCHOR_ anchor;
+	bool enabled;
+	
+	union {
+		rde_ui_element_image_data image;
+		rde_ui_element_text_data text;
+	};
+
+} rde_ui_element;
+RDE_FUNC rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type);
+
+struct rde_ui_container {
+	rde_vec_2UI size;
+	rde_transform* transform;
+	rde_ui_element* elements;
+	rde_ui_container* containers;
+	rde_ui_container_callbacks callbacks;
+	bool used;
+	RDE_UI_STRETCH_ stretch;
+	RDE_UI_ANCHOR_ anchor;
+	RDE_UI_CONTAINER_STATE_ event_state;
+};
+RDE_FUNC rde_ui_container rde_struct_create_ui_container();
+
 // =================================================================== AUDIO ===================================================================
 
 #ifdef RDE_AUDIO_MODULE
@@ -3733,6 +3826,8 @@ RDE_SAFE_ARR_SET(size_t)
 RDE_SAFE_ARR_SET(short)
 RDE_SAFE_ARR_SET(float)
 RDE_SAFE_ARR_SET(double)
+
+RDE_FUNC bool rde_util_is_point_2d_in_rect(rde_vec_2F _point, rde_transform* _transform, rde_vec_2F _size);
 
 // Function: rde_util_file_get_file_extension
 // Gets the extension of a file given a file path.
@@ -4530,6 +4625,8 @@ RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _fin
 //	_window - window to check the event.
 RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
 
+RDE_FUNC void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container);
+
 // =================================================================== RENDERING ===================================================================
 
 // Function: rde_rendering_shader_load
@@ -4876,6 +4973,8 @@ RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transfo
 //	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader);
 
+RDE_FUNC void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde_texture* _texture, rde_ui_nine_slice _nine_slice, rde_color _tint_color, rde_shader* _shader);
+
 // Function: rde_rendering_2d_end_drawing
 // Ends a drawing batch. A previous <rde_rendering_2d_begin_drawing> is mandatory to use this function. Flushes everything into the GPU.
 RDE_FUNC void rde_rendering_2d_end_drawing(void);
@@ -5112,6 +5211,14 @@ RDE_FUNC void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _came
 // Function: rde_rendering_shadows_end
 // Works like <rde_rendering_3d_end_drawing> but it renders shadows of everything inside.
 RDE_FUNC void rde_rendering_shadows_end(void);
+
+RDE_FUNC rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size);
+RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data);
+RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data);
+RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data);
+RDE_FUNC rde_ui_container* rde_ui_add_button_default(rde_ui_container* _container, rde_vec_2UI _size, char* _text);
+RDE_FUNC void rde_rendering_draw_ui(rde_ui_container* _container);
+RDE_FUNC void rde_ui_container_unload_root(rde_ui_container* _container);
 
 // =================================================================== AUDIO ===================================================================
 
