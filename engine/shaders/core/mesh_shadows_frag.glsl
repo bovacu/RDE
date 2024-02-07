@@ -76,16 +76,14 @@ uniform sampler2D shadow_map;
 
 vec3 directional_light_calc(float _shadow) {
 	vec3 _final_light = vec3(0, 0, 0);
-	vec3 _light_dir = normalize(directional_light.position - fs_in.frag_pos);
-	vec3 _norm = normalize(fs_in.normal);
+	vec3 _norm = normalize(normal);
 	vec3 _diffuse = vec3(0, 0, 0);
 	vec3 _specular = vec3(0, 0, 0);
 	vec3 _ambient = vec3(0, 0, 0);
 
 	if(material.Ka != vec3(0, 0, 0)) {
-		vec3 _ambient = material.Ka * directional_light.ambient_color * texture(tex_kd, text_coord).rgb;
+		_ambient = directional_light.ambient_color * texture(tex_kd, text_coord).rgb;
 	}
-
 
 	if(material.Kd != vec3(0, 0, 0)) {
 		float _diff = dot(normalize(normal), normalize(-directional_light.direction));
@@ -94,10 +92,9 @@ vec3 directional_light_calc(float _shadow) {
 
 	if(material.Ks != vec3(0, 0, 0)) {
 		vec3 _view_dir = normalize(camera_pos + frag_pos);
-		vec3 _reflect_dir = reflect(-_light_dir, _norm);
+		vec3 _reflect_dir = reflect(normalize(directional_light.direction), _norm);
 		float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);
-// 		_specular = material.Ks * directional_light.specular_color * _spec * texture(tex_ks, text_coord).rgb;
-		_specular = vec3(0);
+		_specular = material.Ks * directional_light.specular_color * _spec * texture(tex_ks, text_coord).rgb;
 	}
 
 	_final_light = _ambient + (1.0 - _shadow) * (_diffuse + _specular);
@@ -117,8 +114,8 @@ float ShadowCalculation(vec4 frag_pos_light_space) {
     float _closest_depth = texture(shadow_map, _proj_coords.xy).r;
     float _current_depth = _proj_coords.z;
 
-	vec3 _light_dir = normalize(directional_light.direction - fs_in.frag_pos);
-	vec3 _norm = normalize(fs_in.normal);
+	vec3 _light_dir = normalize(directional_light.direction - frag_pos);
+	vec3 _norm = normalize(normal);
 	float _bias = mix(0.0005, 0.0, dot(_norm, -_light_dir));
 
     float _shadow = 0.0;
