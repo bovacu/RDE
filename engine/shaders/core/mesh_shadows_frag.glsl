@@ -88,7 +88,7 @@ vec3 directional_light_calc(float _shadow) {
 
 
 	if(material.Kd != vec3(0, 0, 0)) {
-		float _diff = max(dot(_light_dir, _norm), 0.0);
+		float _diff = dot(normalize(normal), normalize(-directional_light.direction));
 		_diffuse = material.Kd * directional_light.diffuse_color * _diff * texture(tex_kd, text_coord).rgb;
 	}
 
@@ -96,7 +96,8 @@ vec3 directional_light_calc(float _shadow) {
 		vec3 _view_dir = normalize(camera_pos + frag_pos);
 		vec3 _reflect_dir = reflect(-_light_dir, _norm);
 		float _spec = pow(max(dot(_view_dir, _reflect_dir), 0.0), material.shininess);
-		_specular = material.Ks * directional_light.specular_color * _spec * texture(tex_ks, text_coord).rgb;
+// 		_specular = material.Ks * directional_light.specular_color * _spec * texture(tex_ks, text_coord).rgb;
+		_specular = vec3(0);
 	}
 
 	_final_light = _ambient + (1.0 - _shadow) * (_diffuse + _specular);
