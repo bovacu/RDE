@@ -219,6 +219,10 @@ extern "C" {
 // Name for the textures, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'texture_shader'.
 #define RDE_SHADER_TEXTURE "texture_shader"
 
+// Constant: RDE_SHADER_NINE_PATCH
+// Name for the nine patches, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'nine_patch_shader'.
+#define RDE_SHADER_NINE_PATCH "nine_patch_shader"
+
 // Constant: RDE_SHADER_TEXT
 // Name for the text, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'text_shader'.
 #define RDE_SHADER_TEXT "text_shader"

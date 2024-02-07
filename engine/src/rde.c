@@ -408,6 +408,9 @@ RDE_IMPLEMENT_SAFE_ARR_ACCESS(fastObjIndex)
 #define RDE_FBX_EXTENSION "fbx"
 #define RDE_GLTF_EXTENSION "gltf"
 
+#define RDE_MAX_CONTAINERS 500
+#define RDE_NINE_SLICE_MAX 10000.f
+
 /// Event
 #define RDE_WIN_EVENT_INIT (RDE_EVENT_TYPE_WINDOW_BEGIN + 1)
 #define RDE_WIN_EVENT_COUNT (RDE_EVENT_TYPE_WINDOW_END - RDE_EVENT_TYPE_WINDOW_BEGIN)
@@ -591,6 +594,9 @@ typedef struct {
 	rde_vec_3F position;
 	int color;
 	rde_vec_2F texture_coordinates;
+	rde_vec_2F size;
+	rde_vec_4F nine_slice;
+	rde_vec_4F sub_texture_uvs;
 } rde_vertex_2d;
 	
 typedef struct {
@@ -601,7 +607,6 @@ typedef struct {
 	GLuint vertex_buffer_object;
 	GLuint index_buffer_object;
 	GLuint vertex_array_object;
-	mat4 mvp;
 	bool is_hud;
 } rde_batch_2d;
 	
@@ -871,6 +876,7 @@ struct rde_engine {
 	rde_shader* line_shader;
 	rde_shader* color_shader_2d;
 	rde_shader* texture_shader_2d;
+	rde_shader* nine_patch_shader_2d;
 	rde_shader* text_shader_2d;
 	rde_shader* framebuffer_shader;
 	rde_shader* mesh_shader;
@@ -892,6 +898,9 @@ size_t total_amount_of_textures;
 	rde_skybox skybox;
 	rde_antialiasing antialiasing;
 	rde_shadows shadows;
+
+	rde_ui_container ui_containers[RDE_MAX_CONTAINERS];
+	int last_ui_container_used;
 	
 #ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
@@ -1254,7 +1263,6 @@ rde_batch_2d rde_struct_create_2d_batch(void) {
 	_b.vertex_buffer_object = 0;
 	_b.vertex_array_object = 0;
 	_b.index_buffer_object = 0;
-	glm_mat4_copy(GLM_MAT4_IDENTITY, _b.mvp);
 	_b.is_hud = false;
 	return _b;
 }
@@ -1355,6 +1363,82 @@ rde_obj_mesh_data rde_inner_struct_create_obj_mesh_data(void) {
 }
 #endif
 
+rde_ui_nine_slice rde_struct_create_ui_nine_slice() {
+	rde_ui_nine_slice _n;
+	_n.left_right = (rde_vec_2UI) { 0, 0 };
+	_n.bottom_top = (rde_vec_2UI) { 0, 0 };
+	_n.size = (rde_vec_2UI) { 0, 0 };
+	return _n;
+}
+
+rde_ui_element_image_data rde_struct_create_ui_element_image_data() {
+	rde_ui_element_image_data _i;
+	_i.nine_slice = rde_struct_create_ui_nine_slice();
+	_i.texture = NULL;
+	_i.size = (rde_vec_2UI) { 0, 0 };
+	return _i;
+}
+
+rde_ui_element_text_data rde_struct_create_ui_element_text_data() {
+	rde_ui_element_text_data _t;
+	_t.font = NULL;
+	_t.text = NULL;
+	_t.font_size = 36;
+	return _t;
+}
+
+rde_ui_button_data rde_struct_create_ui_container_button_data() {
+	rde_ui_button_data _b;
+	_b.image_idle = rde_struct_create_ui_element_image_data();
+	_b.image_pressed = rde_struct_create_ui_element_image_data();
+	_b.image_selected = rde_struct_create_ui_element_image_data();
+	_b.text = rde_struct_create_ui_element_text_data();
+	return _b;
+}
+
+rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
+	rde_ui_element _e;
+	_e.transform = NULL;
+	_e.type = _type;
+	_e.enabled = true;
+	switch(_type) {
+		case RDE_UI_ELEMENT_TYPE_TEXT: {
+			_e.text = rde_struct_create_ui_element_text_data();
+		} break;
+
+		case RDE_UI_ELEMENT_TYPE_IMAGE: {
+			_e.image = rde_struct_create_ui_element_image_data();
+		} break;
+	}
+	_e.stretch = RDE_UI_STRETCH_NO_STRETCH;
+	_e.anchor = RDE_UI_ANCHOR_MIDDLE;
+	return _e;
+}
+
+rde_ui_container_callbacks rde_struct_create_ui_container_callbacks() {
+	rde_ui_container_callbacks _c;
+	_c.on_button_down = NULL;
+	_c.on_button_up = NULL;
+	_c.on_scroll = NULL;
+	_c.on_mouse_enter = NULL;
+	_c.on_mouse_exit = NULL;
+	return _c;
+}
+
+rde_ui_container rde_struct_create_ui_container() {
+	rde_ui_container _c;
+	_c.size = (rde_vec_2UI) { 0, 0 };
+	_c.transform = NULL;
+	_c.elements = NULL;
+	_c.containers = NULL;
+	_c.callbacks = rde_struct_create_ui_container_callbacks();
+	_c.used = false;
+	_c.stretch = RDE_UI_STRETCH_NO_STRETCH;
+	_c.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_c.event_state = RDE_UI_CONTAINER_STATE_MOUSE_NONE;
+	return _c;
+}
+
 #ifdef RDE_AUDIO_MODULE
 rde_sound rde_struct_create_sound(void) {
 	rde_sound _s;
@@ -1446,6 +1530,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	_e.line_shader = NULL;
 	_e.color_shader_2d = NULL;
 	_e.texture_shader_2d = NULL;
+	_e.nine_patch_shader_2d = NULL;
 	_e.text_shader_2d = NULL;
 	_e.framebuffer_shader = NULL;
 	_e.mesh_shader = NULL;
@@ -1510,6 +1595,11 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 			_e.models[_i] = rde_struct_create_model();
 		}
 	}
+
+	for(size_t _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
+		_e.ui_containers[_i] = rde_struct_create_ui_container();
+	}
+	_e.last_ui_container_used = -1;
 
 #ifdef RDE_AUDIO_MODULE
 	_e.sounds = NULL;
@@ -1742,6 +1832,8 @@ void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _
 void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event);
+void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled);
+void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled);
 void rde_inner_events_sync_events(rde_window* _window);
 
 /// ******************************************* AUDIO *********************************************
@@ -1749,6 +1841,14 @@ void rde_inner_events_sync_events(rde_window* _window);
 #ifdef RDE_MODULE_AUDIO
 void data_callback(ma_device* _device, void* _output, const void* _input, ma_uint32 _frame_count);
 #endif
+
+/// ******************************************* UI ************************************************
+
+void rde_inner_ui_default_button_callback_on_enter(rde_ui_container* _container);
+void rde_inner_ui_default_button_callback_on_exit(rde_ui_container* _container);
+void rde_inner_ui_default_button_callback_on_button_down(rde_ui_container* _container, int _button);
+void rde_inner_ui_default_button_callback_on_button_up(rde_ui_container* _container, int _button);
+
 
 /// ******************************************* MOBILE *********************************************
 
@@ -3510,6 +3610,12 @@ void rde_log_level_inner(RDE_LOG_LEVEL_ _level, const char* _fmt, ...) {
 #endif
 }
 
+bool rde_util_is_point_2d_in_rect(rde_vec_2F _point, rde_transform* _transform, rde_vec_2F _size) {
+	rde_vec_3F _position = _transform->position;
+	return _point.x >= _position.x - _size.x * 0.5f && _point.x <= _position.x + _size.x * 0.5f &&
+ 		  _point.y >= _position.y - _size.y * 0.5f && _point.y <= _position.y + _size.y * 0.5f;
+}
+
 
 
 
@@ -4371,11 +4477,12 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 	rde_calloc_init(_vertex_shader_substituted, char, SHADER_LOADING_BUFFER_SIZE);
 	rde_calloc_init(_fragment_shader_substituted, char, SHADER_LOADING_BUFFER_SIZE);
 
-	#define SHADERS_2D_COUNT 5
+	#define SHADERS_2D_COUNT 6
 	char* _2d_shaders_vert[SHADERS_2D_COUNT] = {
 		"shaders/"SHADER_TYPE"/line_vert.glsl",
 		"shaders/"SHADER_TYPE"/color_vert.glsl",
 		"shaders/"SHADER_TYPE"/texture_vert.glsl",
+		"shaders/"SHADER_TYPE"/nine_patch_vert.glsl",
 		"shaders/"SHADER_TYPE"/text_vert.glsl",
 		"shaders/"SHADER_TYPE"/framebuffer_vert.glsl"
 	};
@@ -4384,6 +4491,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		"shaders/"SHADER_TYPE"/line_frag.glsl",
 		"shaders/"SHADER_TYPE"/color_frag.glsl",
 		"shaders/"SHADER_TYPE"/texture_frag.glsl",
+		"shaders/"SHADER_TYPE"/nine_patch_frag.glsl",
 		"shaders/"SHADER_TYPE"/text_frag.glsl",
 		"shaders/"SHADER_TYPE"/framebuffer_frag.glsl"
 	};
@@ -4397,6 +4505,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_LINE, 			.shader = &ENGINE.line_shader },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_COLOR, 		.shader = &ENGINE.color_shader_2d },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_TEXTURE, 		.shader = &ENGINE.texture_shader_2d },
+		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_NINE_PATCH, 	.shader = &ENGINE.nine_patch_shader_2d },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_TEXT, 			.shader = &ENGINE.text_shader_2d },
 		(rde_shader_ptr__name_pair) { .name = RDE_SHADER_FRAMEBUFFER, 	.shader = &ENGINE.framebuffer_shader }
 	};
@@ -4665,50 +4774,66 @@ void rde_inner_rendering_end_2d(void) {
 }
 
 void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat) {
+	RDE_UNUSED(_transform)
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
-	float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
+	// float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 	rde_vec_2F _screen_pos;
-	
+
 	if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
-		_screen_pos.x = _transform->position.x;
-		_screen_pos.y = _transform->position.y / _aspect_ratio;
+		_screen_pos.x = _mat[3][0];
+		_screen_pos.y = _mat[3][1];
 		rde_math_convert_world_position_to_screen_coordinates_2d(current_drawing_window, &_screen_pos);
 	} else {
 		bool _is_hud = current_batch_2d.is_hud;
-		_screen_pos.x = _transform->position.x - (_is_hud ? 0.f : current_drawing_camera->transform->position.x);
-		_screen_pos.y = _transform->position.y - (_is_hud ? 0.f : current_drawing_camera->transform->position.y);
+		_screen_pos.x = _mat[3][0] - (_is_hud ? 0.f : current_drawing_camera->transform->position.x);
+		_screen_pos.y = _mat[3][1] - (_is_hud ? 0.f : current_drawing_camera->transform->position.y);
+
+		_screen_pos.x /= (float)_window_size.x * 0.5f;
+		_screen_pos.y /= (float)_window_size.y * 0.5f;
 	}
 
-	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
+	// mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
 
-	glm_translate(_transformation_matrix, (vec3) { _screen_pos.x, _screen_pos.y, 0.f });
-	glm_rotate(_transformation_matrix, glm_rad(_transform->rotation.z), (vec3){ 0.0f, 0.0f, 1.0f });
-	
-	if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
-		glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / _aspect_ratio, _transform->scale.z });
-	} else {
-		glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y, _transform->scale.z });
-	}
+	_mat[3][0] = _screen_pos.x;
+	_mat[3][1] = _screen_pos.y;
+	_mat[3][2] = 0;
+	// glm_translate(_transformation_matrix, (vec3) { _screen_pos.x, _screen_pos.y, 0.f });
+	// glm_rotate(_transformation_matrix, glm_rad(_transform->rotation.z), (vec3){ 0.0f, 0.0f, 1.0f });
 
-	glm_mat4_copy(_transformation_matrix, _mat);
+	// if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
+	// 	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / _aspect_ratio, _transform->scale.z });
+	// } else {
+	// 	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y, _transform->scale.z });
+	// }
+
+	// glm_mat4_copy(_transformation_matrix, _mat);
 }
 
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
 	RDE_CHECK_GL(glGenVertexArrays, 1, &_batch->vertex_array_object);
 	RDE_CHECK_GL(glBindVertexArray, _batch->vertex_array_object);
-	
+
 	RDE_CHECK_GL(glGenBuffers, 1, &_batch->vertex_buffer_object);
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, _batch->vertex_buffer_object);
 	RDE_CHECK_GL(glBufferData, GL_ARRAY_BUFFER, sizeof(rde_vertex_2d) * ENGINE.init_info.heap_allocs_config.max_amount_of_vertices_per_batch, NULL, GL_DYNAMIC_DRAW);
 
 	RDE_CHECK_GL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)0);
 	RDE_CHECK_GL(glEnableVertexAttribArray, 0);
-	
+
 	RDE_CHECK_GL(glVertexAttribPointer, 1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3));
 	RDE_CHECK_GL(glEnableVertexAttribArray, 1);
-	
+
 	RDE_CHECK_GL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4));
 	RDE_CHECK_GL(glEnableVertexAttribArray, 2);
+
+	RDE_CHECK_GL(glVertexAttribPointer, 3, 2, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4 + sizeof(float) * 2));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 3);
+
+	RDE_CHECK_GL(glVertexAttribPointer, 4, 4, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4 + sizeof(float) * 2 + sizeof(float) * 2));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 4);
+
+	RDE_CHECK_GL(glVertexAttribPointer, 5, 4, GL_FLOAT, GL_FALSE, sizeof(rde_vertex_2d), (const void*)(sizeof(float) * 3 + sizeof(unsigned char) * 4 + sizeof(float) * 2 + sizeof(float) * 2 + sizeof(float) * 4));
+	RDE_CHECK_GL(glEnableVertexAttribArray, 5);
 
 	RDE_CHECK_GL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 	RDE_CHECK_GL(glBindVertexArray, 0);
@@ -4740,10 +4865,11 @@ void rde_inner_rendering_flush_batch_2d(void) {
 
 	RDE_CHECK_GL(glUseProgram, current_batch_2d.shader->compiled_program_id);
 
-	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)current_batch_2d.mvp);
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "dt"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(current_batch_2d.shader->compiled_program_id, "texture_size"), current_batch_2d.texture.size.x, current_batch_2d.texture.size.y);
 	RDE_CHECK_GL(glBindVertexArray, current_batch_2d.vertex_array_object);
 
 	if(current_batch_2d.texture.opengl_texture_id >= 0) {
@@ -5736,7 +5862,7 @@ void rde_inner_rendering_flush_line_batch(void) {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "dt"), ENGINE.delta_time);
 	
 	RDE_CHECK_GL(glBindVertexArray, current_batch_3d.line_batch.vertex_array_object);
 	
@@ -5819,7 +5945,7 @@ void rde_inner_rendering_flush_batch_3d(void) {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "light_space_matrix"), 1, GL_FALSE, (const void*)ENGINE.shadows.light_space_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(_shader->compiled_program_id, "dt"), ENGINE.delta_time);
 
 	rde_vec_3F _camera_pos = current_drawing_camera->transform->position;
 	RDE_CHECK_GL(glUniform3f, glGetUniformLocation(_shader->compiled_program_id, "camera_pos"), _camera_pos.x, _camera_pos.y, _camera_pos.z);
@@ -7116,7 +7242,7 @@ void rde_rendering_2d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 	}
 
 	glm_mat4_inv(_view_matrix, _view_matrix_inv);
-	glm_mat4_mul(projection_matrix, _view_matrix_inv, current_batch_2d.mvp);
+	glm_mat4_mul(projection_matrix, _view_matrix_inv, projection_matrix);
 }
 
 void rde_rendering_2d_draw_point(rde_vec_2F _position, rde_color _color, rde_shader* _shader) {
@@ -7315,18 +7441,27 @@ void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_te
 	_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
 	_vertex_0_0.color = _color;
 	_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+	_vertex_0_0.size = _texture_tile_size;
+	_vertex_0_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+	_vertex_0_0.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
 	rde_vertex_2d _vertex_0_1;
 	_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 	_vertex_0_1.color = _color;
 	_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_0_1.size = _texture_tile_size;
+	_vertex_0_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+	_vertex_0_1.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
 	rde_vertex_2d _vertex_0_2;
 	_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 	_vertex_0_2.color = _color;
 	_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_0_2.size = _texture_tile_size;
+	_vertex_0_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+	_vertex_0_2.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 	// 2   1
@@ -7340,18 +7475,184 @@ void rde_rendering_2d_draw_texture(const rde_transform* _transform, const rde_te
 	_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 	_vertex_1_0.color = _color;
 	_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_1_0.size = _texture_tile_size;
+	_vertex_1_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+	_vertex_1_0.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
 	rde_vertex_2d _vertex_1_1;
 	_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
 	_vertex_1_1.color = _color;
 	_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+	_vertex_1_1.size = _texture_tile_size;
+	_vertex_1_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+	_vertex_1_1.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
 	rde_vertex_2d _vertex_1_2;
 	_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 	_vertex_1_2.color = _color;
 	_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_1_2.size = _texture_tile_size;
+	_vertex_1_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+	_vertex_1_2.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
+}
+
+void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde_texture* _texture, rde_ui_nine_slice _nine_slice, rde_color _tint_color, rde_shader* _shader) {
+	rde_critical_error(_texture == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_rendering_2d_draw_nine_slice -> texture");
+	const size_t _triangle_vertex_count = 6;
+
+	mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
+	glm_mat4_copy(ENGINE.world_transforms[_transform->index], _transformation_matrix);
+	rde_inner_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
+
+	rde_vec_2F _nine_slice_scaling = (rde_vec_2F) { rde_math_clamp_float(_nine_slice.size.x / (float)_texture->size.x, 1.f, RDE_NINE_SLICE_MAX),
+										rde_math_clamp_float(_nine_slice.size.y / (float)_texture->size.y, 1.f, RDE_NINE_SLICE_MAX)};
+	rde_vec_4F _nine_slice_paddings = (rde_vec_4F) {
+		_nine_slice.left_right.x,
+		_nine_slice.left_right.y,
+		_nine_slice.bottom_top.x,
+		_nine_slice.bottom_top.y
+	};
+
+	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.nine_patch_shader_2d : _shader;
+	rde_inner_rendering_try_create_batch_2d(_drawing_shader, _texture);
+	rde_inner_rendering_try_flush_batch_2d(_drawing_shader, _texture, _triangle_vertex_count);
+
+	rde_vec_2F _texture_origin_norm = (rde_vec_2F){ 0.f, 0.f };
+	rde_vec_2F _texture_tile_size_norm = (rde_vec_2F){ 1.f, 1.f };
+	rde_vec_2F _texture_tile_size = (rde_vec_2F){ (float)_texture->size.x, (float)_texture->size.y };
+
+	if(_texture->atlas_texture != NULL) {
+		_texture_origin_norm.x = _texture->position.x / (float)_texture->atlas_texture->size.x;
+		_texture_origin_norm.y = _texture->position.y / (float)_texture->atlas_texture->size.y;
+
+		_texture_tile_size_norm.x = _texture_tile_size.x / (float)_texture->atlas_texture->size.x;
+		_texture_tile_size_norm.y = _texture_tile_size.y / (float)_texture->atlas_texture->size.y;
+	}
+
+	rde_vec_2F _texture_tile_size_on_screen = _texture_tile_size;
+	rde_math_convert_world_size_to_screen_size(current_drawing_window, &_texture_tile_size_on_screen);
+
+	vec4 _bottom_left_texture_position = GLM_VEC4_ONE_INIT;
+	vec4 _bottom_right_texture_position = GLM_VEC4_ONE_INIT;
+	vec4 _top_right_texture_position = GLM_VEC4_ONE_INIT;
+	vec4 _top_left_texture_position = GLM_VEC4_ONE_INIT;
+
+	glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x * _nine_slice_scaling.x, -_texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _bottom_left_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x * _nine_slice_scaling.x, -_texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _bottom_right_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { _texture_tile_size_on_screen.x * _nine_slice_scaling.x,  _texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _top_right_texture_position);
+	glm_mat4_mulv(_transformation_matrix, (vec4) { -_texture_tile_size_on_screen.x * _nine_slice_scaling.x,  _texture_tile_size_on_screen.y * _nine_slice_scaling.y, 0.0f, 1.0f }, _top_left_texture_position);
+
+	// The (1.f - _texture_origin_norm.y) is needed as we need to invert the coordinates on the Y axis, the exported atlas (by RDE tool) assumes (0, 0)
+	// on top-left, but OpenGL coords for UV origin is bottom-left.
+	vec2 _top_left_texture_uv_coord   	 = (vec2){ _texture_origin_norm.x, 1.f - _texture_origin_norm.y };
+	vec2 _top_right_texture_uv_coord  	 = (vec2){ _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - _texture_origin_norm.y };
+	vec2 _bottom_right_texture_uv_coord  = (vec2){ _texture_origin_norm.x + _texture_tile_size_norm.x, 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
+	vec2 _bottom_left_texture_uv_coord   = (vec2){ _texture_origin_norm.x, 1.f - (_texture_origin_norm.y + _texture_tile_size_norm.y) };
+
+	int _color = RDE_COLOR_TO_HEX_COLOR(_tint_color);
+	// * 2
+	// |\
+	// | \
+	// *--*
+	// 0   1
+	rde_vertex_2d _vertex_0_0;
+	_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
+	_vertex_0_0.color = _color;
+	_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+	_vertex_0_0.size = (rde_vec_2F) { rde_math_clamp_float((float)_nine_slice.size.x, _texture->size.x, RDE_NINE_SLICE_MAX),
+									  rde_math_clamp_float((float)_nine_slice.size.y, _texture->size.y, RDE_NINE_SLICE_MAX) };
+	_vertex_0_0.nine_slice = _nine_slice_paddings;
+	_vertex_0_0.sub_texture_uvs = (rde_vec_4F) {
+		_bottom_left_texture_uv_coord[0],
+		_bottom_left_texture_uv_coord[1],
+		_top_right_texture_uv_coord[0],
+		_top_right_texture_uv_coord[1],
+	};
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
+
+	rde_vertex_2d _vertex_0_1;
+	_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
+	_vertex_0_1.color = _color;
+	_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_0_1.size = (rde_vec_2F) { rde_math_clamp_float((float)_nine_slice.size.x, _texture->size.x, 10000.f),
+									  rde_math_clamp_float((float)_nine_slice.size.y, _texture->size.y, 10000.f) };
+	_vertex_0_1.nine_slice = _nine_slice_paddings;
+	_vertex_0_1.sub_texture_uvs = (rde_vec_4F) {
+		_bottom_left_texture_uv_coord[0],
+		_bottom_left_texture_uv_coord[1],
+		_top_right_texture_uv_coord[0],
+		_top_right_texture_uv_coord[1],
+	};
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
+
+	rde_vertex_2d _vertex_0_2;
+	_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
+	_vertex_0_2.color = _color;
+	_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_0_2.size = (rde_vec_2F) { rde_math_clamp_float((float)_nine_slice.size.x, _texture->size.x, 10000.f),
+									  rde_math_clamp_float((float)_nine_slice.size.y, _texture->size.y, 10000.f) };
+	_vertex_0_2.nine_slice = _nine_slice_paddings;
+	_vertex_0_2.sub_texture_uvs = (rde_vec_4F) {
+			_bottom_left_texture_uv_coord[0],
+			_bottom_left_texture_uv_coord[1],
+			_top_right_texture_uv_coord[0],
+			_top_right_texture_uv_coord[1],
+		};
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
+
+	// 2   1
+	// *--*
+	//  \ |
+	//   \|
+	//    *
+	//    0
+
+	rde_vertex_2d _vertex_1_0;
+	_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
+	_vertex_1_0.color = _color;
+	_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+	_vertex_1_0.size = (rde_vec_2F) { rde_math_clamp_float((float)_nine_slice.size.x, _texture->size.x, 10000.f),
+									  rde_math_clamp_float((float)_nine_slice.size.y, _texture->size.y, 10000.f) };
+	_vertex_1_0.nine_slice = _nine_slice_paddings;
+	_vertex_1_0.sub_texture_uvs = (rde_vec_4F) {
+		_bottom_left_texture_uv_coord[0],
+		_bottom_left_texture_uv_coord[1],
+		_top_right_texture_uv_coord[0],
+		_top_right_texture_uv_coord[1],
+	};
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
+
+	rde_vertex_2d _vertex_1_1;
+	_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
+	_vertex_1_1.color = _color;
+	_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+	_vertex_1_1.size = (rde_vec_2F) { rde_math_clamp_float((float)_nine_slice.size.x, _texture->size.x, 10000.f),
+									  rde_math_clamp_float((float)_nine_slice.size.y, _texture->size.y, 10000.f) };
+	_vertex_1_1.nine_slice = _nine_slice_paddings;
+	_vertex_1_1.sub_texture_uvs = (rde_vec_4F) {
+		_bottom_left_texture_uv_coord[0],
+		_bottom_left_texture_uv_coord[1],
+		_top_right_texture_uv_coord[0],
+		_top_right_texture_uv_coord[1],
+	};
+	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
+
+	rde_vertex_2d _vertex_1_2;
+	_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
+	_vertex_1_2.color = _color;
+	_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+	_vertex_1_2.size = (rde_vec_2F) { rde_math_clamp_float((float)_nine_slice.size.x, _texture->size.x, 10000.f),
+									  rde_math_clamp_float((float)_nine_slice.size.y, _texture->size.y, 10000.f) };
+	_vertex_1_2.nine_slice = _nine_slice_paddings;
+	_vertex_1_2.sub_texture_uvs = (rde_vec_4F) {
+		_bottom_left_texture_uv_coord[0],
+		_bottom_left_texture_uv_coord[1],
+		_top_right_texture_uv_coord[0],
+		_top_right_texture_uv_coord[1],
+	};
 	current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 }
 
@@ -7367,18 +7668,21 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 	rde_shader* _drawing_shader = _shader == NULL ? ENGINE.text_shader_2d : _shader;
 
 	int _next_pos_x = 0;
+	rde_vec_2I _offset = rde_util_font_get_string_size(_text, _font);
 	for (int _i = 0; _i < _text_size; _i++) {
 		rde_transform _t = *_transform;
 		int _key = (int)_text[_i];
 		rde_font_char_info _char_info = {0};
 		rde_arr_get_element(&_font->chars, _key, _char_info);
-		_t.position.x += _next_pos_x + _char_info.bearing.x * _t.scale.x;
-		_t.position.y -= (_char_info.size.y * 0.5f - _char_info.bearing.y) * _t.scale.y;
+		_t.position.x += (_next_pos_x + _char_info.bearing.x * 0.5f - _offset.x * 0.5f) * _t.scale.x;
+		_t.position.y -= (_char_info.size.y * 0.5f - _char_info.bearing.y + _offset.y * 0.25f) * _t.scale.y;
 
 		const size_t _triangle_vertex_count = 6;
 
 		mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
-		rde_inner_rendering_transform_to_glm_mat4_2d(&_t, _transformation_matrix);
+		glm_mat4_copy(ENGINE.world_transforms[_transform->index], _transformation_matrix);
+		glm_translate(_transformation_matrix, (vec4) { _t.position.x, _t.position.y, 0, 0 });
+		rde_inner_rendering_transform_to_glm_mat4_2d(_transform, _transformation_matrix);
 
 		rde_inner_rendering_try_create_batch_2d(_drawing_shader, _char_info.texture.atlas_texture);
 		rde_inner_rendering_try_flush_batch_2d(_drawing_shader, _char_info.texture.atlas_texture, _triangle_vertex_count);
@@ -7390,7 +7694,7 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 		if(_char_info.texture.atlas_texture != NULL) {
 			_texture_origin_norm.x = _char_info.offset.x / (float)_char_info.texture.atlas_texture->size.x;
 			_texture_origin_norm.y = _char_info.offset.y / (float)_char_info.texture.atlas_texture->size.y;
-	
+
 			_texture_tile_size_norm.x = _char_info.size.x / (float)_char_info.texture.atlas_texture->size.x;
 			_texture_tile_size_norm.y = _char_info.size.y / (float)_char_info.texture.atlas_texture->size.y;
 		}
@@ -7429,18 +7733,27 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 		_vertex_0_0.position = (rde_vec_3F){ _bottom_left_texture_position[0], _bottom_left_texture_position[1], 0.f };
 		_vertex_0_0.color = _color;
 		_vertex_0_0.texture_coordinates = (rde_vec_2F){ _bottom_left_texture_uv_coord[0], _bottom_left_texture_uv_coord[1] };
+		_vertex_0_0.size = _texture_tile_size;
+		_vertex_0_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+		_vertex_0_0.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_0;
 
 		rde_vertex_2d _vertex_0_1;
 		_vertex_0_1.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 		_vertex_0_1.color = _color;
 		_vertex_0_1.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+		_vertex_0_1.size = _texture_tile_size;
+		_vertex_0_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+		_vertex_0_1.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_1;
 
 		rde_vertex_2d _vertex_0_2;
 		_vertex_0_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 		_vertex_0_2.color = _color;
 		_vertex_0_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+		_vertex_0_2.size = _texture_tile_size;
+		_vertex_0_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+		_vertex_0_2.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_0_2;
 
 		// 2   1
@@ -7454,18 +7767,27 @@ void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font*
 		_vertex_1_0.position = (rde_vec_3F){ _bottom_right_texture_position[0], _bottom_right_texture_position[1], 0.f };
 		_vertex_1_0.color = _color;
 		_vertex_1_0.texture_coordinates = (rde_vec_2F){ _bottom_right_texture_uv_coord[0], _bottom_right_texture_uv_coord[1] };
+		_vertex_1_0.size = _texture_tile_size;
+		_vertex_1_0.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+		_vertex_1_0.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_0;
 
 		rde_vertex_2d _vertex_1_1;
 		_vertex_1_1.position = (rde_vec_3F){ _top_right_texture_position[0], _top_right_texture_position[1], 0.f };
 		_vertex_1_1.color = _color;
 		_vertex_1_1.texture_coordinates = (rde_vec_2F){ _top_right_texture_uv_coord[0], _top_right_texture_uv_coord[1] };
+		_vertex_1_1.size = _texture_tile_size;
+		_vertex_1_1.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+		_vertex_1_1.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_1;
 
 		rde_vertex_2d _vertex_1_2;
 		_vertex_1_2.position = (rde_vec_3F){ _top_left_texture_position[0], _top_left_texture_position[1], 0.f };
 		_vertex_1_2.color = _color;
 		_vertex_1_2.texture_coordinates = (rde_vec_2F){ _top_left_texture_uv_coord[0], _top_left_texture_uv_coord[1] };
+		_vertex_1_2.size = _texture_tile_size;
+		_vertex_1_2.nine_slice = (rde_vec_4F) { 0, 0, 0, 0 };
+		_vertex_1_2.sub_texture_uvs = (rde_vec_4F) { 0, 0, 1, 1 };
 		current_batch_2d.vertices[current_batch_2d.amount_of_vertices++] = _vertex_1_2;
 
 		_next_pos_x += (_char_info.advance.x >> 6) * _t.scale.x; // /64.f
@@ -7995,7 +8317,7 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
 	rde_vec_2I _mouse_pos = current_drawing_window->mouse_position;
 	RDE_CHECK_GL(glUniform2f, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "mouse_position"), _mouse_pos.x, _mouse_pos.y);
-	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "mouse_position"), ENGINE.delta_time);
+	RDE_CHECK_GL(glUniform1f, glGetUniformLocation(ENGINE.skybox_shader->compiled_program_id, "dt"), ENGINE.delta_time);
 
 	RDE_CHECK_GL(glBindVertexArray, ENGINE.skybox.vao);
 	RDE_CHECK_GL(glActiveTexture, GL_TEXTURE0);
@@ -8598,6 +8920,74 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 	return _event;
 }
 
+void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {
+	rde_vec_2I _mouse_pos = rde_events_mouse_get_position(_window);
+
+	if(rde_util_is_point_2d_in_rect((rde_vec_2F) { _mouse_pos.x, _mouse_pos.y }, _container->transform, (rde_vec_2F){ _container->size.x, _container->size.y })) {
+		if(_event->type == RDE_EVENT_TYPE_MOUSE_MOVED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) == 0) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_EXITED;
+			rde_inner_ui_default_button_callback_on_enter(_container);
+			if(_container->callbacks.on_mouse_enter != NULL) {
+				_container->callbacks.on_mouse_enter(_container);
+			}
+			*_handled = true;
+		}
+
+		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_PRESSED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == 0) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
+			rde_inner_ui_default_button_callback_on_button_down(_container, 0);
+			if(_container->callbacks.on_button_down != NULL) {
+				#if (RDE_IS_WINDOWS() || RDE_IS_MAC() || RDE_IS_LINUX() || RDE_IS_WASM()) && !RDE_IS_MOBILE()
+				_container->callbacks.on_button_down(_container, _event->data.mouse_event_data.button);
+				#else
+				_container->callbacks.on_button_down(_event->data.mobile_event_data.finger_id);
+				#endif
+			}
+			*_handled = true;
+		}
+
+		else if(_event->type == RDE_EVENT_TYPE_MOUSE_BUTTON_RELEASED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_DOWN) == RDE_UI_CONTAINER_STATE_MOUSE_DOWN) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_UP;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			rde_inner_ui_default_button_callback_on_button_up(_container, 0);
+			if(_container->callbacks.on_button_up != NULL) {
+				#if (RDE_IS_WINDOWS() || RDE_IS_MAC() || RDE_IS_LINUX() || RDE_IS_WASM()) && !RDE_IS_MOBILE()
+				_container->callbacks.on_button_up(_container, _event->data.mouse_event_data.button);
+				#else
+				_container->callbacks.on_button_up(_event->data.mobile_event_data.finger_id);
+				#endif
+			}
+			*_handled = true;
+		}
+	} else {
+		if(_event->type == RDE_EVENT_TYPE_MOUSE_MOVED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) == RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) {
+			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_EXITED;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
+			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_DOWN;
+			rde_inner_ui_default_button_callback_on_exit(_container);
+			if(_container->callbacks.on_mouse_exit != NULL) {
+				_container->callbacks.on_mouse_exit(_container);
+			}
+			*_handled = true;
+		}
+	}
+}
+
+void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {
+	rde_critical_error(_event == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> event");
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> container");
+
+	for(int _i = stbds_arrlen(_container->containers) - 1; _i >= 0; _i--) {
+		rde_inner_events_ui_poll(_window, _event, &_container->containers[_i], _handled);
+	}
+
+	if(!*_handled) {
+		rde_inner_events_ui_handle_event(_window, _event, _container, _handled);
+	}
+}
 
 // ==============================================================================
 // =							PUBLIC API - EVENTS					 	    =
@@ -8763,7 +9153,7 @@ bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUT
 
 rde_vec_2I rde_events_mouse_get_position(rde_window* _window) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
-	return (rde_vec_2I) { _window->mouse_position.x - _window_size.x * 0.5f, _window->mouse_position.y - _window_size.y * 0.5f };
+	return (rde_vec_2I) { _window->mouse_position.x - _window_size.x * 0.5f, -(_window->mouse_position.y - _window_size.y * 0.5f) };
 }
 
 rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window) {
@@ -8842,7 +9232,12 @@ void rde_inner_events_sync_events(rde_window* _window) {
 	}
 }
 
-
+void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container) {
+	rde_critical_error(_event == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> event");
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> container");
+	bool _handled = false;
+	rde_inner_events_ui_poll(_window, _event, _container, &_handled);
+}
 
 
 #ifdef RDE_AUDIO_MODULE
@@ -8986,6 +9381,224 @@ void rde_audio_end() {
 }
 
 #endif
+
+
+
+// ==============================================================================
+// =							PRIVATE API - UI					 		   =
+// ==============================================================================
+
+void rde_inner_ui_default_button_callback_on_enter(rde_ui_container* _container) {
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[1].image.texture != NULL) {
+		_container->elements[0].enabled = false;
+		_container->elements[2].enabled = false;
+		_container->elements[1].enabled = true;
+	}
+}
+
+void rde_inner_ui_default_button_callback_on_exit(rde_ui_container* _container) {
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[0].image.texture != NULL) {
+		_container->elements[1].enabled = false;
+		_container->elements[2].enabled = false;
+		_container->elements[0].enabled = true;
+	}
+}
+
+void rde_inner_ui_default_button_callback_on_button_down(rde_ui_container* _container, int _button) {
+	RDE_UNUSED(_button);
+
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[2].image.texture != NULL) {
+		_container->elements[0].enabled = false;
+		_container->elements[1].enabled = false;
+		_container->elements[2].enabled = true;
+	}
+}
+
+void rde_inner_ui_default_button_callback_on_button_up(rde_ui_container* _container, int _button) {
+	RDE_UNUSED(_button);
+
+	if(stbds_arrlen(_container->elements) < 3) {
+		return;
+	}
+
+	if(_container->elements[1].image.texture != NULL) {
+		rde_inner_ui_default_button_callback_on_enter(_container);
+	} else {
+		rde_inner_ui_default_button_callback_on_exit(_container);
+	}
+}
+
+
+// ==============================================================================
+// =							PUBLIC API - UI					 			=
+// ==============================================================================
+
+rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size) {
+	rde_ui_container* _container = NULL;
+
+	for(int _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
+		rde_ui_container* _c = &ENGINE.ui_containers[_i];
+		if(!_c->used) {
+			_container = _c;
+			_c->used = true;
+			_c->transform = rde_transform_load();
+			_c->size = _size;
+			if(ENGINE.last_ui_container_used < _i) {
+				ENGINE.last_ui_container_used = _i;
+			}
+			break;
+		}
+	}
+
+	rde_critical_error(_container == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "UI Container");
+	return _container;
+}
+
+rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_add_image -> container");
+	rde_ui_element _element = rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_IMAGE);
+	_element.type = RDE_UI_ELEMENT_TYPE_IMAGE;
+	_element.transform = rde_transform_load();
+	_element.image = _image_data;
+	stbds_arrput(_container->elements, _element);
+	rde_transform_set_parent(_element.transform, _container->transform);
+	return &stbds_arrlast(_container->elements);
+}
+
+rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_add_text -> container");
+	rde_ui_element _element = rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_TEXT);
+	_element.type = RDE_UI_ELEMENT_TYPE_TEXT;
+	_element.transform = rde_transform_load();
+	_element.text = _text_data;
+	stbds_arrput(_container->elements, _element);
+	rde_transform_set_parent(_element.transform, _container->transform);
+	return &stbds_arrlast(_container->elements);
+}
+
+rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_add_button -> container");
+	rde_ui_container _new_container = rde_struct_create_ui_container();
+	_new_container.size = _button_data.size;
+	rde_ui_element* _i_0 = rde_ui_add_image(&_new_container, _button_data.image_idle);
+	rde_ui_element* _i_1 = rde_ui_add_image(&_new_container, _button_data.image_pressed);
+	rde_ui_element* _i_2 = rde_ui_add_image(&_new_container, _button_data.image_selected);
+	rde_ui_element* _t = rde_ui_add_text(&_new_container, _button_data.text);
+	_new_container.transform = rde_transform_load();
+	stbds_arrput(_container->containers, _new_container);
+
+	rde_transform_set_parent(_i_0->transform, _new_container.transform);
+	rde_transform_set_parent(_i_1->transform, _new_container.transform);
+	rde_transform_set_parent(_i_2->transform, _new_container.transform);
+	rde_transform_set_parent(_t->transform, _new_container.transform);
+
+	rde_transform_set_parent(_new_container.transform, _container->transform);
+	return &stbds_arrlast(_container->containers);
+}
+
+rde_ui_container* rde_ui_add_button_default(rde_ui_container* _container, rde_vec_2UI _size, char* _text) {
+	rde_atlas* _atlas = rde_rendering_atlas_load("default_assets/ui/ui");
+	rde_vec_2UI _size_u = (rde_vec_2UI) { _size.x, _size.y };
+
+	rde_ui_element_image_data _idle_image = rde_struct_create_ui_element_image_data();
+	_idle_image.texture = rde_rendering_atlas_get_subtexture(_atlas, "panel");
+	_idle_image.nine_slice = rde_struct_create_ui_nine_slice();
+	_idle_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
+	_idle_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
+	_idle_image.nine_slice.size = _size_u;
+
+	rde_ui_element_image_data _selected_image = rde_struct_create_ui_element_image_data();
+	_selected_image.texture = rde_rendering_atlas_get_subtexture(_atlas, "panel3");
+	_selected_image.nine_slice = rde_struct_create_ui_nine_slice();
+	_selected_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
+	_selected_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
+	_selected_image.nine_slice.size = _size_u;
+
+	rde_ui_element_image_data _pressed_image = rde_struct_create_ui_element_image_data();
+	_pressed_image.texture = rde_rendering_atlas_get_subtexture(_atlas, "panel4");
+	_pressed_image.nine_slice = rde_struct_create_ui_nine_slice();
+	_pressed_image.nine_slice.left_right = (rde_vec_2UI) { 10, 10 };
+	_pressed_image.nine_slice.bottom_top = (rde_vec_2UI) { 10, 10 };
+	_pressed_image.nine_slice.size = _size_u;
+
+	rde_ui_element_text_data _text_data = rde_struct_create_ui_element_text_data();
+	_text_data.font = rde_rendering_font_load("default_assets/fonts/arial");
+	_text_data.text = _text;
+
+	rde_ui_button_data _button = {
+		.image_idle = _idle_image,
+		.image_selected = _selected_image,
+		.image_pressed = _pressed_image,
+		.text = _text_data,
+		.size = _size_u
+	};
+
+	return rde_ui_add_button(_container, _button);
+}
+
+void rde_ui_container_unload_root(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_unload_root -> container");
+	rde_transform_unload(_container->transform);
+
+	// TODO: unload everything from every sub-container/element
+
+	if(&ENGINE.ui_containers[ENGINE.last_ui_container_used] == _container) {
+		int _last_container_used = ENGINE.last_ui_container_used;
+		for(int _i = ENGINE.last_ui_container_used - 1; _i >= 0; _i--) {
+			rde_ui_container* _c = &ENGINE.ui_containers[_i];
+			if(_c->used) {
+				ENGINE.last_ui_container_used = _i;
+				break;
+			}
+		}
+		if(_last_container_used == ENGINE.last_transform_used) {
+			ENGINE.last_ui_container_used = -1;
+		}
+	}
+	*_container = rde_struct_create_ui_container();
+}
+
+void rde_rendering_draw_ui(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_rendering_draw_ui -> container");
+	for(size_t _i = 0; _i < stbds_arrlenu(_container->elements); _i++) {
+		rde_ui_element* _element = &_container->elements[_i];
+
+		rde_transform* _transform = _element->transform;
+
+		// TODO: apply STRETCH and ANCHORS
+
+		if(!_element->enabled) {
+			continue;
+		}
+
+		switch(_element->type) {
+			case RDE_UI_ELEMENT_TYPE_IMAGE: {
+				rde_rendering_2d_draw_nine_slice(_transform, _element->image.texture, _element->image.nine_slice, RDE_COLOR_WHITE, NULL);
+			} break;
+
+			case RDE_UI_ELEMENT_TYPE_TEXT: {
+				rde_rendering_2d_draw_text(_transform, _element->text.font, _element->text.text, RDE_COLOR_WHITE, NULL);
+			} break;
+		}
+	}
+
+	for(size_t _i = 0; _i < stbds_arrlenu(_container->containers); _i++) {
+		rde_rendering_draw_ui(&_container->containers[_i]);
+	}
+}
+
 
 
 #if RDE_IS_MOBILE()

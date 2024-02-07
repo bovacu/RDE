@@ -1,10 +1,10 @@
-#version 330 core
+#version 300 es
+precision mediump float;
 
 header_2d_frag
 
-vec4 draw_nine_slice() {
-		// This is just to make the image scale correctly
-	vec2 _prop = vec2(sub_texture_uv.z - sub_texture_uv.x, sub_texture_uv.w - sub_texture_uv.y);
+void main() {
+    	vec2 _prop = vec2(sub_texture_uv.z - sub_texture_uv.x, sub_texture_uv.w - sub_texture_uv.y);
 
 	// Point of start if sub-texture
     vec2 _ratio = (texture_size.xy / size.xy);
@@ -28,21 +28,21 @@ vec4 draw_nine_slice() {
 	// 	  |	  |			|	  |
 	// 	  |  L/D |	 M/D	|  R/D |
 	// 	  |	  |			|	  |
-	// 	  *------*------------*------* 
+	// 	  *------*------------*------*
 
 	// --------------------- X Axis
 	// Left
     if(uv.x < sub_texture_uv.x + _border_custom_prop.x) {
         _texture_coord.x = (uv.x - sub_texture_uv.x) / _ratio.x;
 		_atlas_offset.x = sub_texture_uv.x;
-    } 
+    }
 
 	// Right
 	else if(uv.x > (sub_texture_uv.z - _border_custom_prop.x)) {
 		_texture_coord.x = (uv.x - sub_texture_uv.z) / _ratio.x;
 		_atlas_offset.x = sub_texture_uv.z;
 	}
-	
+
 	// Middle
 	else {
 		_texture_coord.x = uv.x + (_border_original_prop.x - _border_custom_prop.x);
@@ -50,14 +50,14 @@ vec4 draw_nine_slice() {
 			_texture_coord.x = sub_texture_uv.z - _border_original_prop.x;
 		}
 	}
-	
+
 	// --------------------- Y Axis
 	// Down
     if(uv.y < sub_texture_uv.y + _border_custom_prop.y) {
 		_texture_coord.y = (uv.y - sub_texture_uv.y) / _ratio.y;
 		_atlas_offset.y = sub_texture_uv.y;
     }
-	
+
 	// Up
 	else if(uv.y > (sub_texture_uv.w - _border_custom_prop.y)) {
 		_texture_coord.y = (uv.y - sub_texture_uv.w) / _ratio.y;
@@ -77,9 +77,5 @@ vec4 draw_nine_slice() {
 		discard;
 	}
 
-    return texture(tex, _texture_coord + _atlas_offset) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
-}
-
-void main() {
-	out_color = texture(tex, uv) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
+    out_color = texture(tex, _texture_coord + _atlas_offset) * vec4(color.x / 255.f, color.y / 255.f, color.z / 255.f, color.w / 255.f);
 }

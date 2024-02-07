@@ -188,7 +188,7 @@ void on_imgui_hub_menu(float _dt) {
 void on_render(float _dt, rde_window* _window) {
 	rde_rendering_set_background_color(RDE_COLOR_BLACK);
 
-	rde_render_2d(_window, &hub_camera, false, {
+	rde_render_2d(_window, &hub_camera, {
 		rde_rendering_2d_draw_texture(duck_transform, duck_texture, RDE_COLOR_WHITE, NULL);
 	})
 
