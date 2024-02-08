@@ -3423,7 +3423,7 @@ void load_paths(char** _argv) {
 	memset(builder_exe_full_path_dir, 0, MAX_PATH);
 	memset(working_dir, 0, MAX_PATH);
 
-	char _path_save[PATH_MAX];
+	char _path_save[MAX_PATH];
 	memset(_path_save, 0, MAX_PATH);
 	char* _path_ptr;
 
@@ -3437,9 +3437,9 @@ void load_paths(char** _argv) {
 	GetModuleFileName(NULL, builder_exe_full_path_dir, MAX_PATH);
 	GetModuleFileName(NULL, builder_exe_full_path, MAX_PATH);
 #elif __APPLE__
-	size_t _size = MAX_PATH;
-	_NSGetExecutablePath(builder_exe_full_path_dir, &_size)
-	_NSGetExecutablePath(builder_exe_full_path, &_size)
+	uint32_t _size = MAX_PATH;
+	_NSGetExecutablePath(builder_exe_full_path_dir, &_size);
+	_NSGetExecutablePath(builder_exe_full_path, &_size);
 #else
 	readlink("/proc/self/exe", builder_exe_full_path_dir, MAX_PATH);
 	readlink("/proc/self/exe", builder_exe_full_path, MAX_PATH);

@@ -2118,6 +2118,10 @@ void* rde_inner_thread_pool_caller_fn(void* _params) {
 			RDE_SLEEP_CONDITIONAL_VAR(_pool);
 		}
 
+		if(_pool == NULL) {
+			break;
+		}
+
 		SDL_GL_MakeCurrent(_pool->window->sdl_window, _gl_context);
 
 		if(_pool->shutdown != 0 && _pool->count == 0) {
@@ -2137,7 +2141,9 @@ void* rde_inner_thread_pool_caller_fn(void* _params) {
 	_pool->started--;
 
 	rde_free(_data);
-	RDE_DESTROY_THREAD(_pool);
+	if(_pool != NULL) {
+		RDE_DESTROY_THREAD(_pool);
+	}
 
 	return NULL;
 }
@@ -2790,10 +2796,7 @@ rde_thread_pool* rde_thread_pool_create(uint _thread_count, uint _tasks_size, rd
 	rde_calloc(_pool->tasks, rde_thread_task, _tasks_size);
 	rde_calloc(_pool->contexts, SDL_GLContext, _thread_count);
 
-	pthread_mutex_init(&(_pool->lock), NULL);
-	pthread_cond_init(&(_pool->notify), NULL);
-
-	if(_pool->lock == NULL) {
+	if(pthread_mutex_init(&(_pool->lock), NULL) != 0 || pthread_cond_init(&(_pool->notify), NULL) != 0) {
 		rde_thread_pool_destroy(_pool);
 		rde_critical_error(true, "Could not initialize MUTEX or CONDITIONAL on thread pool\n");
 	}
