@@ -2874,10 +2874,8 @@ bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
 	rde_free(_pool->tasks);
 	rde_free(_pool->contexts);
 
-	if(_pool->lock != NULL) {
-		RDE_LOCK_MUTEX(_pool);
-		RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
-	}
+	RDE_LOCK_MUTEX(_pool);
+	RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
 
 	_pool->window = NULL;
 	rde_free(_pool);
