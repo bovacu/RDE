@@ -22,10 +22,6 @@
 #include <EGL/egl.h>
 #endif
 
-#if RDE_IS_ANDROID()
-#include <errno.h>
-#endif
-
 #include "SDL3/SDL.h"
 
 #if RDE_IS_MAC()
@@ -95,26 +91,31 @@
 #include "ufbx/ufbx.c"
 #endif
 
-#ifdef RDE_ERROR_MODULE
-#include <signal.h>
-#if RDE_IS_WINDOWS()
-#include <dbghelp.h>
-#include "pthreads_win/include/pthread.h"
-void rde_inner_print_stack_trace(FILE* _f);
-LONG WINAPI rde_inner_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info);
-#endif
-#if !RDE_IS_WINDOWS() && !RDE_IS_ANDROID()
-#include <execinfo.h>
-#include <dlfcn.h>
-#include <err.h>
-void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...);
-void rde_inner_print_stack_trace(FILE* _f);
-void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context);
+#if !RDE_IS_WINDOWS()
+#include <pthread.h>
+#include <errno.h>
 #endif
 
-#if !RDE_IS_WINDOWS()
-void rde_inner_set_posix_signal_handler();
-#endif
+#ifdef RDE_ERROR_MODULE
+	#include <signal.h>
+	#if RDE_IS_WINDOWS()
+		#include <dbghelp.h>
+		#include "pthreads_win/include/pthread.h"
+		void rde_inner_print_stack_trace(FILE* _f);
+		LONG WINAPI rde_inner_error_sig_handler(PEXCEPTION_POINTERS _sigfault_info);
+	#endif
+	#if !RDE_IS_WINDOWS() && !RDE_IS_ANDROID()
+		#include <execinfo.h>
+		#include <dlfcn.h>
+		#include <err.h>
+		void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...);
+		void rde_inner_print_stack_trace(FILE* _f);
+		void rde_inner_posix_signal_handler(int _sig, siginfo_t* _sig_info, void* _context);
+	#endif
+
+	#if !RDE_IS_WINDOWS()
+	void rde_inner_set_posix_signal_handler();
+	#endif
 
 #endif
 
@@ -4077,23 +4078,6 @@ rde_window* rde_inner_window_create_mac_window(size_t _free_window_index) {
 	SDL_SetWindowPosition(_window->sdl_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	SDL_SetWindowResizable(_window->sdl_window, SDL_TRUE);
 
-	int _major = 0;
-	if(SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &_major) != 0) {
-		exit(-1);
-	}
-	printf("Major: %d\n", _major);
-
-	int _minor = 0;
-	if(SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &_minor) != 0) {
-		exit(-1);
-	}
-	printf("Minor: %d\n", _minor);
-
-	int _context = 0;
-	if(SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &_context) != 0) {
-		exit(-1);
-	}
-	printf("Context: %d\n", _context);
 	return _window;
 }
 #endif
@@ -4556,8 +4540,9 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 			rde_free(_sub);
 		}
 
-		*_2d_shaders[_i].shader = rde_rendering_shader_load(_2d_shaders[_i].name, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader,
-													strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader, NULL, NULL);
+		char* _frag_shader_code = strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader;
+		char* _vert_shader_code = strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader;
+		*_2d_shaders[_i].shader = rde_rendering_shader_load(_2d_shaders[_i].name, _vert_shader_code, _frag_shader_code, NULL, NULL);
 		rde_file_close(_shader_vertex_handle);
 		rde_file_close(_shader_fragment_handle);
 		memset(_vertex_shader_substituted, 0, SHADER_LOADING_BUFFER_SIZE);
@@ -4584,7 +4569,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 			rde_free(_sub);
 		}
 
-		if(strcmp(_3d_shaders[_i].name, RDE_SHADER_MESH) == 0) {
+		if(rde_util_string_contains_sub_str(_fragment_shader, "__point_lights__", false) && rde_util_string_contains_sub_str(_fragment_shader, "__spot_lights__", false)) {
 			char _point_lights[8] = {0};
 			sprintf(_point_lights, "%d", ENGINE.init_info.illumination_config.max_amount_of_point_lights);
 			char* _first_sub = rde_util_string_replace_substring(_fragment_shader, "__point_lights__", _point_lights, NULL);
@@ -4599,8 +4584,9 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 			rde_free(_second_sub);
 		}
 
-		*_3d_shaders[_i].shader = rde_rendering_shader_load(_3d_shaders[_i].name, strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader,
-													strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader, NULL, NULL);
+		char* _frag_shader_code = strlen(_fragment_shader_substituted) > 0 ? _fragment_shader_substituted : _fragment_shader;
+		char* _vert_shader_code = strlen(_vertex_shader_substituted) > 0 ? _vertex_shader_substituted : _vertex_shader;
+		*_3d_shaders[_i].shader = rde_rendering_shader_load(_3d_shaders[_i].name, _vert_shader_code, _frag_shader_code, NULL, NULL);
 
 		rde_file_close(_shader_vertex_handle);
 		rde_file_close(_shader_fragment_handle);
@@ -9154,7 +9140,11 @@ bool rde_events_is_mouse_button_just_released(rde_window* _window, RDE_MOUSE_BUT
 
 rde_vec_2I rde_events_mouse_get_position(rde_window* _window) {
 	rde_vec_2I _window_size = rde_window_get_window_size(_window);
+	#if RDE_IS_MAC()
+	return (rde_vec_2I) { _window->mouse_position.x - _window_size.x * 0.5f, (_window->mouse_position.y - _window_size.y * 0.5f) };
+	#else
 	return (rde_vec_2I) { _window->mouse_position.x - _window_size.x * 0.5f, -(_window->mouse_position.y - _window_size.y * 0.5f) };
+	#endif
 }
 
 rde_vec_2F rde_events_mouse_get_scrolled(rde_window* _window) {

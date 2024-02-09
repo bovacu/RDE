@@ -312,8 +312,10 @@ int needs_recompile(const char* _output_path, const char** _input_paths, size_t 
 		}
 		int input_path_time = _statbuf.st_mtime;
 		// NOTE: if even a single input_path is fresher than output_path that's 100% rebuild
-		rde_log_level(RDE_LOG_LEVEL_INFO, "Here needs recompile -> %s", _input_path); 
-		if (input_path_time > _output_path_time) return 1;
+		if (input_path_time > _output_path_time) {
+			rde_log_level(RDE_LOG_LEVEL_INFO, "Here needs recompile -> %s", _input_path);
+			return 1;
+		}
 	}
 
 	return 0;
@@ -467,7 +469,7 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 		exit(-1);
 	}
 
-	if(_needs_recompile) {
+	if(_needs_recompile == 1) {
 		// First we move the current executable to trash
 		
 #if _WIN32
@@ -524,7 +526,6 @@ void try_recompile_and_redirect_execution(int _argc, char** _argv) {
 			exit(-1);
 		}
 #endif
-
 
 		// Then we recompile it
 		rde_log_level(RDE_LOG_LEVEL_INFO, "Recompiling %s first", _just_binary_name != NULL ? _just_binary_name : builder_exe_full_path);
@@ -1886,6 +1887,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-c");
 	}
 
+
 	ADD_PATH(_rde_src_path, "engine/src/rde.c");
 	ADD_PATH(_glad_src_path, "external/include/glad/glad.c");
 
@@ -1903,6 +1905,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		LINK_PATH(_external_lib_path, "external/libs/osx/");
 
 		arrput(_build_command, "-ldl");
+		arrput(_build_command, "-Wno-deprecated-declarations");
 		arrput(_build_command, "-lm");
 		arrput(_build_command, "-lpthread");
 		arrput(_build_command, "-lSDL3");
@@ -2052,18 +2055,22 @@ bool compile_osx_rde() {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
+					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/debug/examples/librde_imgui.dylib")
+					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/debug/examples/libjolt.dylib")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/")
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
+					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/release/examples/librde_imgui.dylib")
+					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/release/examples/libjolt.dylib")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/osx/release/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx/release/examples/")
 			}
 		})
 	}
@@ -2089,18 +2096,22 @@ bool compile_osx_rde() {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
+					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/debug/examples/librde_imgui.dylib")
+					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/debug/examples/libjolt.dylib")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/")
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
 					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
+					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/release/examples/librde_imgui.dylib")
+					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/release/examples/libjolt.dylib")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/osx/release/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx/release/examples/")
 			}
 		})
 	}
