@@ -437,6 +437,8 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AndroidRequestPermission(const char *permis
  */
 extern DECLSPEC int SDLCALL SDL_AndroidShowToast(const char* message, int duration, int gravity, int xoffset, int yoffset);
 
+extern DECLSPEC void* SDLCALL SDL_AndroidGetNativeWindow(void);
+
 /**
  * Send a user command to SDLActivity.
  *
