@@ -1,3 +1,4 @@
+#ifdef _WIN32
 /*
  * Dirent interface for Microsoft Visual Studio
  *
@@ -1235,3 +1236,4 @@ dirent_set_errno(int error)
 }
 #endif
 #endif /*DIRENT_H*/
+#endif

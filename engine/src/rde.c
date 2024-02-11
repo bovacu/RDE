@@ -114,7 +114,7 @@
 	#endif
 
 	#if !RDE_IS_WINDOWS()
-	void rde_inner_set_posix_signal_handler();
+	void rde_inner_set_posix_signal_handler(void);
 	#endif
 
 #endif
@@ -615,7 +615,7 @@ typedef struct {
 	rde_vec_3F position;
 	uint color;
 } rde_line_vertex;
-rde_line_vertex rde_struct_create_line_vertex();
+rde_line_vertex rde_struct_create_line_vertex(void);
 	
 typedef struct {
 	rde_line_vertex* vertices;
@@ -1219,7 +1219,7 @@ void rde_struct_init_alloc_ptr_texture(rde_texture* _t) {
 	_t->pixels_changed = false;
 }
 
-rde_atlas rde_struct_create_atlas() {
+rde_atlas rde_struct_create_atlas(void) {
 	rde_atlas _a;
 	_a.texture = NULL;
 	_a.sub_textures = NULL;
@@ -1236,7 +1236,7 @@ rde_font_char_info rde_struct_create_font_char_info(void) {
 	return _f;
 }
 
-rde_font rde_struct_create_font() {
+rde_font rde_struct_create_font(void) {
 	rde_font _f;
 	_f.texture = NULL;
 	rde_arr_init(&_f.chars);
@@ -1416,7 +1416,7 @@ rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 	return _e;
 }
 
-rde_ui_container_callbacks rde_struct_create_ui_container_callbacks() {
+rde_ui_container_callbacks rde_struct_create_ui_container_callbacks(void) {
 	rde_ui_container_callbacks _c;
 	_c.on_button_down = NULL;
 	_c.on_button_up = NULL;
@@ -1642,7 +1642,7 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	#ifdef RDE_ERROR_MODULE
 	SetUnhandledExceptionFilter(rde_inner_error_sig_handler);
 	#endif
-#else
+#elif !RDE_IS_IOS()
 	rde_inner_set_posix_signal_handler();
 #endif
 
@@ -1663,7 +1663,8 @@ rde_engine ENGINE;
 #if RDE_IS_MOBILE()
 PFNGLFRAMEBUFFERTEXTURE2DMULTISAMPLEIMGPROC glFramebufferTexture2DMultisampleEXT = NULL;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEIMGPROC glRenderbufferStorageMultisampleEXT = NULL;
-PFNGLDISCARDFRAMEBUFFEREXTPROC glDiscardFramebufferEXT = NULL;
+// iOS was giving a problem with the original name... so _ to solve it
+PFNGLDISCARDFRAMEBUFFEREXTPROC glDiscardFramebufferEXT_ = NULL;
 #endif
 
 float FRAMEBUFFER_QUAD_DATA[] = {
@@ -1806,8 +1807,13 @@ bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
 rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_texture_load_data* _in_out_data);
 void rde_inner_rendering_texture_load_data_with_texture_provided(const char* _file_path, rde_texture_load_data* _in_out_data);
 void rde_inner_rendering_texture_load_data_to_opengl(rde_texture* _texture, rde_texture_load_data* _in_data, const rde_texture_parameters* _params);
-rde_texture* rde_inner_rendering_get_first_available_texture();
+rde_texture* rde_inner_rendering_get_first_available_texture(void);
 rde_texture* rde_inner_rendering_texture_already_loaded(const char* _file_path);
+
+#if RDE_IS_IOS()
+typedef void (*__eglMustCastToProperFunctionPointerType)(void);
+__eglMustCastToProperFunctionPointerType eglGetProcAddress(const char* _function_name);
+#endif
 
 /// ******************************************* PHYSICS *********************************************
 
@@ -2513,6 +2519,7 @@ void rde_engine_destroy_engine(void) {
 	}
 	rde_free(ENGINE.textures);
 
+#if defined(RDE_OBJ_MODULE) || defined(RDE_FBX_MODULE)
 	for (size_t _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_models; _i++) {
 		if (rde_arr_get_length(&ENGINE.models[_i].mesh_array) == 0) {
 			continue;
@@ -2521,6 +2528,7 @@ void rde_engine_destroy_engine(void) {
 		rde_rendering_model_unload(&ENGINE.models[_i]);
 	}
 	rde_free(ENGINE.models);
+#endif
 
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_shaders; _i++) {
 		if(ENGINE.shaders[_i].compiled_program_id == -1) {
@@ -2557,7 +2565,7 @@ void rde_engine_destroy_engine(void) {
 	}
 	rde_free(ENGINE.windows);
 
-	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+	SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS);
 	SDL_Quit();
 	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "Exited cleanly");
 }
@@ -4402,7 +4410,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 
 		if(strcmp("GL_EXT_discard_framebuffer", (const char*)glGetStringi(GL_EXTENSIONS, _i)) == 0) {
 			rde_log_level(RDE_LOG_LEVEL_INFO, "Framebuffer discard is supported in this device");
-			glDiscardFramebufferEXT = (PFNGLDISCARDFRAMEBUFFEREXTPROC)eglGetProcAddress("glDiscardFramebufferEXT");
+			glDiscardFramebufferEXT_ = (PFNGLDISCARDFRAMEBUFFEREXTPROC)eglGetProcAddress("glDiscardFramebufferEXT");
 			continue;
 		}
 	}
@@ -4411,7 +4419,7 @@ void rde_inner_rendering_set_rendering_configuration(rde_window* _window) {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, "MSAA is NOT supported on this device");
 	}
 
-	if(glDiscardFramebufferEXT == NULL) {
+	if(glDiscardFramebufferEXT_ == NULL) {
 		rde_log_level(RDE_LOG_LEVEL_WARNING, "Framebuffer discard is NOT supported on this device");
 	}
 #endif
@@ -4651,7 +4659,7 @@ void rde_inner_rendering_flush_to_default_render_texture(rde_window* _window) {
 		rde_inner_rendering_draw_to_framebuffer(DEFAULT_RENDER_TEXTURE);
 #else
 		GLenum _discard_attachments[] = { GL_DEPTH_ATTACHMENT };
-		glDiscardFramebufferEXT(GL_FRAMEBUFFER, 1, _discard_attachments);
+		glDiscardFramebufferEXT_(GL_FRAMEBUFFER, 1, _discard_attachments);
 		rde_render_texture _rt;
 		_rt.opengl_framebuffer_id = 0;
 		_rt.vao = DEFAULT_RENDER_TEXTURE->vao;
@@ -4692,11 +4700,20 @@ void rde_inner_rendering_create_shadows(void) {
 	RDE_CHECK_GL(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, RDE_SHADOW_MAP_SIZE_WIDTH, RDE_SHADOW_MAP_SIZE_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	RDE_CHECK_GL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+#if RDE_IS_IOS()
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER_EXT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER_EXT);
+#else
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+#endif
 	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
+    
+#if RDE_IS_IOS()
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR_EXT, borderColor);
+#else
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+#endif
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.render_texture->opengl_framebuffer_id);
 	RDE_CHECK_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, ENGINE.shadows.render_texture->opengl_texture_id, 0);
 	
@@ -6082,7 +6099,7 @@ void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh
 		return;
 	}
 
-#if !RDE_IS_ANDROID()
+#if !RDE_IS_MOBILE()
     if(current_batch_3d.draw_mesh_wireframe) {
 		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		rde_inner_rendering_flush_batch_3d();
@@ -6144,7 +6161,7 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	GLint _is_geometry_compiled, _is_tessellation_cs_compiled, _is_tessellation_es_compiled;
 	
 	if(_geometry_code != NULL && _geometry_code[0] == '\0') {
-		_geometry_program_id = glCreateShader(GL_GEOMETRY_SHADER);
+		_geometry_program_id = glCreateShader(GL_GEOMETRY_SHADER_EXT);
 		_geometry_source_size = strlen(_geometry_code);
 		RDE_CHECK_GL(glShaderSource, _geometry_program_id, 1, &_geometry_code, &_geometry_source_size);
 		RDE_CHECK_GL(glCompileShader, _geometry_program_id);
@@ -6154,8 +6171,8 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	}
 	
 	if(_tessellation_code != NULL && _tessellation_code[0] != NULL && _tessellation_code[0][0] == '\0' && _tessellation_code[1] != NULL && _tessellation_code[1][0] == '\0') {
-		_tessellation_cs_program_id = glCreateShader(GL_TESS_CONTROL_SHADER);
-		_tessellation_es_program_id = glCreateShader(GL_TESS_EVALUATION_SHADER );
+		_tessellation_cs_program_id = glCreateShader(GL_TESS_CONTROL_SHADER_EXT);
+		_tessellation_es_program_id = glCreateShader(GL_TESS_EVALUATION_SHADER_EXT);
 		_tessellation_cs_source_size = strlen(_tessellation_code[0]);
 		_tessellation_es_source_size = strlen(_tessellation_code[1]);
 		RDE_CHECK_GL(glShaderSource, _tessellation_cs_program_id, 1, &_tessellation_code[0], &_tessellation_cs_source_size);
@@ -6394,7 +6411,7 @@ void rde_inner_rendering_texture_load_data_with_texture_provided(const char* _fi
 	uint _total_size = 0;
 	rde_file_handle* _file_handle = rde_file_open(_sanitized_path, RDE_FILE_MODE_READ);
 	const unsigned char* _texture_data = rde_file_read_full_file_bytes(_file_handle, &_total_size);
-	_in_out_data->data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	_in_out_data->data = stbi_load_from_memory(_texture_data, _total_size, &_in_out_data->width, &_in_out_data->height, &_in_out_data->channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
 	rde_file_close(_file_handle);
 #else
 	_in_out_data->data = stbi_load(_sanitized_path, &_in_out_data->width, &_in_out_data->height, &_in_out_data->channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
@@ -6472,7 +6489,7 @@ rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_t
 	uint _total_size = 0;
 	rde_file_handle* _file_handle = rde_file_open(_sanitized_path, RDE_FILE_MODE_READ);
 	const unsigned char* _texture_data = rde_file_read_full_file_bytes(_file_handle, &_total_size);
-	_in_out_data->data = stbi_load_from_memory(_texture_data, _total_size, &_width, &_height, &_channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
+	_in_out_data->data = stbi_load_from_memory(_texture_data, _total_size, &_in_out_data->width, &_in_out_data->height, &_in_out_data->channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
 	rde_file_close(_file_handle);
 #else
 	_in_out_data->data = stbi_load(_sanitized_path, &_in_out_data->width, &_in_out_data->height, &_in_out_data->channels, (strcmp(_extension, "png") == 0 ? 4 : 3));
@@ -7120,7 +7137,7 @@ void rde_rendering_render_texture_destroy(rde_render_texture* _render_texture) {
 void rde_rendering_set_antialiasing(rde_window* _window, RDE_ANTIALIASING_ _antialiasing) {
 
  #if RDE_IS_MOBILE()
-	if(glFramebufferTexture2DMultisampleEXT == NULL || glRenderbufferStorageMultisampleEXT == NULL || glDiscardFramebufferEXT == NULL) {
+	if(glFramebufferTexture2DMultisampleEXT == NULL || glRenderbufferStorageMultisampleEXT == NULL || glDiscardFramebufferEXT_ == NULL) {
 		return;
 	}
  #endif
@@ -8160,7 +8177,7 @@ void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _mo
 
 void rde_rendering_3d_end_drawing() {
 
-#if !RDE_IS_ANDROID()
+#if !RDE_IS_MOBILE()
 	if(current_batch_3d.draw_mesh_wireframe) {
 		RDE_CHECK_GL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
 		rde_inner_rendering_flush_batch_3d();
@@ -8472,6 +8489,17 @@ void rde_inner_physics_draw_debug_shapes(rde_window* _window, rde_camera* _camer
 	})
 }
 
+#endif
+
+#if RDE_IS_IOS()
+#include <dlfcn.h>
+__eglMustCastToProperFunctionPointerType eglGetProcAddress(const char* _function_name) {
+	static void* _handle = NULL;
+    if (!_handle) {
+        _handle = dlopen(NULL, RTLD_LAZY);
+    }
+    return _handle ? (__eglMustCastToProperFunctionPointerType)dlsym(_handle, _function_name) : NULL;
+}
 #endif
 
 
@@ -8930,7 +8958,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 				#if (RDE_IS_WINDOWS() || RDE_IS_MAC() || RDE_IS_LINUX() || RDE_IS_WASM()) && !RDE_IS_MOBILE()
 				_container->callbacks.on_button_down(_container, _event->data.mouse_event_data.button);
 				#else
-				_container->callbacks.on_button_down(_event->data.mobile_event_data.finger_id);
+				_container->callbacks.on_button_down(_container, _event->data.mobile_event_data.finger_id);
 				#endif
 			}
 			*_handled = true;
@@ -8944,7 +8972,7 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 				#if (RDE_IS_WINDOWS() || RDE_IS_MAC() || RDE_IS_LINUX() || RDE_IS_WASM()) && !RDE_IS_MOBILE()
 				_container->callbacks.on_button_up(_container, _event->data.mouse_event_data.button);
 				#else
-				_container->callbacks.on_button_up(_event->data.mobile_event_data.finger_id);
+				_container->callbacks.on_button_up(_container, _event->data.mobile_event_data.finger_id);
 				#endif
 			}
 			*_handled = true;
@@ -9708,7 +9736,7 @@ ANativeWindow* rde_android_get_native_window(void) {
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 
-#elif (RDE_IS_MAC() || RDE_IS_LINUX) && !RDE_IS_ANDROID()
+#elif (RDE_IS_MAC() || RDE_IS_LINUX) && !RDE_IS_ANDROID() && !RDE_IS_IOS()
 
 	void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
 	    va_list _args;
@@ -10158,7 +10186,7 @@ void rde_critical_error(bool _condition, const char* _fmt, ...) {
 	rde_back_trace_android_init(&backtrace_state, signal_ucontext);
 	rde_inner_unwind_backtrace_with_skipping(&backtrace_state);
 	rde_inner_android_print_backtrace(&backtrace_state);
-#else
+#elif !RDE_IS_IOS()
 	FILE* _f = NULL;
 	
 	#if RDE_IS_WINDOWS()

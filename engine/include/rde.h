@@ -1637,6 +1637,26 @@ typedef struct {			\
 		return 0;																	  	\
 	}
 
+#elif RDE_IS_IOS()
+
+#include "SDL3/SDL.h"
+#include "SDL3/SDL_main.h"
+#define SDL_GESTURE_IMPLEMENTATION 1
+#include "SDL3/SDL_gesture.h"
+#define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)   	\
+	int main(int _argc, char* _argv[]) {											   	\
+		_window = rde_engine_create_engine(_argc, _argv, _config_path);					\
+		rde_setup_initial_info(_mandatory_callbacks);								  	\
+																						\
+		_init_func(_argc, _argv);													  	\
+																						\
+		rde_engine_on_run();														   	\
+		_end_func();																   	\
+		rde_engine_destroy_engine();												   	\
+																						\
+		return 0;																	  	\
+	}
+
 #else
 
 #define RDE_MAIN(_window, _config_path, _mandatory_callbacks, _init_func, _end_func)	\
@@ -3505,21 +3525,21 @@ typedef struct {
 	rde_vec_2UI bottom_top;
 	rde_vec_2UI size;
 } rde_ui_nine_slice;
-RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice();
+RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice(void);
 
 typedef struct {
 	rde_ui_nine_slice nine_slice;
 	rde_texture* texture;
 	rde_vec_2UI size;
 } rde_ui_element_image_data;
-RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data();
+RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data(void);
 
 typedef struct {
 	rde_font* font;
 	char* text;
 	size_t font_size;
 } rde_ui_element_text_data;
-RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data();
+RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data(void);
 
 typedef struct {
 	rde_vec_2UI size;
@@ -3528,7 +3548,7 @@ typedef struct {
 	rde_ui_element_image_data image_selected;
 	rde_ui_element_text_data text;
 } rde_ui_button_data;
-RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data();
+RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
 
 typedef enum {
 	RDE_UI_ELEMENT_TYPE_IMAGE,
@@ -3569,7 +3589,7 @@ struct rde_ui_container {
 	RDE_UI_ANCHOR_ anchor;
 	RDE_UI_CONTAINER_STATE_ event_state;
 };
-RDE_FUNC rde_ui_container rde_struct_create_ui_container();
+RDE_FUNC rde_ui_container rde_struct_create_ui_container(void);
 
 // =================================================================== AUDIO ===================================================================
 
@@ -3580,7 +3600,7 @@ typedef struct {
 	unsigned short channels;
 	uint rate;
 } rde_sound_config;
-RDE_FUNC rde_sound_config rde_struct_create_audio_config();
+RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 #endif
 
 // 											==============================================================================
@@ -4195,7 +4215,7 @@ RDE_FUNC void rde_engine_supress_logs(bool _supress);
 
 // Function: rde_engine_get_platform
 // Returns the current platform the engine is running on.
-RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform();
+RDE_FUNC RDE_PLATFORM_TYPE_ rde_engine_get_platform(void);
 
 // Function: rde_engine_get_fixed_delta
 // Returns the fixed update physics delta.
