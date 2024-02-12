@@ -94,7 +94,7 @@ void android_mouse_controller(float _dt) {
 	if(rde_events_is_mobile_touch_pressed(current_window, 0)) {
 		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
 		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)_mouse_pos.y;
+		float _y_pos = (float)-_mouse_pos.y;
 
 		if(android_last_x == _x_pos && android_last_y == _y_pos) {
 			return;

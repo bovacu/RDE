@@ -727,6 +727,43 @@ typedef struct {
 	mat4 light_space_matrix;
 } rde_shadows;
 
+// percentual_position: [-1.0, 1.0] percentual_position.x = -1.0 means -parent_container_width/2 and percentual_position.x = 1.0 parent_container_width/2. percentual_position.y = -1.0 means -parent_container_height/2 and percentual_position.y = 1.0 parent_container_height/2. 
+// percentual_size: same as for position, but with size.
+// parent: container to take as reference, if no container is set (parent = NULL), the whole window will be used as container.
+struct rde_ui_dynamic_layout {
+	RDE_UI_ANCHOR_ anchor;
+	RDE_UI_STRETCH_ stretch;
+	rde_vec_3F offset_position;
+	rde_vec_2F percentual_size;
+	rde_ui_container* parent;
+};
+
+struct rde_ui_element {
+	rde_transform* transform;
+	RDE_UI_ELEMENT_TYPE_ type;
+	rde_ui_dynamic_layout dynamic_layout;
+	bool enabled;
+	
+	union {
+		rde_ui_element_image_data image;
+		rde_ui_element_text_data text;
+	};
+
+};
+
+rde_arr_decl(rde_ui_container);
+rde_arr_decl(rde_ui_element);
+struct rde_ui_container {
+	rde_vec_2UI size;
+	rde_transform* transform;
+	rde_arr_rde_ui_element elements;
+	rde_arr_rde_ui_container containers;
+	rde_ui_container_callbacks callbacks;
+	bool used;
+	rde_ui_dynamic_layout dynamic_layout;
+	RDE_UI_CONTAINER_STATE_ event_state;
+};
+
 typedef struct {
 	size_t number_of_drawcalls;
 } rde_rendering_statistics;
@@ -887,7 +924,7 @@ struct rde_engine {
 	rde_shader* shadows_shader;
 	rde_shader* shaders;
 	
-size_t total_amount_of_textures;
+	size_t total_amount_of_textures;
 	
 	rde_texture* textures;
 	rde_atlas* atlases;
@@ -1376,7 +1413,6 @@ rde_ui_element_image_data rde_struct_create_ui_element_image_data() {
 	rde_ui_element_image_data _i;
 	_i.nine_slice = rde_struct_create_ui_nine_slice();
 	_i.texture = NULL;
-	_i.size = (rde_vec_2UI) { 0, 0 };
 	return _i;
 }
 
@@ -1397,6 +1433,16 @@ rde_ui_button_data rde_struct_create_ui_container_button_data() {
 	return _b;
 }
 
+rde_ui_dynamic_layout rde_struct_create_ui_dynamic_layout(void) {
+	rde_ui_dynamic_layout _r;
+	_r.anchor = RDE_UI_ANCHOR_NO_ANCHOR;
+	_r.stretch = RDE_UI_STRETCH_NO_STRETCH;
+	_r.offset_position = (rde_vec_3F) { 0.f, 0.f, 0.f };
+	_r.percentual_size = (rde_vec_2F) { 0.1f, 0.1f };
+	_r.parent = NULL;
+	return _r;
+}
+
 rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 	rde_ui_element _e;
 	_e.transform = NULL;
@@ -1411,8 +1457,7 @@ rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type) {
 			_e.image = rde_struct_create_ui_element_image_data();
 		} break;
 	}
-	_e.stretch = RDE_UI_STRETCH_NO_STRETCH;
-	_e.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_e.dynamic_layout = rde_struct_create_ui_dynamic_layout();
 	return _e;
 }
 
@@ -1430,12 +1475,13 @@ rde_ui_container rde_struct_create_ui_container() {
 	rde_ui_container _c;
 	_c.size = (rde_vec_2UI) { 0, 0 };
 	_c.transform = NULL;
-	_c.elements = NULL;
-	_c.containers = NULL;
+	rde_arr_init(&_c.elements);
+	rde_arr_new(&_c.elements);
+	rde_arr_init(&_c.containers);
+	rde_arr_new(&_c.containers);
 	_c.callbacks = rde_struct_create_ui_container_callbacks();
 	_c.used = false;
-	_c.stretch = RDE_UI_STRETCH_NO_STRETCH;
-	_c.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_c.dynamic_layout = rde_struct_create_ui_dynamic_layout();
 	_c.event_state = RDE_UI_CONTAINER_STATE_MOUSE_NONE;
 	return _c;
 }
@@ -1839,9 +1885,15 @@ void rde_inner_event_sdl_to_rde_helper_transform_mouse_button_event(SDL_Event* _
 void rde_inner_event_sdl_to_rde_helper_transform_drop_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 void rde_inner_event_sdl_to_rde_helper_transform_mobile_event(SDL_Event* _sdl_event, rde_event* _rde_event);
 rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event);
+void rde_inner_events_sync_events(rde_window* _window);
+
+/// ******************************************* UI ************************************************
+
+void rde_inner_ui_update_container_with_dynamic_layout(rde_window* _window, rde_ui_container* _container);
+void rde_inner_ui_update_ui_element_with_dynamic_layout(rde_window* _window, rde_ui_element* _ui_element);
+void rde_inner_ui_update_container_and_inner_elements_with_dynamic_layout(rde_window* _window, rde_ui_container* _container);
 void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled);
 void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled);
-void rde_inner_events_sync_events(rde_window* _window);
 
 /// ******************************************* AUDIO *********************************************
 
@@ -2474,10 +2526,11 @@ void rde_engine_destroy_engine(void) {
 	rde_free(ENGINE.transforms);
 	rde_free(ENGINE.world_transforms);
 	rde_arr_free(&ENGINE.free_transforms);
-
-	// rde_rendering_render_texture_destroy(SHADOWS_RENDER_TEXTURE);
-	// glDeleteBuffers(1, &SHADOWS_RENDER_TEXTURE->vbo);
-	// glDeleteVertexArrays(1, &SHADOWS_RENDER_TEXTURE->vao);
+	
+	for(uint _i = 0; _i < RDE_MAX_CONTAINERS; _i++) {
+		rde_arr_free(&ENGINE.ui_containers[_i].elements);
+		rde_arr_free(&ENGINE.ui_containers[_i].containers);
+	}
 	
 	if(ENGINE.skybox.opengl_texture_id != -1) {
 		rde_rendering_skybox_unload(ENGINE.skybox.opengl_texture_id);
@@ -4274,6 +4327,20 @@ bool rde_window_orientation_is_horizontal(rde_window* _window) {
 	return _window_size.x >= _window_size.y;
 }
 
+rde_window* rde_window_get_focused_window(void) {
+	SDL_Window* _window = SDL_GL_GetCurrentWindow();
+	rde_critical_error(_window == NULL, "Could not get current window\n");
+
+	for(uint _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_windows; _i++) {
+		if(ENGINE.windows[_i].sdl_window == _window) {
+			return &ENGINE.windows[_i];
+		}
+	}
+	
+	rde_critical_error(true, "Could not find current window \n");
+	return NULL;
+}
+
 void rde_window_take_screenshot(rde_window* _window, rde_vec_2I _position, rde_vec_2I _size_of_rectangle, const char* _file_name_with_extension) {
 	RDE_UNUSED(_window)
 	RDE_UNUSED(_position)
@@ -4780,7 +4847,6 @@ void rde_inner_rendering_end_2d(void) {
 void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transform, mat4 _mat) {
 	RDE_UNUSED(_transform)
 	rde_vec_2I _window_size = rde_window_get_window_size(current_drawing_window);
-	// float _aspect_ratio = (float)_window_size.x / (float)_window_size.y;
 	rde_vec_2F _screen_pos;
 
 	if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
@@ -4796,21 +4862,9 @@ void rde_inner_rendering_transform_to_glm_mat4_2d(const rde_transform* _transfor
 		_screen_pos.y /= (float)_window_size.y * 0.5f;
 	}
 
-	// mat4 _transformation_matrix = GLM_MAT4_IDENTITY_INIT;
-
 	_mat[3][0] = _screen_pos.x;
 	_mat[3][1] = _screen_pos.y;
 	_mat[3][2] = 0;
-	// glm_translate(_transformation_matrix, (vec3) { _screen_pos.x, _screen_pos.y, 0.f });
-	// glm_rotate(_transformation_matrix, glm_rad(_transform->rotation.z), (vec3){ 0.0f, 0.0f, 1.0f });
-
-	// if(current_drawing_camera->camera_type == RDE_CAMERA_TYPE_ORTHOGRAPHIC) {
-	// 	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y / _aspect_ratio, _transform->scale.z });
-	// } else {
-	// 	glm_scale(_transformation_matrix, (vec3) { _transform->scale.x, _transform->scale.y, _transform->scale.z });
-	// }
-
-	// glm_mat4_copy(_transformation_matrix, _mat);
 }
 
 void rde_inner_rendering_generate_gl_vertex_config_for_quad_2d(rde_batch_2d* _batch) {
@@ -6161,7 +6215,11 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	GLint _is_geometry_compiled, _is_tessellation_cs_compiled, _is_tessellation_es_compiled;
 	
 	if(_geometry_code != NULL && _geometry_code[0] == '\0') {
+#if RDE_IS_IOS()
 		_geometry_program_id = glCreateShader(GL_GEOMETRY_SHADER_EXT);
+#else
+		_geometry_program_id = glCreateShader(GL_GEOMETRY_SHADER);
+#endif
 		_geometry_source_size = strlen(_geometry_code);
 		RDE_CHECK_GL(glShaderSource, _geometry_program_id, 1, &_geometry_code, &_geometry_source_size);
 		RDE_CHECK_GL(glCompileShader, _geometry_program_id);
@@ -6171,8 +6229,13 @@ rde_shader* rde_rendering_shader_load(const char* _name, const char* _vertex_cod
 	}
 	
 	if(_tessellation_code != NULL && _tessellation_code[0] != NULL && _tessellation_code[0][0] == '\0' && _tessellation_code[1] != NULL && _tessellation_code[1][0] == '\0') {
+#if RDE_IS_IOS()
 		_tessellation_cs_program_id = glCreateShader(GL_TESS_CONTROL_SHADER_EXT);
 		_tessellation_es_program_id = glCreateShader(GL_TESS_EVALUATION_SHADER_EXT);
+#else
+		_tessellation_cs_program_id = glCreateShader(GL_TESS_CONTROL_SHADER);
+		_tessellation_es_program_id = glCreateShader(GL_TESS_EVALUATION_SHADER);
+#endif
 		_tessellation_cs_source_size = strlen(_tessellation_code[0]);
 		_tessellation_es_source_size = strlen(_tessellation_code[1]);
 		RDE_CHECK_GL(glShaderSource, _tessellation_cs_program_id, 1, &_tessellation_code[0], &_tessellation_cs_source_size);
@@ -8938,7 +9001,9 @@ rde_event rde_inner_event_sdl_event_to_rde_event(SDL_Event* _sdl_event) {
 void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {
 	rde_vec_2I _mouse_pos = rde_events_mouse_get_position(_window);
 
-	if(rde_util_is_point_2d_in_rect((rde_vec_2F) { _mouse_pos.x, _mouse_pos.y }, _container->transform, (rde_vec_2F){ _container->size.x, _container->size.y })) {
+	rde_transform _transform = rde_struct_create_transform();
+	
+	if(rde_util_is_point_2d_in_rect((rde_vec_2F) { _mouse_pos.x, _mouse_pos.y }, &_transform, (rde_vec_2F){ _container->size.x, _container->size.y })) {
 		if(_event->type == RDE_EVENT_TYPE_MOUSE_MOVED && (_container->event_state & RDE_UI_CONTAINER_STATE_MOUSE_ENTERED) == 0) {
 			_container->event_state |= RDE_UI_CONTAINER_STATE_MOUSE_ENTERED;
 			_container->event_state &= ~RDE_UI_CONTAINER_STATE_MOUSE_NONE;
@@ -8991,12 +9056,93 @@ void rde_inner_events_ui_handle_event(rde_window* _window, rde_event* _event, rd
 	}
 }
 
+rde_vec_3F rde_inner_ui_update_position_with_dynamic_layout(rde_window* _window, rde_ui_dynamic_layout* _layout) {
+	rde_vec_2I _parent_container_size = { 0.f, 0.f };
+	
+	if(_layout->parent == NULL) {
+		_parent_container_size = rde_window_get_window_size(_window);
+	} else {
+		_parent_container_size = (rde_vec_2I) { _layout->parent->size.x, _layout->parent->size.y };
+	}
+	
+	RDE_UI_ANCHOR_ _anchor = _layout->anchor;
+	rde_vec_3F _new_pos = { 0.f, 0.f, 0.f };
+	
+	if((_anchor & RDE_UI_ANCHOR_MIDDLE) == RDE_UI_ANCHOR_MIDDLE) {
+		_new_pos.x += _layout->offset_position.x;
+		_new_pos.y += _layout->offset_position.y;
+	} else {
+		if((_anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT || (_anchor & RDE_UI_ANCHOR_LEFT) == RDE_UI_ANCHOR_LEFT) {
+			_new_pos.x = ((_anchor & RDE_UI_ANCHOR_RIGHT) == RDE_UI_ANCHOR_RIGHT ? 1 : -1) * _parent_container_size.x * 0.5f;
+			_new_pos.x += _layout->offset_position.x;
+		}
+		
+		if((_anchor & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP || (_anchor & RDE_UI_ANCHOR_BOTTOM) == RDE_UI_ANCHOR_BOTTOM) {
+			_new_pos.y = ((_anchor & RDE_UI_ANCHOR_TOP) == RDE_UI_ANCHOR_TOP ? 1 : -1) * _parent_container_size.y * 0.5f;
+			_new_pos.y += _layout->offset_position.y;
+		}
+	}
+	
+	return _new_pos;
+}
+
+rde_vec_2UI rde_inner_ui_update_size_with_dynamic_layout(rde_window* _window, rde_ui_dynamic_layout* _layout, rde_vec_2UI _initial_size) {
+	rde_vec_2I _parent_container_size = { 0.f, 0.f };
+	
+	if(_layout->parent == NULL) {
+		_parent_container_size = rde_window_get_window_size(_window);
+	} else {
+		_parent_container_size = (rde_vec_2I) { _layout->parent->size.x, _layout->parent->size.y };
+	}
+	
+	RDE_UI_STRETCH_ _stretch = _layout->stretch;
+	rde_vec_2UI _new_size = _initial_size;
+	
+	if((_stretch & RDE_UI_STRETCH_HORIZONTAL_STRETCH) == RDE_UI_STRETCH_HORIZONTAL_STRETCH) {
+		_new_size.x = (uint)(_parent_container_size.x * _layout->percentual_size.x);
+	}
+	
+	if((_stretch & RDE_UI_STRETCH_VERTICAL_STRETCH) == RDE_UI_STRETCH_VERTICAL_STRETCH) {
+		_new_size.y = (uint)(_parent_container_size.y * _layout->percentual_size.y);
+	}
+	
+	return _new_size;
+}
+
+void rde_inner_ui_update_container_with_dynamic_layout(rde_window* _window, rde_ui_container* _container) {
+	rde_ui_dynamic_layout* _layout = &_container->dynamic_layout;	
+	rde_transform_set_position(_container->transform, rde_inner_ui_update_position_with_dynamic_layout(_window, _layout));
+	_container->size = rde_inner_ui_update_size_with_dynamic_layout(_window, _layout, _container->size);
+}
+
+void rde_inner_ui_update_ui_element_with_dynamic_layout(rde_window* _window, rde_ui_element* _ui_element) {
+	rde_ui_dynamic_layout* _layout = &_ui_element->dynamic_layout;	
+	rde_transform_set_position(_ui_element->transform, rde_inner_ui_update_position_with_dynamic_layout(_window, _layout));
+	
+	if(_ui_element->type == RDE_UI_ELEMENT_TYPE_IMAGE) {
+		_ui_element->image.nine_slice.size = rde_inner_ui_update_size_with_dynamic_layout(_window, _layout, _ui_element->image.nine_slice.size);
+	} else {
+		// TODO: check what to do with texts
+	}
+}
+
+void rde_inner_ui_update_container_and_inner_elements_with_dynamic_layout(rde_window* _window, rde_ui_container* _container) {
+	rde_inner_ui_update_container_with_dynamic_layout(_window, _container);
+		for(uint _i = 0; _i < rde_arr_get_length(&_container->elements); _i++) {
+			rde_inner_ui_update_ui_element_with_dynamic_layout(_window, &_container->elements.memory[_i]);
+		}
+}
+
 void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container, bool* _handled) {
 	rde_critical_error(_event == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> event");
 	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_events_ui_poll -> container");
 
-	for(int _i = stbds_arrlen(_container->containers) - 1; _i >= 0; _i--) {
-		rde_inner_events_ui_poll(_window, _event, &_container->containers[_i], _handled);
+	if(_event->type == RDE_EVENT_TYPE_WINDOW_RESIZED) {
+		rde_inner_ui_update_container_and_inner_elements_with_dynamic_layout(_window, _container);
+	}
+	
+	for(int _i = rde_arr_get_length(&_container->containers) - 1; _i >= 0; _i--) {
+		rde_inner_events_ui_poll(_window, _event, &_container->containers.memory[_i], _handled);
 	}
 
 	if(!*_handled) {
@@ -9408,51 +9554,51 @@ void rde_audio_end() {
 // ==============================================================================
 
 void rde_inner_ui_default_button_callback_on_enter(rde_ui_container* _container) {
-	if(stbds_arrlen(_container->elements) < 3) {
+	if(rde_arr_get_length(&_container->elements) < 3) {
 		return;
 	}
 
-	if(_container->elements[1].image.texture != NULL) {
-		_container->elements[0].enabled = false;
-		_container->elements[2].enabled = false;
-		_container->elements[1].enabled = true;
+	if(_container->elements.memory[1].image.texture != NULL) {
+		_container->elements.memory[0].enabled = false;
+		_container->elements.memory[2].enabled = false;
+		_container->elements.memory[1].enabled = true;
 	}
 }
 
 void rde_inner_ui_default_button_callback_on_exit(rde_ui_container* _container) {
-	if(stbds_arrlen(_container->elements) < 3) {
+	if(rde_arr_get_length(&_container->elements) < 3) {
 		return;
 	}
 
-	if(_container->elements[0].image.texture != NULL) {
-		_container->elements[1].enabled = false;
-		_container->elements[2].enabled = false;
-		_container->elements[0].enabled = true;
+	if(_container->elements.memory[0].image.texture != NULL) {
+		_container->elements.memory[1].enabled = false;
+		_container->elements.memory[2].enabled = false;
+		_container->elements.memory[0].enabled = true;
 	}
 }
 
 void rde_inner_ui_default_button_callback_on_button_down(rde_ui_container* _container, int _button) {
 	RDE_UNUSED(_button);
 
-	if(stbds_arrlen(_container->elements) < 3) {
+	if(rde_arr_get_length(&_container->elements) < 3) {
 		return;
 	}
 
-	if(_container->elements[2].image.texture != NULL) {
-		_container->elements[0].enabled = false;
-		_container->elements[1].enabled = false;
-		_container->elements[2].enabled = true;
+	if(_container->elements.memory[2].image.texture != NULL) {
+		_container->elements.memory[0].enabled = false;
+		_container->elements.memory[1].enabled = false;
+		_container->elements.memory[2].enabled = true;
 	}
 }
 
 void rde_inner_ui_default_button_callback_on_button_up(rde_ui_container* _container, int _button) {
 	RDE_UNUSED(_button);
 
-	if(stbds_arrlen(_container->elements) < 3) {
+	if(rde_arr_get_length(&_container->elements) < 3) {
 		return;
 	}
 
-	if(_container->elements[1].image.texture != NULL) {
+	if(_container->elements.memory[1].image.texture != NULL) {
 		rde_inner_ui_default_button_callback_on_enter(_container);
 	} else {
 		rde_inner_ui_default_button_callback_on_exit(_container);
@@ -9474,6 +9620,11 @@ rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size) {
 			_c->used = true;
 			_c->transform = rde_transform_load();
 			_c->size = _size;
+			_c->dynamic_layout.percentual_size = (rde_vec_2F) { 1.f, 1.f };
+			_c->dynamic_layout.offset_position = (rde_vec_3F) { 0.f, 0.f, 0.f };
+			_c->dynamic_layout.anchor = RDE_UI_ANCHOR_MIDDLE;
+			_c->dynamic_layout.stretch = RDE_UI_STRETCH_VERTICAL_STRETCH | RDE_UI_STRETCH_HORIZONTAL_STRETCH;
+			_c->dynamic_layout.parent = NULL;
 			if(ENGINE.last_ui_container_used < _i) {
 				ENGINE.last_ui_container_used = _i;
 			}
@@ -9491,9 +9642,11 @@ rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_im
 	_element.type = RDE_UI_ELEMENT_TYPE_IMAGE;
 	_element.transform = rde_transform_load();
 	_element.image = _image_data;
-	stbds_arrput(_container->elements, _element);
-	rde_transform_set_parent(_element.transform, _container->transform);
-	return &stbds_arrlast(_container->elements);
+	rde_arr_add(&_container->elements, _element);
+	rde_ui_element* _ref = &_container->elements.memory[rde_arr_get_length(&_container->elements) - 1];
+	_ref->dynamic_layout.parent = _container;
+	rde_transform_set_parent(_ref->transform, _container->transform);
+	return _ref;
 }
 
 rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data) {
@@ -9502,9 +9655,11 @@ rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_tex
 	_element.type = RDE_UI_ELEMENT_TYPE_TEXT;
 	_element.transform = rde_transform_load();
 	_element.text = _text_data;
-	stbds_arrput(_container->elements, _element);
-	rde_transform_set_parent(_element.transform, _container->transform);
-	return &stbds_arrlast(_container->elements);
+	rde_arr_add(&_container->elements, _element);
+	rde_ui_element* _ref = &_container->elements.memory[rde_arr_get_length(&_container->elements) - 1];
+	_ref->dynamic_layout.parent = _container;
+	rde_transform_set_parent(_ref->transform, _container->transform);
+	return _ref;
 }
 
 rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data) {
@@ -9516,15 +9671,37 @@ rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_
 	rde_ui_element* _i_2 = rde_ui_add_image(&_new_container, _button_data.image_selected);
 	rde_ui_element* _t = rde_ui_add_text(&_new_container, _button_data.text);
 	_new_container.transform = rde_transform_load();
-	stbds_arrput(_container->containers, _new_container);
+	rde_arr_add(&_container->containers, _new_container);
+	rde_ui_container* _new_container_ref = &_container->containers.memory[rde_arr_get_length(&_container->containers) - 1];
 
-	rde_transform_set_parent(_i_0->transform, _new_container.transform);
-	rde_transform_set_parent(_i_1->transform, _new_container.transform);
-	rde_transform_set_parent(_i_2->transform, _new_container.transform);
-	rde_transform_set_parent(_t->transform, _new_container.transform);
+	rde_transform_set_parent(_i_0->transform, _new_container_ref->transform);
+	rde_transform_set_parent(_i_1->transform, _new_container_ref->transform);
+	rde_transform_set_parent(_i_2->transform, _new_container_ref->transform);
+	rde_transform_set_parent(_t->transform, _new_container_ref->transform);
+	
+	_i_0->dynamic_layout.parent = _new_container_ref;
+	_i_0->dynamic_layout.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_i_0->dynamic_layout.stretch = RDE_UI_STRETCH_HORIZONTAL_STRETCH | RDE_UI_STRETCH_VERTICAL_STRETCH;
+	_i_0->dynamic_layout.offset_position = (rde_vec_3F) { 0.f, 0.f, 0.f };
+	_i_0->dynamic_layout.percentual_size = (rde_vec_2F) { 1.f, 1.f };
+	
+	_i_1->dynamic_layout.parent = _new_container_ref;
+	_i_1->dynamic_layout.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_i_1->dynamic_layout.stretch = RDE_UI_STRETCH_HORIZONTAL_STRETCH | RDE_UI_STRETCH_VERTICAL_STRETCH;
+	_i_1->dynamic_layout.offset_position = (rde_vec_3F) { 0.f, 0.f, 0.f };
+	_i_1->dynamic_layout.percentual_size = (rde_vec_2F) { 1.f, 1.f };
+	
+	_i_2->dynamic_layout.parent = _new_container_ref;
+	_i_2->dynamic_layout.anchor = RDE_UI_ANCHOR_MIDDLE;
+	_i_2->dynamic_layout.stretch = RDE_UI_STRETCH_HORIZONTAL_STRETCH | RDE_UI_STRETCH_VERTICAL_STRETCH;
+	_i_2->dynamic_layout.offset_position = (rde_vec_3F) { 0.f, 0.f, 0.f };
+	_i_2->dynamic_layout.percentual_size = (rde_vec_2F) { 1.f, 1.f };
+	
+	_t->dynamic_layout.parent = _new_container_ref;
 
-	rde_transform_set_parent(_new_container.transform, _container->transform);
-	return &stbds_arrlast(_container->containers);
+	rde_transform_set_parent(_new_container_ref->transform, _container->transform);
+	
+	return _new_container_ref;
 }
 
 rde_ui_container* rde_ui_add_button_default(rde_ui_container* _container, rde_vec_2UI _size, char* _text) {
@@ -9591,8 +9768,8 @@ void rde_ui_container_unload_root(rde_ui_container* _container) {
 
 void rde_rendering_draw_ui(rde_ui_container* _container) {
 	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_rendering_draw_ui -> container");
-	for(size_t _i = 0; _i < stbds_arrlenu(_container->elements); _i++) {
-		rde_ui_element* _element = &_container->elements[_i];
+	for(size_t _i = 0; _i < rde_arr_get_length(&_container->elements); _i++) {
+		rde_ui_element* _element = &_container->elements.memory[_i];
 
 		rde_transform* _transform = _element->transform;
 
@@ -9613,10 +9790,105 @@ void rde_rendering_draw_ui(rde_ui_container* _container) {
 		}
 	}
 
-	for(size_t _i = 0; _i < stbds_arrlenu(_container->containers); _i++) {
-		rde_rendering_draw_ui(&_container->containers[_i]);
+	for(size_t _i = 0; _i < rde_arr_get_length(&_container->containers); _i++) {
+		rde_rendering_draw_ui(&_container->containers.memory[_i]);
 	}
 }
+
+RDE_UI_ANCHOR_ rde_ui_container_get_anchor(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_get_anchor - _container");
+	return _container->dynamic_layout.anchor;
+}
+
+RDE_UI_STRETCH_ rde_ui_container_get_stretch(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_get_stretch - _container");
+	return _container->dynamic_layout.stretch;
+}
+
+RDE_UI_ANCHOR_ rde_ui_element_get_anchor(rde_ui_element* _element) {
+	rde_critical_error(_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_get_anchor - _element");
+	return _element->dynamic_layout.anchor;
+}
+
+RDE_UI_STRETCH_ rde_ui_element_get_stretch(rde_ui_element* _element) {
+	rde_critical_error(_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_get_stretch - _element");
+	return _element->dynamic_layout.stretch;
+}
+
+void rde_ui_container_set_anchor_and_strecth(rde_ui_container* _container, RDE_UI_ANCHOR_ _anchor, RDE_UI_STRETCH_ _stretch) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_set_anchor_and_strecth - _container");
+	_container->dynamic_layout.stretch = _stretch;
+	_container->dynamic_layout.anchor = _anchor;
+	rde_inner_ui_update_container_and_inner_elements_with_dynamic_layout(rde_window_get_focused_window(), _container);
+}
+
+void rde_ui_element_set_anchor_and_strecth(rde_ui_element* _ui_element, RDE_UI_ANCHOR_ _anchor, RDE_UI_STRETCH_ _stretch) {
+	rde_critical_error(_ui_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_set_anchor_and_strecth - _ui_element");
+	_ui_element->dynamic_layout.stretch = _stretch;
+	_ui_element->dynamic_layout.anchor = _anchor;
+	rde_inner_ui_update_ui_element_with_dynamic_layout(rde_window_get_focused_window(), _ui_element);
+}
+
+void rde_ui_container_set_parent(rde_ui_container* _container, rde_ui_container* _parent) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_set_parent - _container");
+	_container->dynamic_layout.parent = _parent;
+}
+
+rde_ui_container* rde_ui_container_get_parent(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_get_parent - _container");
+	return _container->dynamic_layout.parent;
+}
+
+rde_vec_3F rde_ui_container_get_offset_position(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_get_offset_position - _container");
+	return _container->dynamic_layout.offset_position;
+}
+
+rde_vec_3F rde_ui_element_get_offset_position(rde_ui_element* _element) {
+	rde_critical_error(_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_get_offset_position - _element");
+	return _element->dynamic_layout.offset_position;
+}
+
+void rde_ui_container_set_offset_position(rde_ui_container* _container, rde_vec_3F _offset_position) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_set_offset_position - _container");
+	_container->dynamic_layout.offset_position = _offset_position;
+	rde_inner_ui_update_container_and_inner_elements_with_dynamic_layout(rde_window_get_focused_window(), _container);
+}
+
+void rde_ui_element_set_offset_position(rde_ui_element* _element, rde_vec_3F _offset_position) {
+	rde_critical_error(_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_set_offset_position - _element");
+	_element->dynamic_layout.offset_position = _offset_position;
+	rde_inner_ui_update_ui_element_with_dynamic_layout(rde_window_get_focused_window(), _element);
+}
+
+rde_vec_2F rde_ui_container_get_percentual_size(rde_ui_container* _container) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_get_percentual_size - _container");
+	return _container->dynamic_layout.percentual_size;
+}
+
+rde_vec_2F rde_ui_element_get_percentual_size(rde_ui_element* _element) {
+	rde_critical_error(_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_get_percentual_size - _element");
+	return _element->dynamic_layout.percentual_size;
+}
+
+void rde_ui_container_set_percentual_size(rde_ui_container* _container, rde_vec_2F _percentual_size) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_set_percentual_size - _container");
+	_container->dynamic_layout.percentual_size = _percentual_size;
+	rde_inner_ui_update_container_and_inner_elements_with_dynamic_layout(rde_window_get_focused_window(), _container);
+}
+
+void rde_ui_container_set_callbacks(rde_ui_container* _container, rde_ui_container_callbacks _callbacks) {
+	rde_critical_error(_container == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_container_set_callbacks - _container");
+	_container->callbacks = _callbacks;
+}
+
+void rde_ui_element_set_percentual_size(rde_ui_element* _element, rde_vec_2F _percentual_size) {
+	rde_critical_error(_element == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_ui_element_set_percentual_size - _element");
+	_element->dynamic_layout.percentual_size = _percentual_size;
+	rde_inner_ui_update_ui_element_with_dynamic_layout(rde_window_get_focused_window(), _element);
+}
+
+
 
 
 

@@ -1,3 +1,4 @@
+#include "rde.h"
 rde_camera shadows_camera;
 rde_mesh* cube_mesh;
 rde_mesh* plain_mesh;
@@ -75,7 +76,7 @@ void shadows_mouse_controller(float _dt) {
 	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
 		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
 		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)_mouse_pos.y;
+		float _y_pos = (float)-_mouse_pos.y;
 
 		if(shadows_last_x == _x_pos && shadows_last_y == _y_pos) {
 			return;

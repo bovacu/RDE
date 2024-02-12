@@ -1,3 +1,4 @@
+#include "rde.h"
 rde_camera ui_camera;
 
 rde_camera ui_hud_camera;
@@ -74,13 +75,15 @@ void ui_init() {
 	ui_root_container = rde_ui_container_load_root((rde_vec_2UI) { _screen_size.x, _screen_size.y });
 
 	rde_ui_container* _button_0 = rde_ui_add_button_default(ui_root_container, (rde_vec_2UI) { 170, 64 }, "Button");
-	_button_0->callbacks.on_button_up = button_0_callback;
+	// _button_0->dynamic_layout.offset_position = (rde_vec_2F) { -128, 70.0f };
+	rde_ui_container_set_percentual_size(_button_0, (rde_vec_2F) { 0.5f, 0.5f });
+	rde_ui_container_set_anchor_and_strecth(_button_0, RDE_UI_ANCHOR_MIDDLE, RDE_UI_STRETCH_HORIZONTAL_STRETCH | RDE_UI_STRETCH_VERTICAL_STRETCH);
+	rde_ui_container_callbacks _callbacks = rde_struct_create_ui_container_callbacks();
+	_callbacks.on_button_up = button_0_callback;
+	rde_ui_container_set_callbacks(_button_0, _callbacks);
 
-	rde_ui_container* _button_1 = rde_ui_add_button_default(ui_root_container, (rde_vec_2UI) { 170, 64 }, "Button");
-	_button_1->callbacks.on_button_down = button_1_callback;
-	rde_transform_set_position(_button_1->transform, (rde_vec_3F) {
-		250, 120, 0
-	});
+	// rde_ui_container* _button_1 = rde_ui_add_button_default(ui_root_container, (rde_vec_2UI) { 170, 64 }, "Button");
+	// _button_1->callbacks.on_button_down = button_1_callback;
 
 	events_callback = &ui_on_event;
 	update_callback = &ui_on_update;

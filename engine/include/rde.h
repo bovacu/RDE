@@ -2186,11 +2186,12 @@ typedef enum {
 // RDE_UI_ANCHOR_TOP - Will anchor to the top side of the screen as a pivot.
 // RDE_UI_ANCHOR_BOTTOM - Will anchor to the bottom side of the screen as a pivot.
 typedef enum {
-	RDE_UI_ANCHOR_MIDDLE              = 1 << 1,
-	RDE_UI_ANCHOR_LEFT                = 1 << 2,
-	RDE_UI_ANCHOR_RIGHT               = 1 << 3,
-	RDE_UI_ANCHOR_TOP                 = 1 << 4,
-	RDE_UI_ANCHOR_BOTTOM              = 1 << 5
+	RDE_UI_ANCHOR_NO_ANCHOR           = 1 << 1,
+	RDE_UI_ANCHOR_MIDDLE              = 1 << 2,
+	RDE_UI_ANCHOR_LEFT                = 1 << 3,
+	RDE_UI_ANCHOR_RIGHT               = 1 << 4,
+	RDE_UI_ANCHOR_TOP                 = 1 << 5,
+	RDE_UI_ANCHOR_BOTTOM              = 1 << 6
 } RDE_UI_ANCHOR_;
 
 // Enum: RDE_UI_STRETCH_
@@ -2200,9 +2201,9 @@ typedef enum {
 // RDE_UI_STRETCH_VERTICAL_STRETCH - Will strech on the Y axis.
 // RDE_UI_STRETCH_HORIZONTAL_STRETCH - Will strech on the X axis.
 typedef enum {
-	RDE_UI_STRETCH_NO_STRETCH          = 1 << 6,
-	RDE_UI_STRETCH_VERTICAL_STRETCH    = 1 << 7,
-	RDE_UI_STRETCH_HORIZONTAL_STRETCH  = 1 << 8
+	RDE_UI_STRETCH_NO_STRETCH          = 1 << 1,
+	RDE_UI_STRETCH_VERTICAL_STRETCH    = 1 << 2,
+	RDE_UI_STRETCH_HORIZONTAL_STRETCH  = 1 << 3
 } RDE_UI_STRETCH_;
 
 // Enum: RDE_UNIFORM_FV_
@@ -2376,6 +2377,21 @@ typedef enum {
 	RDE_LOG_LEVEL_WARNING,
 	RDE_LOG_LEVEL_ERROR,
 } RDE_LOG_LEVEL_;
+
+// =================================================================== UI ===========================================================================
+
+typedef enum {
+	RDE_UI_ELEMENT_TYPE_IMAGE,
+	RDE_UI_ELEMENT_TYPE_TEXT
+} RDE_UI_ELEMENT_TYPE_;
+
+typedef enum {
+	RDE_UI_CONTAINER_STATE_MOUSE_NONE = 1,
+	RDE_UI_CONTAINER_STATE_MOUSE_ENTERED = 2,
+	RDE_UI_CONTAINER_STATE_MOUSE_EXITED = 4,
+	RDE_UI_CONTAINER_STATE_MOUSE_DOWN = 8,
+	RDE_UI_CONTAINER_STATE_MOUSE_UP = 16
+} RDE_UI_CONTAINER_STATE_;
 
 // =================================================================== IMGUI ========================================================================
 
@@ -2835,33 +2851,45 @@ typedef struct rde_model rde_model;
 // Type: rde_skybox_id
 // This is just an id to locate the skyboxes.
 typedef uint rde_skybox_id;
+
+// Type: rde_ui_container
+// Represents the basic group structure of the UI, it is an empty container which can contain several ui_elements and/or other containers.
 typedef struct rde_ui_container rde_ui_container;
+
+// Type: rde_ui_dynamic_layout
+// Represents layout data of containers and ui_elements, to make it adaptable to different screen sizes and resolutions.
+typedef struct rde_ui_dynamic_layout rde_ui_dynamic_layout;
+
+// Type: rde_ui_element
+// Represents the basic element structure of the UI, it may be a text or an image (nine-slice or not).
+typedef struct rde_ui_element rde_ui_element;
 
 // Type: rde_mesh
 // Represents a mesh, may be part of a model or not. This is just a pointer, implementation is in the source file.
 typedef struct rde_mesh rde_mesh;
 
 #ifdef RDE_IMGUI_MODULE
-typedef int rde_imgui_window_flags;       // -> enum ImGuiWindowFlags_     // Flags: for Begin(), BeginChild()
-typedef int rde_imgui_dock_node_flags;     // -> enum ImGuiDockNodeFlags_   // Flags: for DockSpace()
-typedef int rde_imgui_slider_flags;     // -> enum ImGuiSliderFlags_
-typedef unsigned int rde_imgui_id;// A unique ID used by widgets (typically the result of hashing a stack of string)
+// Type: rde_imgui_window_flags
+// Represents a combined number of rde_imgui_window_flags
+typedef int rde_imgui_window_flags;
+
+// Type: rde_imgui_dock_node_flags
+// Represents a combined number of rde_imgui_dock_node_flags
+typedef int rde_imgui_dock_node_flags;
+
+// Type: rde_imgui_slider_flags
+// Represents a combined number of rde_imgui_slider_flags
+typedef int rde_imgui_slider_flags;
+
+// Type: rde_imgui_id
+// Represents an ImGui ID.
+typedef unsigned int rde_imgui_id;
 #ifndef rde_imgui_texture_id
+// Type: rde_imgui_texture_id
+// Represents an ImGui texture ID.
 typedef void* rde_imgui_texture_id;
 #endif
 #endif
-
-typedef void (*rde_ui_container_callback_bd)(rde_ui_container* _container, int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
-typedef void (*rde_ui_container_callback_bu)(rde_ui_container* _container, int _button_down); // Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
-typedef void (*rde_ui_container_callback_scroll)(rde_ui_container* _container, rde_vec_2F _scroll);
-typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container* _container);
-typedef struct {
-	rde_ui_container_callback_bd on_button_down;
-	rde_ui_container_callback_bd on_button_up;
-	rde_ui_container_callback_scroll on_scroll;
-	rde_ui_container_callback_mouse_entered_exited on_mouse_enter;
-	rde_ui_container_callback_mouse_entered_exited on_mouse_exit;
-} rde_ui_container_callbacks;
 
 #ifdef RDE_PHYSICS_MODULE
 // Type: rde_physics_body_id
@@ -2877,8 +2905,16 @@ typedef struct rde_physics_shape rde_physics_shape;
 typedef struct rde_physics_body rde_physics_body;
 #endif
 
+// Type: rde_thread rde_thread
+// Represents a system independent thread.
 typedef struct rde_thread rde_thread;
+
+// Type: rde_thread_task
+// Represents the function and parameters of the function that a rde_thread will execute.
 typedef struct rde_thread_task rde_thread_task;
+
+// Type: rde_thread_pool
+// Represents a pool of threads, so a fixed amount of them is spawned and then re-used.
 typedef struct rde_thread_pool rde_thread_pool;
 
 // =================================================================== UTIL ====================================================================
@@ -3108,34 +3144,108 @@ typedef void (*rde_update_func)(float);
 //	_window - the pointer to the window that will render the scene.
 typedef void (*rde_render_func)(float, rde_window*);
 
+// Callback: rde_thread_fn
+// Function pointer (callback) for functions inside RDE's thread system.
+//
+// Parameters:
+//	_thread - thread where the function is being executed.
+// _params - any parameters that the executing function may need.
 typedef void* (*rde_thread_fn)(rde_thread*, void*);
+
+// Callback: rde_thread_foreach_fn
+// Function pointer (callback) for functions inside RDE's thread system when using rde_thread_foreach function.
+//
+// Parameters:
+//	_thread - thread where the function is being executed.
+// _params - any parameters that the executing function may need.
+// _index - current index of the element on the looped array.
 typedef void (*rde_thread_foreach_fn)(rde_thread*, void*, uint);
+
+// Callback: rde_thread_task_fn
+// Function pointer (callback) for functions inside RDE's thread system when using rde_thread_pool.
+//
+// Parameters:
+// _params - any parameters that the executing function may need.
 typedef void(*rde_thread_task_fn)(void*);
 
 #ifdef RDE_PHYSICS_MODULE
-// Callback: rde_render_func
-// Function pointer (callback) valid for render function. Users need one of these callbacks per function.
+// Callback: rde_physics_error_fn
+// Function pointer (callback) for handling errors on the physics system.
 //
 // Parameters:
-//	_dt - delta time passed between frames.
-//	_window - the pointer to the window that will render the scene.
+//	_error - if the error happened or not.
+//	_error_msg - formatted error message.
 typedef void(*rde_physics_error_fn)(bool, const char*, ...);
-typedef void(*rde_physics_log_fn)(RDE_LOG_LEVEL_, const char*, ...);
-typedef rde_vec_3F(*rde_physics_transform_get_pos)(rde_transform*);
-typedef rde_vec_3F(*rde_physics_transform_get_rot)(rde_transform*);
-typedef void(*rde_physics_transform_set_pos)(rde_transform*, rde_vec_3F);
-typedef void(*rde_physics_transform_set_rot)(rde_transform*, rde_vec_3F);
-typedef void(*rde_physics_body_iter_callback_fn)(rde_physics_body*, rde_physics_shape*, rde_transform*);
 
-typedef struct {
-	rde_physics_error_fn error_fn;
-	rde_physics_log_fn log_fn;
-	rde_physics_transform_get_pos get_pos_fn;
-	rde_physics_transform_get_rot get_rot_fn;
-	rde_physics_transform_set_pos set_pos_fn;
-	rde_physics_transform_set_rot set_rot_fn;
-} rde_physics_callbacks;
+// Callback: rde_physics_log_fn
+// Function pointer (callback) for logging on the physics system.
+//
+// Parameters:
+//	_log_level - log level of the log.
+//	_msg - formatted message.
+typedef void(*rde_physics_log_fn)(RDE_LOG_LEVEL_, const char*, ...);
+
+// Callback: rde_physics_transform_get_pos
+// Function pointer (callback) for getting an RDE's transform position on the physics system.
+//
+// Parameters:
+//	_transform - RDE transform.
+typedef rde_vec_3F(*rde_physics_transform_get_pos)(rde_transform*);
+
+// Callback: rde_physics_transform_get_rot
+// Function pointer (callback) for getting an RDE's transform rotation (euler angles in degrees) on the physics system.
+//
+// Parameters:
+//	_transform - RDE transform.
+typedef rde_vec_3F(*rde_physics_transform_get_rot)(rde_transform*);
+
+// Callback: rde_physics_transform_set_pos
+// Function pointer (callback) for setting an RDE's transform position on the physics system.
+//
+// Parameters:
+//	_transform - RDE transform.
+//	_position - position of the transform.
+typedef void(*rde_physics_transform_set_pos)(rde_transform*, rde_vec_3F);
+
+// Callback: rde_physics_transform_set_rot
+// Function pointer (callback) for setting an RDE's transform rotation on the physics system.
+//
+// Parameters:
+//	_transform - RDE transform.
+//	_rotation - rotation (euler angles in degrees) of the transform.
+typedef void(*rde_physics_transform_set_rot)(rde_transform*, rde_vec_3F);
+
+// Callback: rde_physics_body_iter_callback_fn
+// Function pointer (callback) for iterating over all existing physics bodies on the physics system.
+//
+// Parameters:
+//	_physics_body - current physics body of the iteration.
+//	_physics_shape - current physics shape of the iteration.
+//	_transform - current transform of the iteration.
+typedef void(*rde_physics_body_iter_callback_fn)(rde_physics_body*, rde_physics_shape*, rde_transform*);
 #endif
+
+// Callback: rde_ui_container_callback_bd
+// Represents a callback in the UI system for button down. Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+//
+// Parameters:
+//	_container - container that triggered the button down event.
+//	_button_down - button down that triggered the even. RDE_MOUSE_BUTTON_ if it was a button, RDE_CONTROLLER_BUTTON_ if it was a controller or touch id if it was mobile.
+typedef void (*rde_ui_container_callback_bd)(rde_ui_container*, int);
+
+// Callback: rde_ui_container_callback_bu
+// Represents a callback in the UI system for button up. Convert to RDE_MOUSE_BUTTON_ on desktop (or controller button) and to touch id in mobile
+typedef void (*rde_ui_container_callback_bu)(rde_ui_container*, int);
+
+// Callback: rde_ui_container_callback_scroll
+// Represents a callback in the UI system for mouse scrolling.
+typedef void (*rde_ui_container_callback_scroll)(rde_ui_container*, rde_vec_2F);
+
+// Callback: rde_ui_container_callback_mouse_entered_exited
+// Represents a callback in the UI system for mouse entering or exiting a container.
+typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container*);
+
+// =================================================================== ENGINE ===================================================================
 
 // Type: rde_end_user_mandatory_callbacks
 // All callbacks that end user must provide for the engine to work.
@@ -3151,8 +3261,6 @@ typedef struct {
 	rde_update_func on_late_update;
 	rde_render_func on_render;
 } rde_end_user_mandatory_callbacks;
-
-// =================================================================== ENGINE ===================================================================
 
 // Type: rde_engine_heap_allocs_config
 // Struct that contains values to allocate on heap when the engine is loading for the first time. In general, those are the only allocations the engine will do internally during the whole program's lifetime.
@@ -3520,26 +3628,32 @@ typedef struct {
 	uint vertices_count;
 } rde_polygon;
 
+// =================================================================== UI ===================================================================
+
+typedef struct {
+	rde_ui_container_callback_bd on_button_down;
+	rde_ui_container_callback_bd on_button_up;
+	rde_ui_container_callback_scroll on_scroll;
+	rde_ui_container_callback_mouse_entered_exited on_mouse_enter;
+	rde_ui_container_callback_mouse_entered_exited on_mouse_exit;
+} rde_ui_container_callbacks;
+
 typedef struct {
 	rde_vec_2UI left_right;
 	rde_vec_2UI bottom_top;
 	rde_vec_2UI size;
 } rde_ui_nine_slice;
-RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice(void);
 
 typedef struct {
 	rde_ui_nine_slice nine_slice;
 	rde_texture* texture;
-	rde_vec_2UI size;
 } rde_ui_element_image_data;
-RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data(void);
 
 typedef struct {
 	rde_font* font;
 	char* text;
 	size_t font_size;
 } rde_ui_element_text_data;
-RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data(void);
 
 typedef struct {
 	rde_vec_2UI size;
@@ -3548,48 +3662,6 @@ typedef struct {
 	rde_ui_element_image_data image_selected;
 	rde_ui_element_text_data text;
 } rde_ui_button_data;
-RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
-
-typedef enum {
-	RDE_UI_ELEMENT_TYPE_IMAGE,
-	RDE_UI_ELEMENT_TYPE_TEXT
-} RDE_UI_ELEMENT_TYPE_;
-
-typedef enum {
-	RDE_UI_CONTAINER_STATE_MOUSE_NONE = 1,
-	RDE_UI_CONTAINER_STATE_MOUSE_ENTERED = 2,
-	RDE_UI_CONTAINER_STATE_MOUSE_EXITED = 4,
-	RDE_UI_CONTAINER_STATE_MOUSE_DOWN = 8,
-	RDE_UI_CONTAINER_STATE_MOUSE_UP = 16
-} RDE_UI_CONTAINER_STATE_;
-
-typedef struct {
-	rde_transform* transform;
-	RDE_UI_ELEMENT_TYPE_ type;
-	RDE_UI_STRETCH_ stretch;
-	RDE_UI_ANCHOR_ anchor;
-	bool enabled;
-	
-	union {
-		rde_ui_element_image_data image;
-		rde_ui_element_text_data text;
-	};
-
-} rde_ui_element;
-RDE_FUNC rde_ui_element rde_struct_create_ui_element(RDE_UI_ELEMENT_TYPE_ _type);
-
-struct rde_ui_container {
-	rde_vec_2UI size;
-	rde_transform* transform;
-	rde_ui_element* elements;
-	rde_ui_container* containers;
-	rde_ui_container_callbacks callbacks;
-	bool used;
-	RDE_UI_STRETCH_ stretch;
-	RDE_UI_ANCHOR_ anchor;
-	RDE_UI_CONTAINER_STATE_ event_state;
-};
-RDE_FUNC rde_ui_container rde_struct_create_ui_container(void);
 
 // =================================================================== AUDIO ===================================================================
 
@@ -3602,6 +3674,17 @@ typedef struct {
 } rde_sound_config;
 RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 #endif
+
+// =================================================================== PHYSICS ===========================================================================================
+
+typedef struct {
+	rde_physics_error_fn error_fn;
+	rde_physics_log_fn log_fn;
+	rde_physics_transform_get_pos get_pos_fn;
+	rde_physics_transform_get_rot get_rot_fn;
+	rde_physics_transform_set_pos set_pos_fn;
+	rde_physics_transform_set_rot set_rot_fn;
+} rde_physics_callbacks;
 
 // 											==============================================================================
 // 											=								GLOBAL VARIABLES					 	   	 =
@@ -3802,6 +3885,21 @@ RDE_FUNC rde_color rde_struct_create_color(void);
 
 // Constructor: rde_struct_create_polygon
 RDE_FUNC rde_polygon rde_struct_create_polygon(void);
+
+// Constructor: rde_struct_create_ui_nine_slice
+RDE_FUNC rde_ui_nine_slice rde_struct_create_ui_nine_slice(void);
+
+// Constructor: rde_struct_create_ui_element_image_data
+RDE_FUNC rde_ui_element_image_data rde_struct_create_ui_element_image_data(void);
+
+// Constructor: rde_struct_create_ui_element_text_data
+RDE_FUNC rde_ui_element_text_data rde_struct_create_ui_element_text_data(void);
+
+// Constructor: rde_struct_create_ui_container_button_data
+RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
+
+// Constructor: rde_struct_create_ui_container_callbacks
+RDE_FUNC rde_ui_container_callbacks rde_struct_create_ui_container_callbacks(void);
 
 // =================================================================== LOG ===================================================================
 
@@ -4440,6 +4538,10 @@ RDE_FUNC void rde_window_set_window_title(rde_window* _window, const char* _titl
 //	_window - window to get the orientation.
 RDE_FUNC bool rde_window_orientation_is_horizontal(rde_window* _window);
 
+// Function: rde_window_get_focused_window
+// Returns the current selected window.
+RDE_FUNC rde_window* rde_window_get_focused_window(void);
+
 // Function: rde_window_take_screenshot
 // Takes a screenshot of a window and saves it to a file.
 //
@@ -4556,6 +4658,15 @@ RDE_FUNC void rde_events_drag_and_drop_consume_events(rde_event* _event, rde_win
 //	_window - window where the event happened.
 RDE_FUNC void rde_events_mobile_consume_events(rde_event* _event, rde_window* _window);
 
+// Function: rde_events_ui_poll
+// Takes and tries to handle ui events for a window. This method MUST be called by end-user if interaction with the UI system is expected.
+//
+// Parameters:
+//	_window - window where the event happened.
+//	_event - event to be handled.
+//	_container - UI root container.
+RDE_FUNC void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container);
+
 // Function: rde_events_is_key_just_pressed
 // Returns true if a key on a window has just been pressed, this function will only return true during 1 frame
 //
@@ -4648,8 +4759,6 @@ RDE_FUNC bool rde_events_is_mobile_touch_released(rde_window* _window, uint _fin
 // Parameters:
 //	_window - window to check the event.
 RDE_FUNC uint rde_events_mobile_get_finger_amount(rde_window* _window);
-
-RDE_FUNC void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container* _container);
 
 // =================================================================== RENDERING ===================================================================
 
@@ -4997,6 +5106,15 @@ RDE_FUNC void rde_rendering_2d_draw_memory_texture(const rde_transform* _transfo
 //	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_2d_draw_text(const rde_transform* _transform, const rde_font* _font, const char* _text, rde_color _tint_color, rde_shader* _shader);
 
+// Function: rde_rendering_2d_draw_nine_slice
+// Draws a texture with 9-Slice settings on the screen.
+//
+// Parameters:
+//	_transform - transform of the texture.
+//	_texture - texture data.
+//	_nine_slice - nine slice settings.
+//	_tint_color - color to tint the texture. Use RDE_COLOR_WHITE if no tint is needed.
+//	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_2d_draw_nine_slice(const rde_transform* _transform, const rde_texture* _texture, rde_ui_nine_slice _nine_slice, rde_color _tint_color, rde_shader* _shader);
 
 // Function: rde_rendering_2d_end_drawing
@@ -5236,11 +5354,30 @@ RDE_FUNC void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _came
 // Works like <rde_rendering_3d_end_drawing> but it renders shadows of everything inside.
 RDE_FUNC void rde_rendering_shadows_end(void);
 
+// =================================================================== UI ===================================================================
+
 RDE_FUNC rde_ui_container* rde_ui_container_load_root(rde_vec_2UI _size);
 RDE_FUNC rde_ui_element* rde_ui_add_image(rde_ui_container* _container, rde_ui_element_image_data _image_data);
 RDE_FUNC rde_ui_element* rde_ui_add_text(rde_ui_container* _container, rde_ui_element_text_data _text_data);
 RDE_FUNC rde_ui_container* rde_ui_add_button(rde_ui_container* _container, rde_ui_button_data _button_data);
 RDE_FUNC rde_ui_container* rde_ui_add_button_default(rde_ui_container* _container, rde_vec_2UI _size, char* _text);
+RDE_FUNC RDE_UI_ANCHOR_ rde_ui_container_get_anchor(rde_ui_container* _container);
+RDE_FUNC RDE_UI_STRETCH_ rde_ui_container_get_stretch(rde_ui_container* _container);
+RDE_FUNC RDE_UI_ANCHOR_ rde_ui_element_get_anchor(rde_ui_element* _element);
+RDE_FUNC RDE_UI_STRETCH_ rde_ui_element_get_stretch(rde_ui_element* _element);
+RDE_FUNC void rde_ui_container_set_anchor_and_strecth(rde_ui_container* _container, RDE_UI_ANCHOR_ _anchor, RDE_UI_STRETCH_ _stretch);
+RDE_FUNC void rde_ui_element_set_anchor_and_strecth(rde_ui_element* _ui_element, RDE_UI_ANCHOR_ _anchor, RDE_UI_STRETCH_ _stretch);
+RDE_FUNC void rde_ui_container_set_parent(rde_ui_container* _container, rde_ui_container* _parent);
+RDE_FUNC rde_ui_container* rde_ui_container_get_parent(rde_ui_container* _container);
+RDE_FUNC rde_vec_3F rde_ui_container_get_offset_position(rde_ui_container* _container);
+RDE_FUNC rde_vec_3F rde_ui_element_get_offset_position(rde_ui_element* _element);
+RDE_FUNC void rde_ui_container_set_offset_position(rde_ui_container* _container, rde_vec_3F _offset_position);
+RDE_FUNC void rde_ui_element_set_offset_position(rde_ui_element* _element, rde_vec_3F _offset_position);
+RDE_FUNC rde_vec_2F rde_ui_container_get_percentual_size(rde_ui_container* _container);
+RDE_FUNC rde_vec_2F rde_ui_element_get_percentual_size(rde_ui_element* _element);
+RDE_FUNC void rde_ui_container_set_percentual_size(rde_ui_container* _container, rde_vec_2F _percentual_size);
+RDE_FUNC void rde_ui_element_set_percentual_size(rde_ui_element* _element, rde_vec_2F _percentual_size);
+RDE_FUNC void rde_ui_container_set_callbacks(rde_ui_container* _container, rde_ui_container_callbacks _callbacks);
 RDE_FUNC void rde_rendering_draw_ui(rde_ui_container* _container);
 RDE_FUNC void rde_ui_container_unload_root(rde_ui_container* _container);
 
