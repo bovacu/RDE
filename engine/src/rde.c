@@ -943,6 +943,7 @@ struct rde_engine {
 #ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
 	ma_device miniaudio_device;
+	ma_device_config ma_device_config;
 	rde_sound_config device_config;
 #endif
 		
@@ -2932,14 +2933,13 @@ bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
 		}
 	}
 
-	rde_free(_pool->threads);
-	rde_free(_pool->tasks);
-	rde_free(_pool->contexts);
-
 	RDE_LOCK_MUTEX(_pool);
 	RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
 
 	_pool->window = NULL;
+	rde_free(_pool->threads);
+	rde_free(_pool->tasks);
+	rde_free(_pool->contexts);
 	rde_free(_pool);
 	return true;
 }
@@ -9404,25 +9404,67 @@ void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container
 	rde_inner_events_ui_poll(_window, _event, _container, &_handled);
 }
 
-
 #ifdef RDE_AUDIO_MODULE
 
 // ==============================================================================
 // =							PRIVATE API - AUDIO					 	    =
 // ==============================================================================
 
-// TODO: use this https://github.com/raysan5/raylib/blob/master/src/raudio.c as a reference, raylib does a more
-// complex implementation that what I need, but it is a really good implementation on how to mix sounds with 
-// mini audio and how to load different audio formats
+ma_uint32 read_and_mix_pcm_frames_f32(ma_decoder* _decoder, float* _output_f32, ma_uint32 _frame_count) {
+    /*
+    The way mixing works is that we just read into a temporary buffer, then take the contents of that buffer and mix it with the
+    contents of the output buffer by simply adding the samples together. You could also clip the samples to -1..+1, but I'm not
+    doing that in this example.
+    */
+    ma_result _result;
+    float _temp[4096];
+    ma_uint32 _tempCapInFrames = ma_countof(_temp) / ENGINE.device_config.channels;
+    ma_uint32 _total_frames_read = 0;
+
+    while (_total_frames_read < _frame_count) {
+        ma_uint64 _i_sample;
+        ma_uint64 _frames_read_this_iteration;
+        ma_uint32 _total_frames_remaining = _frame_count - _total_frames_read;
+        ma_uint32 _frames_to_read_this_iteration = _tempCapInFrames;
+        if (_frames_to_read_this_iteration > _total_frames_remaining) {
+            _frames_to_read_this_iteration = _total_frames_remaining;
+        }
+
+        _result = ma_decoder_read_pcm_frames(_decoder, _temp, _frames_to_read_this_iteration, &_frames_read_this_iteration);
+        if (_result != MA_SUCCESS || _frames_read_this_iteration == 0) {
+            break;
+        }
+
+        for (_i_sample = 0; _i_sample < _frames_read_this_iteration*ENGINE.device_config.channels; ++_i_sample) {
+            _output_f32[_total_frames_read * ENGINE.device_config.channels + _i_sample] += _temp[_i_sample];
+        }
+
+        _total_frames_read += (ma_uint32)_frames_read_this_iteration;
+
+        if (_frames_read_this_iteration < (ma_uint32)_frames_to_read_this_iteration) {
+            break;
+        }
+    }
+    
+    return _total_frames_read;
+}
 
 void data_callback(ma_device* _device, void* _output, const void* _input, ma_uint32 _frame_count) {
 	(void)_device;
 	(void)_input;
+	float* _output_f32 = (float*)_output;
+	MA_ASSERT(_device->playback.format == ENGINE.ma_device_config.playback.format);
 
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
 		if(_sound->used && _sound->playing) {
-			ma_data_source_read_pcm_frames(&_sound->miniaudio_decoder, _output, _frame_count, NULL);
+			 ma_uint32 _read = read_and_mix_pcm_frames_f32(&_sound->miniaudio_decoder, _output_f32, _frame_count);
+			 if(_read < _frame_count) {
+				 ma_decoder_seek_to_pcm_frame(&_sound->miniaudio_decoder, 0);
+				 if(!_sound->looping) {
+					 _sound->playing = false;
+				}
+			}
 		}
 	}
 }
@@ -9461,6 +9503,7 @@ void rde_audio_init(rde_sound_config _config) {
 
 	is_miniaudio_initialized = true;
 	ENGINE.device_config = _config;
+	ENGINE.ma_device_config = _device_config;
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Initiated audio module correctly");
 }
 
@@ -9497,7 +9540,10 @@ void rde_audio_unload_sound(rde_sound* _sound) {
 
 void rde_audio_play_sound(rde_sound* _sound) {
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
-
+	if(_sound->playing) {
+		ma_decoder_seek_to_pcm_frame(&_sound->miniaudio_decoder, 0);
+	}
+	
 	_sound->playing = true;
 	_sound->paused = false;
 	_sound->played_frame = 0;
