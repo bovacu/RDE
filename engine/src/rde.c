@@ -883,11 +883,9 @@ typedef struct {
 	size_t size_of_type;
 } rde_thread_foreach_params;
 
-#define RDE_INNER_CONCATENATE(_s1, _s2) _s1##_s2
-#define RDE_INNER_EXPAND_THEN_CONCATENATE(_s1, _s2) RDE_INNER_CONCATENATE(_s1, _s2)
 #define RDE_CL static_assert(__COUNTER__ + 1, "");
-#define RDE_SCL(_count_name) enum { RDE_INNER_EXPAND_THEN_CONCATENATE(_count_name, _start) = __COUNTER__ };
-#define RDE_ECL(_count_name) enum { _count_name = __COUNTER__ - RDE_INNER_EXPAND_THEN_CONCATENATE(_count_name, _start) - 1 };
+#define RDE_SCL(_count_name) enum { _count_name##_start = __COUNTER__ };
+#define RDE_ECL(_count_name) enum { _count_name = __COUNTER__ - _count_name##_start - 1 };
 
 /// Engine
 struct rde_engine {
