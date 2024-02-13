@@ -883,6 +883,12 @@ typedef struct {
 	size_t size_of_type;
 } rde_thread_foreach_params;
 
+#define RDE_INNER_CONCATENATE(_s1, _s2) _s1##_s2
+#define RDE_INNER_EXPAND_THEN_CONCATENATE(_s1, _s2) RDE_INNER_CONCATENATE(_s1, _s2)
+#define RDE_CL static_assert(__COUNTER__ + 1, "");
+#define RDE_SCL(_count_name) enum { RDE_INNER_EXPAND_THEN_CONCATENATE(_count_name, _start) = __COUNTER__ };
+#define RDE_ECL(_count_name) enum { _count_name = __COUNTER__ - RDE_INNER_EXPAND_THEN_CONCATENATE(_count_name, _start) - 1 };
+
 /// Engine
 struct rde_engine {
 	float delta_time;
@@ -910,19 +916,20 @@ struct rde_engine {
 	JNIEnv* android_env;
 #endif
 
-#define RDE_SHADERS_AMOUNT 9
-	rde_shader* line_shader;
-	rde_shader* color_shader_2d;
-	rde_shader* texture_shader_2d;
-	rde_shader* nine_patch_shader_2d;
-	rde_shader* text_shader_2d;
-	rde_shader* framebuffer_shader;
-	rde_shader* mesh_shader;
-	rde_shader* mesh_shadows_shader;
-	rde_shader* render_texture_shader;
-	rde_shader* skybox_shader;
-	rde_shader* shadows_shader;
-	rde_shader* shaders;
+	RDE_SCL(RDE_SHADERS_AMOUNT)
+	rde_shader* line_shader;			RDE_CL
+	rde_shader* color_shader_2d;		RDE_CL
+	rde_shader* texture_shader_2d;		RDE_CL
+	rde_shader* nine_patch_shader_2d;	RDE_CL
+	rde_shader* text_shader_2d;			RDE_CL
+	rde_shader* framebuffer_shader;		RDE_CL
+	rde_shader* mesh_shader;			RDE_CL
+	rde_shader* mesh_shadows_shader;	RDE_CL
+	rde_shader* render_texture_shader;	RDE_CL
+	rde_shader* skybox_shader;			RDE_CL
+	rde_shader* shadows_shader;			RDE_CL
+	rde_shader* shaders;				RDE_CL
+	RDE_ECL(RDE_SHADERS_AMOUNT)
 	
 	size_t total_amount_of_textures;
 	
