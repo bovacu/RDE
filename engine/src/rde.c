@@ -463,11 +463,14 @@ size_t current_frame = 0;
 #define RDE_WARNING_MOBILE_FINGER_INPUT "Maximum number of fingers '%d' reached on mobile, ignoring this one \n."
 
 #ifdef RDE_AUDIO_MODULE
-#define RDE_ERROR_MA_CONTEXT "Failed to initialize context.\n"
-#define RDE_ERROR_MA_DEVICE_INFO "Failed to retrieve device information.\n"
+#define RDE_ERROR_MA_CONTEXT "Failed to initialize context. Error code for MiniAudio %d\n"
+#define RDE_ERROR_MA_DEVICE_INFO "Failed to retrieve device information. Error code for MiniAudio %d\n"
+#define RDE_ERROR_MA_RESOURCE_MANAGER_INIT "Could not init audio resource manager. Error code for MiniAudio %d\n"
+#define RDE_ERROR_MA_ENGINE_INIT "Could not init audio engine. Error code for MiniAudio %d\n"
+#define RDE_ERROR_MA_ENGINE_START "Could not start audio engine. Error code for MiniAudio %d\n"
 #define RDE_ERROR_MA_DEVICE_INIT "Could not init audio device. Error code for MiniAudio %d\n"
 #define RDE_ERROR_MA_DEVICE_START "Could not start the audio device to play sounds. Error code for MiniAudio %d\n"
-#define RDE_ERROR_MA_FILE_NOT_FOUND "Could not load sound '%s'. error code for MiniAudio %d.\n"
+#define RDE_ERROR_MA_SOUND_INIT "Could not load sound '%s'. error code for MiniAudio %d.\n"
 #endif
 
 #define RDE_ERROR_RENDERING_TEXTURE_UNSUPPORTED_FORMAT "Tried to load model '%s' which has an unsupported format '%s'. Valid formats are [png,jpeg,jpg]."
@@ -808,16 +811,17 @@ typedef struct {
 
 /// Audio
 #ifdef RDE_AUDIO_MODULE
+typedef enum {
+	RDE_SOUND_STATE_NONE,
+	RDE_SOUND_STATE_LOADED,
+	RDE_SOUND_STATE_PLAYING,
+	RDE_SOUND_STATE_STOPPED,
+	RDE_SOUND_STATE_ENDED
+} RDE_SOUND_STATE_;
 struct rde_sound {
-	bool used;
-		
-	bool playing;
-	bool paused;
+	RDE_SOUND_STATE_ state;
 	bool looping;
-	
-	size_t played_frame;
-	
-	ma_decoder miniaudio_decoder;
+	ma_sound engine_sounds[RDE_MAX_AUDIO_ENGINES];
 };
 #endif
 
@@ -947,9 +951,14 @@ struct rde_engine {
 	
 #ifdef RDE_AUDIO_MODULE
 	rde_sound* sounds;
-	ma_device miniaudio_device;
-	ma_device_config ma_device_config;
-	rde_sound_config device_config;
+	ma_resource_manager audio_resource_manager;
+	ma_context audio_context;
+	ma_engine audio_engines[RDE_MAX_AUDIO_ENGINES];
+	uint audio_current_engine_index;
+	ma_engine_config audio_engine_configs[RDE_MAX_AUDIO_ENGINES];
+	ma_device audio_devices[RDE_MAX_AUDIO_ENGINES];
+	ma_device_config audio_device_configs[RDE_MAX_AUDIO_ENGINES];
+	uint audio_engines_count;
 #endif
 		
 	rde_event_func window_events[RDE_WIN_EVENT_COUNT];
@@ -1495,11 +1504,9 @@ rde_ui_container rde_struct_create_ui_container() {
 #ifdef RDE_AUDIO_MODULE
 rde_sound rde_struct_create_sound(void) {
 	rde_sound _s;
-	_s.used = false;
-	_s.playing = false;
-	_s.paused = false;
+	_s.state = RDE_SOUND_STATE_NONE;
 	_s.looping = false;
-	_s.played_frame = 0;
+	memset(_s.engine_sounds, 0, sizeof(_s.engine_sounds));
 	return _s;
 }
 
@@ -1663,6 +1670,8 @@ rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 			_e.sounds[_i] = rde_struct_create_sound();
 		}
 	}
+	_e.audio_engines_count = 0;
+	_e.audio_current_engine_index = 0;
 #endif
 
 	for(unsigned int _i = 0; _i < RDE_WIN_EVENT_COUNT; _i++) { 
@@ -1903,8 +1912,11 @@ void rde_inner_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_con
 
 /// ******************************************* AUDIO *********************************************
 
-#ifdef RDE_MODULE_AUDIO
-void data_callback(ma_device* _device, void* _output, const void* _input, ma_uint32 _frame_count);
+#ifdef RDE_AUDIO_MODULE
+void rde_inner_audio_init();
+void rde_inner_audio_data_callback(ma_device* _device, void* _output, const void* _input, ma_uint32 _frame_count);
+void rde_inner_audio_on_sound_end(void* _user_data, ma_sound* _sound);
+void rde_inner_audio_end();
 #endif
 
 /// ******************************************* UI ************************************************
@@ -2292,6 +2304,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 	rde_physics_init(_engine_init_info.jolt_config, _callbacks);
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Jolt loaded correctly");
 #endif
+	
+#ifdef RDE_AUDIO_MODULE
+	rde_inner_audio_init();
+#endif
 
 	srand(time(NULL));
 
@@ -2603,7 +2619,7 @@ void rde_engine_destroy_engine(void) {
 	}
 
 #ifdef RDE_AUDIO_MODULE
-	rde_audio_end();
+	rde_inner_audio_end();
 	rde_free(ENGINE.sounds);
 #endif
 
@@ -9410,191 +9426,348 @@ void rde_events_ui_poll(rde_window* _window, rde_event* _event, rde_ui_container
 	rde_inner_events_ui_poll(_window, _event, _container, &_handled);
 }
 
+
+
+
+// ==============================================================================
+// =							PRIVATE API - AUDIO					 	     	=
+// ==============================================================================
+
 #ifdef RDE_AUDIO_MODULE
-
-// ==============================================================================
-// =							PRIVATE API - AUDIO					 	    =
-// ==============================================================================
-
-ma_uint32 read_and_mix_pcm_frames_f32(ma_decoder* _decoder, float* _output_f32, ma_uint32 _frame_count) {
-    /*
-    The way mixing works is that we just read into a temporary buffer, then take the contents of that buffer and mix it with the
-    contents of the output buffer by simply adding the samples together. You could also clip the samples to -1..+1, but I'm not
-    doing that in this example.
-    */
-    ma_result _result;
-    float _temp[4096];
-    ma_uint32 _tempCapInFrames = ma_countof(_temp) / ENGINE.device_config.channels;
-    ma_uint32 _total_frames_read = 0;
-
-    while (_total_frames_read < _frame_count) {
-        ma_uint64 _i_sample;
-        ma_uint64 _frames_read_this_iteration;
-        ma_uint32 _total_frames_remaining = _frame_count - _total_frames_read;
-        ma_uint32 _frames_to_read_this_iteration = _tempCapInFrames;
-        if (_frames_to_read_this_iteration > _total_frames_remaining) {
-            _frames_to_read_this_iteration = _total_frames_remaining;
-        }
-
-        _result = ma_decoder_read_pcm_frames(_decoder, _temp, _frames_to_read_this_iteration, &_frames_read_this_iteration);
-        if (_result != MA_SUCCESS || _frames_read_this_iteration == 0) {
-            break;
-        }
-
-        for (_i_sample = 0; _i_sample < _frames_read_this_iteration*ENGINE.device_config.channels; ++_i_sample) {
-            _output_f32[_total_frames_read * ENGINE.device_config.channels + _i_sample] += _temp[_i_sample];
-        }
-
-        _total_frames_read += (ma_uint32)_frames_read_this_iteration;
-
-        if (_frames_read_this_iteration < (ma_uint32)_frames_to_read_this_iteration) {
-            break;
-        }
-    }
-    
-    return _total_frames_read;
+void rde_inner_audio_data_callback(ma_device* _device, void* _output, const void* _input, ma_uint32 _frame_count) {
+	(void)_input;
+	(void)_output;
+	(void)_frame_count;
+	ma_engine* _engine = (ma_engine*)_device->pUserData;
+	ma_engine_read_pcm_frames(_engine, _output, _frame_count, NULL);
 }
 
-void data_callback(ma_device* _device, void* _output, const void* _input, ma_uint32 _frame_count) {
-	(void)_device;
-	(void)_input;
-	float* _output_f32 = (float*)_output;
-	MA_ASSERT(_device->playback.format == ENGINE.ma_device_config.playback.format);
-
-	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
-		rde_sound* _sound = &ENGINE.sounds[_i];
-		if(_sound->used && _sound->playing) {
-			 ma_uint32 _read = read_and_mix_pcm_frames_f32(&_sound->miniaudio_decoder, _output_f32, _frame_count);
-			 if(_read < _frame_count) {
-				 ma_decoder_seek_to_pcm_frame(&_sound->miniaudio_decoder, 0);
-				 if(!_sound->looping) {
-					 _sound->playing = false;
-				}
-			}
-		}
+void rde_inner_audio_on_sound_end(void* _user_data, ma_sound* _sound) {
+	RDE_UNUSED(_sound)
+	rde_sound* _rde_sound = (rde_sound*)_user_data;
+	if(!_rde_sound->looping) {
+		_rde_sound->state = RDE_SOUND_STATE_ENDED;
 	}
 }
 
-
+#define ma_apply(_code)													\
+	for(uint _i = 0; _i < ENGINE.audio_engines_count; _i++) {			\
+		_code															\
+	}
+	
 // ==============================================================================
-// =							PUBLIC API - AUDIO					 	     =
+// =							PUBLIC API - AUDIO					 	     	=
 // ==============================================================================
 
-void rde_audio_init(rde_sound_config _config) {
-	ma_context _context;
+void rde_inner_audio_init() {
+	ma_resource_manager_config _resource_config = ma_resource_manager_config_init();
+	_resource_config.decodedFormat = ma_format_f32;
+	_resource_config.decodedChannels = 0; // Automatic channel detection
+	_resource_config.decodedSampleRate = 48000;
+	ma_result _resource_manager_init_res = ma_resource_manager_init(&_resource_config, &ENGINE.audio_resource_manager);
+	rde_critical_error(_resource_manager_init_res != MA_SUCCESS, RDE_ERROR_MA_RESOURCE_MANAGER_INIT, _resource_manager_init_res);
+	
+	ma_result _context_init_res = ma_context_init(NULL, 0, NULL, &ENGINE.audio_context);
+	rde_critical_error(_context_init_res != MA_SUCCESS, RDE_ERROR_MA_CONTEXT, _context_init_res);
+	
 	ma_device_info* _playback_devices_info;
 	ma_uint32 _playback_device_count;
 	ma_device_info* _capture_device_infos;
 	ma_uint32 _capture_device_count;
-	// ma_uint32 iDevice;
-
-	rde_critical_error(ma_context_init(NULL, 0, NULL, &_context) != MA_SUCCESS, RDE_ERROR_MA_CONTEXT);
-	rde_critical_error(ma_context_get_devices(&_context, &_playback_devices_info, &_playback_device_count, &_capture_device_infos, &_capture_device_count) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INFO);
-
-	// printf("Playback Devices\n");
-	// for (iDevice = 0; iDevice < _playback_device_count; ++iDevice) {
-	// 	printf("    %u: %s\n", iDevice, _playback_devices_info[iDevice].name);
-	// }
-
-	ma_device_config _device_config = ma_device_config_init(ma_device_type_playback);
-	_device_config.playback.format = DEFAULT_FORMAT;
-	_device_config.playback.channels = _config.channels;
-	//_device_config.playback.pDeviceID = &_playback_devices_info[2].id;
-	_device_config.sampleRate = _config.rate;
-	_device_config.dataCallback = data_callback;
-	_device_config.pUserData = NULL;
-
-	rde_critical_error(ma_device_init(NULL, &_device_config, &ENGINE.miniaudio_device) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INIT);
-	rde_critical_error(ma_device_start(&ENGINE.miniaudio_device) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_START);
-
+	ma_result _devices_info_res = ma_context_get_devices(&ENGINE.audio_context, &_playback_devices_info, &_playback_device_count, &_capture_device_infos, &_capture_device_count);
+	rde_critical_error(_devices_info_res != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INFO, _devices_info_res);
+ 
+	if(_playback_device_count == 0) {
+		rde_log_level(RDE_LOG_LEVEL_WARNING, "No valid audio device where detected on the system, so audio module will be disabled \n");
+		return;
+	}
+	
+	printf("Playback Devices\n");
+	for (ma_uint32 _i = 0; _i < (_playback_device_count <= RDE_MAX_AUDIO_ENGINES ? _playback_device_count : RDE_MAX_AUDIO_ENGINES); ++_i) {
+		printf("    %u: %s. Is Default? %d\n", _i, _playback_devices_info[_i].name, _playback_devices_info[_i].isDefault == MA_TRUE ? 1 : 0);
+		ENGINE.audio_device_configs[_i] = ma_device_config_init(ma_device_type_playback);
+		ENGINE.audio_device_configs[_i].playback.pDeviceID = &_playback_devices_info[_i].id;
+		ENGINE.audio_device_configs[_i].playback.format = _resource_config.decodedFormat;
+		ENGINE.audio_device_configs[_i].playback.channels = 0;
+		ENGINE.audio_device_configs[_i].sampleRate = _resource_config.decodedSampleRate;
+		ENGINE.audio_device_configs[_i].dataCallback = rde_inner_audio_data_callback;
+		ENGINE.audio_device_configs[_i].pUserData = &ENGINE.audio_engines[_i];
+		rde_critical_error(ma_device_init(NULL, &ENGINE.audio_device_configs[_i], &ENGINE.audio_devices[_i]) != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INIT);
+		
+		ENGINE.audio_engine_configs[_i] = ma_engine_config_init();
+		ENGINE.audio_engine_configs[_i].pDevice          = &ENGINE.audio_devices[_i];
+		ENGINE.audio_engine_configs[_i].pResourceManager = &ENGINE.audio_resource_manager;
+		ENGINE.audio_engine_configs[_i].noAutoStart      = MA_TRUE;
+		
+		ma_result _engine_init_res = ma_engine_init(&ENGINE.audio_engine_configs[_i], &ENGINE.audio_engines[_i]);
+		rde_critical_error(_engine_init_res != MA_SUCCESS, RDE_ERROR_MA_ENGINE_INIT, _engine_init_res);
+		ma_engine_listener_set_world_up(&ENGINE.audio_engines[_i], 0, 0, 1, 0);
+		
+		if(_playback_devices_info[_i].isDefault == MA_TRUE) {
+			ENGINE.audio_current_engine_index = _i;
+		}
+	}
+ 
+	for (ma_uint32 _i = 0; _i < (_playback_device_count <= RDE_MAX_AUDIO_ENGINES ? _playback_device_count : RDE_MAX_AUDIO_ENGINES); ++_i) {
+		ma_result _engine_start_res = ma_engine_start(&ENGINE.audio_engines[_i]);
+		rde_critical_error(_engine_start_res != MA_SUCCESS, RDE_ERROR_MA_ENGINE_INIT, _engine_start_res);
+	}
+	
 	is_miniaudio_initialized = true;
-	ENGINE.device_config = _config;
-	ENGINE.ma_device_config = _device_config;
-	rde_log_level(RDE_LOG_LEVEL_INFO, "Initiated audio module correctly");
+	ENGINE.audio_engines_count = (_playback_device_count <= RDE_MAX_AUDIO_ENGINES ? _playback_device_count : RDE_MAX_AUDIO_ENGINES);
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Initiated audio module correctly with %d available devices", _playback_device_count);
 }
 
-rde_sound* rde_audio_load_sound(const char* _sound_path) {
+void rde_audio_get_available_devices(rde_audio_device_id* _device_list[RDE_MAX_AUDIO_ENGINES], uint* _out_devices_found_amount) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_device_list == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_get_available_devices - _device_list");
+	
+	ma_device_info* _playback_devices_info;
+	ma_uint32 _playback_device_count;
+	ma_device_info* _capture_device_infos;
+	ma_uint32 _capture_device_count;
+	ma_result _devices_info_res = ma_context_get_devices(&ENGINE.audio_context, &_playback_devices_info, &_playback_device_count, &_capture_device_infos, &_capture_device_count);
+	rde_critical_error(_devices_info_res != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INFO, _devices_info_res);
+	
+	for (ma_uint32 _i = 0; _i < RDE_MAX_AUDIO_ENGINES; ++_i) {
+		if(_i >= ENGINE.audio_engines_count) {
+			(*_device_list)[_i] = NULL;
+			continue;
+		}
+		
+		(*_device_list)[_i] = (void*)&ENGINE.audio_devices[_i].playback.id;
+		if(_out_devices_found_amount != NULL) {
+			(*_out_devices_found_amount)++;
+		}
+	}
+}
+
+void rde_audio_set_current_active_device(rde_audio_device_id _id) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_id == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_set_current_active_device - _id");
+	
+	for (ma_uint32 _i = 0; _i < ENGINE.audio_engines_count; ++_i) {
+		if(ENGINE.audio_devices[_i].playback.pID == (ma_device_id*)_id) {
+			for(uint _j = 0; _j < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds;_j++) {
+				rde_sound* _s = &ENGINE.sounds[_j];
+				
+				if(_s->state == RDE_SOUND_STATE_PLAYING || _s->state == RDE_SOUND_STATE_STOPPED) {
+					ma_sound_stop(&_s->engine_sounds[ENGINE.audio_current_engine_index]);
+					ma_uint64 _cursor = 0;
+					ma_sound_get_cursor_in_pcm_frames(&_s->engine_sounds[ENGINE.audio_current_engine_index], &_cursor);
+					ma_sound_seek_to_pcm_frame(&_s->engine_sounds[_i], _cursor);
+					ma_sound_seek_to_pcm_frame(&_s->engine_sounds[ENGINE.audio_current_engine_index], 0);
+					
+					if(_s->state == RDE_SOUND_STATE_PLAYING) {
+						ma_sound_start(&_s->engine_sounds[_i]);
+					}
+				}
+			}
+			
+			ENGINE.audio_current_engine_index = _i;
+			
+			break;
+		}
+	}
+}
+
+void rde_audio_get_device_name(rde_audio_device_id _id, char* _out_name, uint* _out_name_size) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_id == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_get_device_name - _id");
+	rde_critical_error(_out_name == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_get_device_name - _out_name");
+	
+	for (ma_uint32 _i = 0; _i < ENGINE.audio_engines_count; ++_i) {
+		ma_device* _device = &ENGINE.audio_devices[_i];
+		if(_device->playback.pID == (ma_device_id*)_id) {
+			size_t _size = strlen(_device->playback.name);;
+			
+			if(_out_name_size != NULL) {
+				*_out_name_size = _size;
+			}
+			
+			rde_memcpy(_out_name, _size, _device->playback.name);
+			break;
+		}
+	}
+}
+
+rde_audio_device_id rde_audio_get_default_device() {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return NULL;
+	
+	ma_device_info* _playback_devices_info;
+	ma_uint32 _playback_device_count;
+	ma_device_info* _capture_device_infos;
+	ma_uint32 _capture_device_count;
+	ma_result _devices_info_res = ma_context_get_devices(&ENGINE.audio_context, &_playback_devices_info, &_playback_device_count, &_capture_device_infos, &_capture_device_count);
+	rde_critical_error(_devices_info_res != MA_SUCCESS, RDE_ERROR_MA_DEVICE_INFO, _devices_info_res);
+	
+	for (ma_uint32 _i = 0; _i < ENGINE.audio_engines_count; ++_i) {
+		if(_playback_devices_info[_i].isDefault) {
+			return &ENGINE.audio_devices[_i].playback.id;
+		}
+	}
+	
+	return NULL;
+}
+
+rde_sound* rde_audio_load(const char* _sound_path, bool _is_short) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return NULL;
+	rde_critical_error(_sound_path == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_load - _sound_path");
+	
 	rde_sound* _sound = NULL;
 
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _s = &ENGINE.sounds[_i];
 
-		if(!_s->used) {
+		if(_s->state == RDE_SOUND_STATE_NONE) {
 			_sound = _s;
-			_sound->used = true;
+			_sound->state = RDE_SOUND_STATE_LOADED;
 			break;
 		}
 	}
 
 	rde_critical_error(_sound == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "sounds", ENGINE.init_info.heap_allocs_config.max_amount_of_sounds);
-	ma_decoder_config _decoder_config = ma_decoder_config_init(DEFAULT_FORMAT, 
-	                                                           ENGINE.device_config.channels, 
-	                                                           ENGINE.device_config.rate);
-
-	ma_result _result = ma_decoder_init_file(_sound_path, &_decoder_config, &_sound->miniaudio_decoder);
-	rde_critical_error(_result != MA_SUCCESS, RDE_ERROR_MA_FILE_NOT_FOUND, _sound_path, _result);
+	
+	ma_uint32 _flags = MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE;
+	if(!_is_short) {
+		_flags |= MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM;
+	}
+	
+	ma_apply({
+		ma_result _sound_init_res = ma_sound_init_from_file(&ENGINE.audio_engines[_i], _sound_path, _flags, NULL, NULL, &_sound->engine_sounds[_i]);
+		rde_critical_error(_sound_init_res != MA_SUCCESS, RDE_ERROR_MA_SOUND_INIT, _sound_path, _sound_init_res);
+		ma_sound_set_end_callback(&_sound->engine_sounds[_i], rde_inner_audio_on_sound_end, &_sound);
+	})
 
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded sound '%s' correctly", _sound_path);
 	return _sound;
 }
 
-void rde_audio_unload_sound(rde_sound* _sound) {
+void rde_audio_unload(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
-	ma_decoder_uninit(&_sound->miniaudio_decoder);
-	_sound->used = false;
+	
+	ma_apply({ ma_sound_uninit(&_sound->engine_sounds[_i]); })
+	_sound->state = RDE_SOUND_STATE_NONE;
 }
 
-void rde_audio_play_sound(rde_sound* _sound) {
+void rde_audio_listener_set_position(rde_vec_3F _position) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	
+	ma_apply({ ma_engine_listener_set_position(&ENGINE.audio_engines[_i], 0, _position.x, _position.y, _position.z); });
+}
+
+void rde_audio_listener_set_direction(rde_vec_3F _direction) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	
+	ma_apply({ ma_engine_listener_set_direction(&ENGINE.audio_engines[_i], 0, _direction.x, _direction.y, _direction.z); });
+}
+
+void rde_audio_play(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
-	if(_sound->playing) {
-		ma_decoder_seek_to_pcm_frame(&_sound->miniaudio_decoder, 0);
+	
+	if(_sound->state == RDE_SOUND_STATE_PLAYING) {
+		ma_sound_seek_to_pcm_frame(&_sound->engine_sounds[ENGINE.audio_current_engine_index], 0);
 	}
 	
-	_sound->playing = true;
-	_sound->paused = false;
-	_sound->played_frame = 0;
+	ma_sound_start(&_sound->engine_sounds[ENGINE.audio_current_engine_index]);
+	_sound->state = RDE_SOUND_STATE_PLAYING;
 }
 
-void rde_audio_pause_sound(rde_sound* _sound) {
-	RDE_UNUSED(_sound)
-	RDE_UNIMPLEMENTED()
+void rde_audio_set_loop(rde_sound* _sound, bool _loop) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
+	
+	ma_apply({ ma_sound_set_looping(&_sound->engine_sounds[_i], _loop ? MA_TRUE : MA_FALSE); })
 }
 
-void rde_audio_stop_sound(rde_sound* _sound) {
-	RDE_UNUSED(_sound)
-	RDE_UNIMPLEMENTED()
+void rde_audio_pause(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
+	ma_sound_stop(&_sound->engine_sounds[ENGINE.audio_current_engine_index]);
+	_sound->state = RDE_SOUND_STATE_STOPPED;
 }
 
-void rde_audio_restart_sound(rde_sound* _sound) {
-	RDE_UNUSED(_sound)
-	RDE_UNIMPLEMENTED()
+void rde_audio_continue(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
+	
+	if(_sound->state != RDE_SOUND_STATE_STOPPED) {
+		return;
+	}
+	
+	ma_sound_start(&_sound->engine_sounds[ENGINE.audio_current_engine_index]);
 }
 
-bool rde_audio_is_sound_playing(rde_sound* _sound) {
-	RDE_UNUSED(_sound)
-	RDE_UNIMPLEMENTED()
-	return false;
+void rde_audio_restart(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
+	
+	ma_sound_seek_to_pcm_frame(&_sound->engine_sounds[ENGINE.audio_current_engine_index], 0);
 }
 
-bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume) {
-	RDE_UNUSED(_sound)
-	RDE_UNUSED(_volume)
-	RDE_UNIMPLEMENTED()
-	return false;
+bool rde_audio_is_playing(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return false;
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");	
+	
+	return ma_sound_is_playing(&_sound->engine_sounds[ENGINE.audio_current_engine_index]);
 }
 
-void rde_audio_end() {
+void rde_audio_set_volume(rde_sound* _sound, float _volume) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
+	
+	_volume = rde_math_clamp_float(_volume, 0.0f, 1.0f);
+	ma_apply({ ma_sound_set_volume(&_sound->engine_sounds[_i], _volume * 100.0f); })
+}
+
+void rde_audio_set_master_volume(float _volume) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	
+	_volume = rde_math_clamp_float(_volume, 0.0f, 1.0f);
+	ma_apply({ ma_engine_set_volume(&ENGINE.audio_engines[_i], _volume * 100.0f); })
+}
+
+float rde_audio_get_master_volume() {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return 0.0f;
+	
+	float _volume = 0;
+	ma_apply({ _volume = ma_engine_get_volume(&ENGINE.audio_engines[_i]); })
+	return _volume / 100.f;
+}
+
+
+float rde_audio_get_volume(rde_sound* _sound) {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return 0.0f;
+	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
+	
+	float _volume = 0;
+	ma_apply({ _volume = ma_sound_get_volume(&_sound->engine_sounds[_i]); })
+	return _volume / 100.f;
+}
+
+void rde_inner_audio_end() {
+	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
 
-		if(_sound->used) {
-			rde_audio_unload_sound(_sound);
+		if(_sound->state != RDE_SOUND_STATE_NONE) {
+			rde_audio_unload(_sound);
 		}
 	}
 
 	if(is_miniaudio_initialized) {
-		ma_device_uninit(&ENGINE.miniaudio_device);
+		for(uint _i = 0; _i < ENGINE.audio_engines_count; _i++) {
+			ma_engine_stop(&ENGINE.audio_engines[_i]);
+			ma_device_uninit(&ENGINE.audio_devices[_i]);
+		}
 	}
+	
+	ma_context_uninit(&ENGINE.audio_context);
+	ma_resource_manager_uninit(&ENGINE.audio_resource_manager);
 }
 
 #endif

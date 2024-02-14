@@ -1,6 +1,10 @@
 #ifndef RDE_H
 #define RDE_H
 
+#ifndef RDE_AUDIO_MODULE
+#define RDE_AUDIO_MODULE
+#endif
+
 // This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled
 // without extern "C" won't work.
 #ifdef __cplusplus
@@ -254,6 +258,8 @@ extern "C" {
 // Constant: RDE_SHADER_DEPTH_SHADOWS
 // Name for the shadow map, it is used to search this shader with <rde_rendering_shader_get_by_name>. By default is 'depth_shadows_shader'.
 #define RDE_SHADER_DEPTH_SHADOWS "depth_shadows_shader"
+
+#define RDE_MAX_AUDIO_ENGINES 8	
 
 /// =================================================================== COMPILATION AND EXPORT ===================================================================
 
@@ -560,6 +566,8 @@ typedef unsigned int uint;
 	_block_of_code												\
 	rde_rendering_2d_end_drawing();
 
+#define rde_memcpy(_dst, _size, _src) memcpy(_dst, _src, _size)
+	
 #if RDE_IS_WINDOWS()
 // Macro: rde_strcpy
 // Platform independent standard strcpy.
@@ -2916,6 +2924,12 @@ typedef struct rde_thread_task rde_thread_task;
 // Type: rde_thread_pool
 // Represents a pool of threads, so a fixed amount of them is spawned and then re-used.
 typedef struct rde_thread_pool rde_thread_pool;
+
+#ifdef RDE_AUDIO_MODULE
+// Type: rde_audio_device_id
+// This is just an id to locate the audio device. An audio device is each device that can input or output sound.
+typedef void* rde_audio_device_id;
+#endif
 
 // =================================================================== UTIL ====================================================================
 
@@ -5384,23 +5398,65 @@ RDE_FUNC void rde_ui_container_unload_root(rde_ui_container* _container);
 // =================================================================== AUDIO ===================================================================
 
 #ifdef RDE_AUDIO_MODULE
+// Function: rde_audio_get_available_devices
+// Outputs a list of all available devices. Total amount found is saved in _out_devices_found_amount and any index after this value, will be NULL.
+//
+// Parameters:
+//	_device_list - array of rde_audio_device_id that will save all available ids.
+//	_out_devices_found_amount - output parameter with the amount of found devices. Can be NULL.
+RDE_FUNC void rde_audio_get_available_devices(rde_audio_device_id* _device_list[RDE_MAX_AUDIO_ENGINES], uint* _out_devices_found_amount);
 
-RDE_FUNC void rde_audio_init(rde_sound_config _config);
+// Function: rde_audio_set_current_active_device
+// Sets which audio device will reproduce sound between all of the availables.
+//
+// Parameters:
+//	_id - id of the audio device.
+RDE_FUNC void rde_audio_set_current_active_device(rde_audio_device_id _id);
 
-RDE_FUNC rde_sound* rde_audio_load_sound(const char* _sound_path);
-RDE_FUNC void rde_audio_unload_sound(rde_sound* _sound);
+// Function: rde_audio_get_device_name
+// Outputs in _out_name the system name of a specfici audio device, given its id. The way to get the id is by using <rde_audio_get_available_devices>.
+//
+// Parameters:
+//	_id - id of the audio device.
+//	_out_name - output string that can contain the name of the device.
+//	_out_name_size - output variable containing the size of the name. Can be NULL.
+RDE_FUNC void rde_audio_get_device_name(rde_audio_device_id _id, char* _out_name, uint* _out_name_size);
 
-RDE_FUNC void rde_audio_play_sound(rde_sound* _sound);
-RDE_FUNC void rde_audio_pause_sound(rde_sound* _sound);
-RDE_FUNC void rde_audio_stop_sound(rde_sound* _sound);
-RDE_FUNC void rde_audio_restart_sound(rde_sound* _sound);
+// Function: rde_audio_get_default_device
+// Returns the id of the OS's default audio device.
+RDE_FUNC rde_audio_device_id rde_audio_get_default_device();
 
-RDE_FUNC bool rde_audio_is_sound_playing(rde_sound* _sound);
+// Function: rde_audio_load
+// Loads a sound or music. _is_short must be true if it is loading background music, voices... something big.
+//
+// Parameters:
+//	_sound_path - path to the sound.
+//	_is_short - determines if the sound will be loaded streamed or directly into memory.
+RDE_FUNC rde_sound* rde_audio_load(const char* _sound_path, bool _is_short);
 
-RDE_FUNC bool rde_audio_set_sound_volume(rde_sound* _sound, float _volume);
+// Function: rde_audio_unload
+// Unloads a sound or music.
+//
+// Parameters:
+//	_sound - sound to unload.
+RDE_FUNC void rde_audio_unload(rde_sound* _sound);
 
-RDE_FUNC void rde_audio_end(void);
+RDE_FUNC void rde_audio_listener_set_position(rde_vec_3F _position);
+RDE_FUNC void rde_audio_listener_set_direction(rde_vec_3F _direction);
 
+RDE_FUNC void rde_audio_play(rde_sound* _sound);
+RDE_FUNC void rde_audio_set_loop(rde_sound* _sound, bool _loop);
+RDE_FUNC void rde_audio_pause(rde_sound* _sound);
+RDE_FUNC void rde_audio_continue(rde_sound* _sound);
+RDE_FUNC void rde_audio_restart(rde_sound* _sound);
+
+RDE_FUNC bool rde_audio_is_playing(rde_sound* _sound);
+
+RDE_FUNC void rde_audio_set_master_volume(float _volume);
+RDE_FUNC float rde_audio_get_master_volume();
+
+RDE_FUNC void rde_audio_set_volume(rde_sound* _sound, float _volume);
+RDE_FUNC float rde_audio_get_volume(rde_sound* _sound);
 #endif
 
 // =================================================================== FILE SYSTEM ===================================================================
