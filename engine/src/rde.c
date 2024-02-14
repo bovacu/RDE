@@ -2183,15 +2183,11 @@ void* rde_inner_thread_pool_caller_fn(void* _params) {
 			RDE_SLEEP_CONDITIONAL_VAR(_pool);
 		}
 
-		if(_pool == NULL) {
+		if(_pool == NULL || _pool->shutdown != 0 || _pool->count == 0) {
 			break;
 		}
 
 		SDL_GL_MakeCurrent(_pool->window->sdl_window, _gl_context);
-
-		if(_pool->shutdown != 0 && _pool->count == 0) {
-			break;
-		}
 
 		_task = _pool->tasks[_pool->head];
 		_pool->head = (_pool->head + 1) % _pool->tasks_size;
@@ -2203,12 +2199,12 @@ void* rde_inner_thread_pool_caller_fn(void* _params) {
 		_task.fn(_task.args);
 	}
 
-	_pool->started--;
-
-	rde_free(_data);
 	if(_pool != NULL) {
+		_pool->started--;
 		RDE_DESTROY_THREAD(_pool);
 	}
+	
+	rde_free(_data);
 
 	return NULL;
 }
@@ -2941,6 +2937,11 @@ bool rde_thread_pool_destroy(rde_thread_pool* _pool) {
 	RDE_LOCK_MUTEX(_pool);
 	RDE_DESTROY_MUTEX_AND_CONDITIONAL_VAR(_pool);
 
+	_pool->threads_count = 0;
+	_pool->count = 0;
+	_pool->head = 0;
+	_pool->tail = 0;
+	_pool->tasks_size = 0;
 	_pool->window = NULL;
 	rde_free(_pool->threads);
 	rde_free(_pool->tasks);
