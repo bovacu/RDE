@@ -9454,7 +9454,9 @@ void rde_inner_audio_on_sound_end(void* _user_data, ma_sound* _sound) {
 	for(uint _i = 0; _i < ENGINE.audio_engines_count; _i++) {			\
 		_code															\
 	}
-	
+
+#define ma_check_enabled() if(!is_miniaudio_initialized) { rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return; }
+#define ma_check_enabled_ret(_ret) if(!is_miniaudio_initialized) { rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return _ret; }
 // ==============================================================================
 // =							PUBLIC API - AUDIO					 	     	=
 // ==============================================================================
@@ -9484,7 +9486,7 @@ void rde_inner_audio_init() {
 	
 	printf("Playback Devices\n");
 	for (ma_uint32 _i = 0; _i < (_playback_device_count <= RDE_MAX_AUDIO_ENGINES ? _playback_device_count : RDE_MAX_AUDIO_ENGINES); ++_i) {
-		printf("    %u: %s. Is Default? %d\n", _i, _playback_devices_info[_i].name, _playback_devices_info[_i].isDefault == MA_TRUE ? 1 : 0);
+		printf("    %u: %s. %s\n", _i, _playback_devices_info[_i].name, _playback_devices_info[_i].isDefault == MA_TRUE ? "Default" : "");
 		ENGINE.audio_device_configs[_i] = ma_device_config_init(ma_device_type_playback);
 		ENGINE.audio_device_configs[_i].playback.pDeviceID = &_playback_devices_info[_i].id;
 		ENGINE.audio_device_configs[_i].playback.format = _resource_config.decodedFormat;
@@ -9519,7 +9521,7 @@ void rde_inner_audio_init() {
 }
 
 void rde_audio_get_available_devices(rde_audio_device_id* _device_list[RDE_MAX_AUDIO_ENGINES], uint* _out_devices_found_amount) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_device_list == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_get_available_devices - _device_list");
 	
 	ma_device_info* _playback_devices_info;
@@ -9543,7 +9545,7 @@ void rde_audio_get_available_devices(rde_audio_device_id* _device_list[RDE_MAX_A
 }
 
 void rde_audio_set_current_active_device(rde_audio_device_id _id) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_id == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_set_current_active_device - _id");
 	
 	for (ma_uint32 _i = 0; _i < ENGINE.audio_engines_count; ++_i) {
@@ -9572,7 +9574,7 @@ void rde_audio_set_current_active_device(rde_audio_device_id _id) {
 }
 
 void rde_audio_get_device_name(rde_audio_device_id _id, char* _out_name, uint* _out_name_size) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_id == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_get_device_name - _id");
 	rde_critical_error(_out_name == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_get_device_name - _out_name");
 	
@@ -9592,7 +9594,7 @@ void rde_audio_get_device_name(rde_audio_device_id _id, char* _out_name, uint* _
 }
 
 rde_audio_device_id rde_audio_get_default_device() {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return NULL;
+	ma_check_enabled_ret(NULL)
 	
 	ma_device_info* _playback_devices_info;
 	ma_uint32 _playback_device_count;
@@ -9611,7 +9613,7 @@ rde_audio_device_id rde_audio_get_default_device() {
 }
 
 rde_sound* rde_audio_load(const char* _sound_path, bool _is_short) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return NULL;
+	ma_check_enabled_ret(NULL)
 	rde_critical_error(_sound_path == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_audio_load - _sound_path");
 	
 	rde_sound* _sound = NULL;
@@ -9644,7 +9646,7 @@ rde_sound* rde_audio_load(const char* _sound_path, bool _is_short) {
 }
 
 void rde_audio_unload(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	ma_apply({ ma_sound_uninit(&_sound->engine_sounds[_i]); })
@@ -9652,19 +9654,19 @@ void rde_audio_unload(rde_sound* _sound) {
 }
 
 void rde_audio_listener_set_position(rde_vec_3F _position) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	
 	ma_apply({ ma_engine_listener_set_position(&ENGINE.audio_engines[_i], 0, _position.x, _position.y, _position.z); });
 }
 
 void rde_audio_listener_set_direction(rde_vec_3F _direction) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	
 	ma_apply({ ma_engine_listener_set_direction(&ENGINE.audio_engines[_i], 0, _direction.x, _direction.y, _direction.z); });
 }
 
 void rde_audio_play(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	if(_sound->state == RDE_SOUND_STATE_PLAYING) {
@@ -9676,14 +9678,14 @@ void rde_audio_play(rde_sound* _sound) {
 }
 
 void rde_audio_set_loop(rde_sound* _sound, bool _loop) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	ma_apply({ ma_sound_set_looping(&_sound->engine_sounds[_i], _loop ? MA_TRUE : MA_FALSE); })
 }
 
 void rde_audio_pause(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	ma_sound_stop(&_sound->engine_sounds[ENGINE.audio_current_engine_index]);
@@ -9691,7 +9693,7 @@ void rde_audio_pause(rde_sound* _sound) {
 }
 
 void rde_audio_continue(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	if(_sound->state != RDE_SOUND_STATE_STOPPED) {
@@ -9702,21 +9704,21 @@ void rde_audio_continue(rde_sound* _sound) {
 }
 
 void rde_audio_restart(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	ma_sound_seek_to_pcm_frame(&_sound->engine_sounds[ENGINE.audio_current_engine_index], 0);
 }
 
 bool rde_audio_is_playing(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return false;
+	ma_check_enabled_ret(false)
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");	
 	
 	return ma_sound_is_playing(&_sound->engine_sounds[ENGINE.audio_current_engine_index]);
 }
 
 void rde_audio_set_volume(rde_sound* _sound, float _volume) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	_volume = rde_math_clamp_float(_volume, 0.0f, 1.0f);
@@ -9724,14 +9726,14 @@ void rde_audio_set_volume(rde_sound* _sound, float _volume) {
 }
 
 void rde_audio_set_master_volume(float _volume) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	
 	_volume = rde_math_clamp_float(_volume, 0.0f, 1.0f);
 	ma_apply({ ma_engine_set_volume(&ENGINE.audio_engines[_i], _volume * 100.0f); })
 }
 
 float rde_audio_get_master_volume() {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return 0.0f;
+	ma_check_enabled_ret(0.0f)
 	
 	float _volume = 0;
 	ma_apply({ _volume = ma_engine_get_volume(&ENGINE.audio_engines[_i]); })
@@ -9740,7 +9742,7 @@ float rde_audio_get_master_volume() {
 
 
 float rde_audio_get_volume(rde_sound* _sound) {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return 0.0f;
+	ma_check_enabled_ret(0.0f)
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	float _volume = 0;
@@ -9749,7 +9751,7 @@ float rde_audio_get_volume(rde_sound* _sound) {
 }
 
 void rde_inner_audio_end() {
-	if(!is_miniaudio_initialized) rde_log_level(RDE_LOG_LEVEL_WARNING, "Audio module is disabled because no audio device could be found \n"); return;
+	ma_check_enabled()
 	
 	for(unsigned int _i = 0; _i < ENGINE.init_info.heap_allocs_config.max_amount_of_sounds; _i++) {
 		rde_sound* _sound = &ENGINE.sounds[_i];
