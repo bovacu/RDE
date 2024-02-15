@@ -9675,6 +9675,7 @@ void rde_audio_unload(rde_sound* _sound) {
 	rde_critical_error(_sound == NULL, RDE_ERROR_NO_NULL_ALLOWED, "sound");
 	
 	ma_apply({ ma_sound_uninit(&_sound->engine_sounds[_i]); })
+	ma_audio_buffer_uninit_and_free(_sound->audio_buffer);
 	_sound->state = RDE_SOUND_STATE_NONE;
 }
 
