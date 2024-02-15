@@ -68,15 +68,16 @@
 #include "stb/stb_ds.h"
 #pragma clang diagnostic pop
 
-#ifdef RDE_AUDIO_MODULE
-#define MINIAUDIO_IMPLEMENTATION
-#include "miniaudio/miniaudio.h"
-#endif
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include "json/cJSON.c"
 #pragma clang diagnostic pop
+
+#ifdef RDE_AUDIO_MODULE
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio/extras/stb_vorbis.c"
+#include "miniaudio/miniaudio.h"
+#endif
 
 #include "rendering_3d_default_meshes.c"
 
@@ -822,6 +823,7 @@ struct rde_sound {
 	RDE_SOUND_STATE_ state;
 	bool looping;
 	ma_sound engine_sounds[RDE_MAX_AUDIO_ENGINES];
+	ma_audio_buffer* audio_buffer;
 };
 #endif
 
@@ -9484,9 +9486,9 @@ void rde_inner_audio_init() {
 		return;
 	}
 	
-	printf("Playback Devices\n");
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Playback Devices");
 	for (ma_uint32 _i = 0; _i < (_playback_device_count <= RDE_MAX_AUDIO_ENGINES ? _playback_device_count : RDE_MAX_AUDIO_ENGINES); ++_i) {
-		printf("    %u: %s. %s\n", _i, _playback_devices_info[_i].name, _playback_devices_info[_i].isDefault == MA_TRUE ? "Default" : "");
+		rde_log_level(RDE_LOG_LEVEL_INFO, "    %u: %s. %s", _i, _playback_devices_info[_i].name, _playback_devices_info[_i].isDefault == MA_TRUE ? "Default" : "");
 		ENGINE.audio_device_configs[_i] = ma_device_config_init(ma_device_type_playback);
 		ENGINE.audio_device_configs[_i].playback.pDeviceID = &_playback_devices_info[_i].id;
 		ENGINE.audio_device_configs[_i].playback.format = _resource_config.decodedFormat;
@@ -9629,18 +9631,41 @@ rde_sound* rde_audio_load(const char* _sound_path, bool _is_short) {
 	}
 
 	rde_critical_error(_sound == NULL, RDE_ERROR_MAX_LOADABLE_RESOURCE_REACHED, "sounds", ENGINE.init_info.heap_allocs_config.max_amount_of_sounds);
-	
-	ma_uint32 _flags = MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_DECODE;
+
+	ma_uint32 _flags = 0;
 	if(!_is_short) {
 		_flags |= MA_RESOURCE_MANAGER_DATA_SOURCE_FLAG_STREAM;
 	}
 	
+	rde_file_handle* _file_handle = rde_file_open(_sound_path, RDE_FILE_MODE_READ);
+	uint _size = 0;
+	unsigned char* _bytes = rde_file_read_full_file_bytes(_file_handle, &_size);
+	
+	ma_uint64 _size_in_frames = 0;
+	void* _frames_out = NULL;
+	uint _channels = ma_engine_get_channels(&ENGINE.audio_engines[ENGINE.audio_current_engine_index]);
+	ma_format _format = ma_format_f32;
+	ma_uint64 _sample_rate = ENGINE.audio_engines[ENGINE.audio_current_engine_index].sampleRate;
+	
+	ma_decoder_config _decoder_config = ma_decoder_config_init(_format, _channels, _sample_rate);
+	ma_result _decode_memory_res = ma_decode_memory(_bytes, _size, &_decoder_config, &_size_in_frames, &_frames_out);
+	rde_critical_error(_decode_memory_res != MA_SUCCESS, "Error decoding bytes, erro code %d\n", _decode_memory_res);
+	
+	ma_audio_buffer_config _audio_buffer_config = ma_audio_buffer_config_init(_format, _channels, _size_in_frames, _frames_out, NULL);
+	_audio_buffer_config.sampleRate = _sample_rate;
+	ma_result _audio_buffer_alloc_res = ma_audio_buffer_alloc_and_init(&_audio_buffer_config, &_sound->audio_buffer);
+	rde_critical_error(_audio_buffer_alloc_res != MA_SUCCESS, "Error allocating audio buffer, erro code %d\n", _audio_buffer_alloc_res);
+	
 	ma_apply({
-		ma_result _sound_init_res = ma_sound_init_from_file(&ENGINE.audio_engines[_i], _sound_path, _flags, NULL, NULL, &_sound->engine_sounds[_i]);
+		ma_result _sound_init_res = ma_sound_init_from_data_source(&ENGINE.audio_engines[_i], _sound->audio_buffer, _flags, NULL, &_sound->engine_sounds[_i]);
 		rde_critical_error(_sound_init_res != MA_SUCCESS, RDE_ERROR_MA_SOUND_INIT, _sound_path, _sound_init_res);
 		ma_sound_set_end_callback(&_sound->engine_sounds[_i], rde_inner_audio_on_sound_end, &_sound);
 	})
 
+	rde_file_free_read_bytes(_file_handle);
+	rde_file_close(_file_handle);
+	MA_FREE(_frames_out);
+	
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Loaded sound '%s' correctly", _sound_path);
 	return _sound;
 }
