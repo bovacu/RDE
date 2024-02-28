@@ -41,105 +41,6 @@ rde_skybox_id model_viewer_skybox;
 bool model_viewer_show_skybox = false;
 int model_viewer_msaa_samples = -1;
 
-void model_viewer_keyboard_controller(float _dt) {
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_transform_get_position(model_viewer_camera.transform);
-		_position.x += model_viewer_camera_front.x * 10 * _dt;
-		_position.y += model_viewer_camera_front.y * 10 * _dt;
-		_position.z += model_viewer_camera_front.z * 10 * _dt;
-		rde_transform_set_position(model_viewer_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_transform_get_position(model_viewer_camera.transform);
-		_position.x -= model_viewer_camera_front.x * 10 * _dt;
-		_position.y -= model_viewer_camera_front.y * 10 * _dt;
-		_position.z -= model_viewer_camera_front.z * 10 * _dt;
-		rde_transform_set_position(model_viewer_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_transform_get_position(model_viewer_camera.transform);
-		_position.y -= 10 * _dt;
-		rde_transform_set_position(model_viewer_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_transform_get_position(model_viewer_camera.transform);
-		_position.y += 10 * _dt;
-		rde_transform_set_position(model_viewer_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
-		rde_vec_3F _cp = rde_math_cross_product(model_viewer_camera_front, model_viewer_camera_up);
-		rde_math_normalize(&_cp);
-		
-		rde_vec_3F _position = rde_transform_get_position(model_viewer_camera.transform);
-		_position.x -= _cp.x * 10 * _dt;
-		_position.y -= _cp.y * 10 * _dt;
-		_position.z -= _cp.z * 10 * _dt;
-		rde_transform_set_position(model_viewer_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
-		rde_vec_3F _cp = rde_math_cross_product(model_viewer_camera_front, model_viewer_camera_up);
-		rde_math_normalize(&_cp);
-
-		rde_vec_3F _position = rde_transform_get_position(model_viewer_camera.transform);
-		_position.x += _cp.x * 10 * _dt;
-		_position.y += _cp.y * 10 * _dt;
-		_position.z += _cp.z * 10 * _dt;
-		rde_transform_set_position(model_viewer_camera.transform, _position);
-	}
-}
-
-void model_viewer_mouse_controller(float _dt) {
-	RDE_UNUSED(_dt)
-
-	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
-		model_viewer_first_mouse = true;
-	}
-
-	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
-		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
-		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)-_mouse_pos.y;
-
-		if(model_viewer_last_x == _x_pos && model_viewer_last_y == _y_pos) {
-			return;
-		}
-
-		if (model_viewer_first_mouse) {
-			model_viewer_last_x = _x_pos;
-			model_viewer_last_y = _y_pos;
-			model_viewer_first_mouse = false;
-		}
-
-		float _x_offset = _x_pos - model_viewer_last_x;
-		float _y_offset = _y_pos - model_viewer_last_y;
-		model_viewer_last_x = _x_pos;
-		model_viewer_last_y = _y_pos;
-
-		float _sensitivity = 0.1f;
-		_x_offset *= _sensitivity;
-		_y_offset *= _sensitivity;
-
-		model_viewer_yaw -= _x_offset;
-		model_viewer_pitch += _y_offset;
-
-		if (model_viewer_pitch > 89.0f)
-			model_viewer_pitch = 89.0f;
-		
-		if (model_viewer_pitch < -89.0f)
-			model_viewer_pitch = -89.0f;
-
-		rde_vec_3F _front;
-		_front.x = cos(rde_math_degrees_to_radians(model_viewer_yaw)) * cos(rde_math_degrees_to_radians(model_viewer_pitch));
-		_front.y = sin(rde_math_degrees_to_radians(model_viewer_pitch));
-		_front.z = sin(rde_math_degrees_to_radians(model_viewer_yaw)) * cos(rde_math_degrees_to_radians(model_viewer_pitch));
-		rde_math_normalize(&_front);
-
-		model_viewer_camera.direction = _front;
-		model_viewer_camera_front = _front;
-
-
-	}
-}
-
 void model_viewer_on_event(rde_event* _event, rde_window* _window) {
 	RDE_UNUSED(_window);
 
@@ -178,8 +79,8 @@ void model_viewer_on_update(float _dt) {
 		rde_transform_set_position(model_viewer_camera.transform, _position);
 	}
 
-	model_viewer_mouse_controller(_dt);
-	model_viewer_keyboard_controller(_dt);
+	common_mouse_controller(&model_viewer_camera, _dt);
+	common_keyboard_controller(&model_viewer_camera ,_dt);
 }
 
 void model_viewer_on_fixed_update(float _dt) {

@@ -53,6 +53,8 @@ in VS_OUT {
 
 
 uniform vec3 camera_pos;
+uniform mat4 light_space_matrix;
+uniform mat4 camera_view_matrix;
 uniform rde_directional_light directional_light;
 uniform float dt;
 uniform vec2 mouse_position;
@@ -65,7 +67,6 @@ uniform rde_point_light point_lights[RDE_MAX_POINT_LIGHTS];
 uniform rde_spot_light spot_lights[RDE_MAX_SPOT_LIGHTS];
 #endif
 
-uniform int use_shadows;
 uniform rde_material material;
 uniform sampler2D tex_ka;
 uniform sampler2D tex_kd;
@@ -130,8 +131,8 @@ float ShadowCalculation(vec4 frag_pos_light_space) {
 
     _shadow /= 20.0;
 
-	if(_proj_coords.z > 1.0)
-        _shadow = 0.0;
+// 	if(_proj_coords.z > 1.0)
+//         _shadow = 0.0;
 
     return _shadow;
 }

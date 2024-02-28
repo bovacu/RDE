@@ -169,7 +169,7 @@
 //			- [] Implement all collision shapes
 //
 //		- [] UI:
-//			- [] Anchors
+//			- [DONE] Anchors
 //			- [] Strechs
 //			- [] UI Elements:
 //				- [DONE] Text
@@ -189,11 +189,11 @@
 //			- [DONE] Add Geometry and Tessellation shaders to the shader_load function
 //
 //		- Sound:
-//			- [] Play/stop/restart/resume sound.
-//			- [] Play/stop/restart/resume music.
-//			- [] Multiple sounds/mousic at the same time.
-//			- [] Sound/Music volume.
-//			- [] 3D sound.
+//			- [DONE] Play/stop/restart/resume sound.
+//			- [DONE] Play/stop/restart/resume music.
+//			- [DONE] Multiple sounds/mousic at the same time.
+//			- [DONE] Sound/Music volume.
+//			- [DONE] 3D sound.
 //
 //		- Networking:
 //			- [] Basic HTTP/HTTPs requests
@@ -1114,8 +1114,8 @@ rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
 	_c.transform = rde_transform_load();
 	_c.camera_type = _camera_type;
 	_c.enabled = true;
-	_c.direction = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
-	_c.up = (rde_vec_3F) { 0.0f, 1.0f, 0.0f };
+	_c.v_front = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
+	_c.world_up = (rde_vec_3F) { 0.0f, 1.0f, 0.0f };
 	_c.near_far = (rde_vec_2F) { 0.1f, 100.f };
 	return _c;
 }
@@ -1866,6 +1866,7 @@ void rde_inner_rendering_end_3d(void);
 void rde_inner_rendering_transform_to_glm_mat4_3d(const rde_transform* _transform, mat4 _mat);
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices);
 bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
+void rde_inner_rendering_get_camera_view_matrix(rde_camera* _camera, mat4* _out_view_matrix);
 
 rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_texture_load_data* _in_out_data);
 void rde_inner_rendering_texture_load_data_with_texture_provided(const char* _file_path, rde_texture_load_data* _in_out_data);
@@ -5931,14 +5932,7 @@ void rde_inner_rendering_flush_line_batch(void) {
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_vec_3F _cam_pos = current_drawing_camera->transform->position;
-	rde_vec_3F _cam_direction = current_drawing_camera->direction;
-	rde_vec_3F _cam_up = current_drawing_camera->up;
-	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
-				(vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
-				(vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
-				_view_matrix
-	);
+	rde_inner_rendering_get_camera_view_matrix(current_drawing_camera, &_view_matrix);
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(_shader->compiled_program_id, "view_projection_matrix"), 1, GL_FALSE, (const void*)_view_projection_matrix);
@@ -5971,14 +5965,7 @@ void rde_inner_rendering_flush_batch_3d(void) {
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_vec_3F _cam_pos = current_drawing_camera->transform->position;
-	rde_vec_3F _cam_direction = current_drawing_camera->direction;
-	rde_vec_3F _cam_up = current_drawing_camera->up;
-	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
-				(vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
-				(vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
-				_view_matrix
-	);
+	rde_inner_rendering_get_camera_view_matrix(current_drawing_camera, &_view_matrix);
 
 	glm_mat4_mul(projection_matrix, _view_matrix, _view_projection_matrix);
 
@@ -6144,8 +6131,6 @@ void rde_inner_rendering_flush_batch_3d(void) {
 
 		memset(_spot_light_var, 0, 256);
 	}
-	
-	RDE_CHECK_GL(glUniform1i, glGetUniformLocation(_shader->compiled_program_id, "use_shadows"), current_batch_3d.use_shadows == RDE_SHADOW_PASS_STATE_NORMAL ? 1 : 0);
 
 	RDE_CHECK_GL(glBindVertexArray, _mesh->vao);
 
@@ -6197,6 +6182,72 @@ void rde_inner_rendering_flush_render_texture_3d(void) {
 	rde_inner_rendering_reset_line_batch();
 }
 
+void rde_inner_rendering_get_camera_view_matrix(rde_camera* _camera, mat4* _out_view_matrix) {
+	rde_vec_3F _shadows_camera_rotation = rde_transform_get_rotation_degs(_camera->transform);
+	vec3 _front = {
+		cos(rde_math_degrees_to_radians(_shadows_camera_rotation.y)) * cos(rde_math_degrees_to_radians(_shadows_camera_rotation.x)),
+		sin(rde_math_degrees_to_radians(_shadows_camera_rotation.x)),
+		sin(rde_math_degrees_to_radians(_shadows_camera_rotation.y)) * cos(rde_math_degrees_to_radians(_shadows_camera_rotation.x))
+	};
+	glm_vec3_normalize(_front);
+	
+	vec3 _right = GLM_VEC3_ZERO_INIT;
+	glm_vec3_cross(_front, (vec3) { _camera->world_up.x, _camera->world_up.y, _camera->world_up.z }, _right);
+	glm_vec3_normalize(_right);
+	
+	vec3 _up = GLM_VEC3_ZERO_INIT;
+	glm_vec3_cross(_right, _front, _up);
+	glm_vec3_normalize(_up);
+	
+	_camera->v_front = (rde_vec_3F) { _front[0], _front[1], _front[2] };
+	_camera->v_up = (rde_vec_3F) { _up[0], _up[1], _up[2] };
+	_camera->v_right = (rde_vec_3F) { _right[0], _right[1], _right[2] };
+	
+	rde_vec_3F _cam_position = rde_transform_get_position(_camera->transform);
+	glm_lookat((vec3) { _cam_position.x, _cam_position.y, _cam_position.z }, 
+			   (vec3) { _cam_position.x + _front[0], _cam_position.y + _front[1], _cam_position.z + _front[2] }, 
+			   (vec3) { _camera->v_up.x, _camera->v_up.y, _camera->v_up.z }, 
+			   *_out_view_matrix);
+}
+
+void rde_inner_rendering_get_camera_frustum_corners(mat4 _projection_matrix, mat4 _view_matrix, vec4 _corners_arr[8]) {
+	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
+	glm_mat4_mul(_projection_matrix, _view_matrix, _view_projection_matrix);
+	
+	mat4 _inv_view_proj_matrix = GLM_MAT4_IDENTITY_INIT;
+	glm_mat4_inv(_view_projection_matrix, _inv_view_proj_matrix);
+	
+	uint _counter = 0;
+	for(uint _x = 0; _x < 2; _x++) {
+		for(uint _y = 0; _y < 2; _y++) {
+			for(uint _z = 0; _z < 2; _z++) {
+				vec4 _pt = GLM_VEC4_ZERO;
+				glm_mat4_mulv(_inv_view_proj_matrix, (vec4) { 2.0f * _x - 1.0f, 2.0f * _y - 1.0f, 2.0f * _z - 1.0f, 1.0f }, _pt);
+				glm_vec4_copy(_pt, _corners_arr[_counter++]);
+			}
+		}
+	}
+}
+
+void rde_inner_rendering_get_light_view_projection_matrix(rde_window* _window, rde_camera* _camera, rde_vec_3F _light_direction, float _near_plane, float _far_plane, mat4* _out_matrix) {
+	mat4 _projection_matrix = GLM_MAT4_IDENTITY_INIT;
+	glm_perspective(rde_math_degrees_to_radians(_camera->fov), rde_window_get_aspect_ratio(_window), _near_plane, _far_plane, _projection_matrix);
+	
+	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
+	rde_inner_rendering_get_camera_view_matrix(current_drawing_camera, &_view_matrix);
+	
+	mat4 _light_view_matrix = GLM_MAT4_IDENTITY_INIT;
+	vec3 _light_dir = GLM_VEC3_ZERO_INIT;
+	_light_dir[0] = -_light_direction.x;
+	_light_dir[1] = -_light_direction.y;
+	_light_dir[2] = -_light_direction.z;
+	glm_vec3_normalize(_light_dir);
+	glm_lookat(_light_dir, GLM_VEC3_ZERO, (vec3) { _camera->world_up.x, _camera->world_up.y, _camera->world_up.z }, _light_view_matrix);
+	
+	mat4 _light_projection_matrix = GLM_MAT4_IDENTITY_INIT;
+	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection_matrix);
+	glm_mat4_mul(_light_projection_matrix, _light_view_matrix, *_out_matrix);
+} 
 
 // ==============================================================================
 // =							PUBLIC API - RENDERING					 	 =
@@ -8215,7 +8266,7 @@ void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 
 	rde_vec_2F _aspect_ratios = rde_inner_rendering_get_aspect_ratio();
 	float _aspect_ratio = rde_window_orientation_is_horizontal(_window) ? _aspect_ratios.y : _aspect_ratios.x;
-	glm_perspective(_camera->fov, _aspect_ratio, _camera->near_far.x, _camera->near_far.y, projection_matrix);
+	glm_perspective(rde_math_degrees_to_radians(_camera->fov), _aspect_ratio, _camera->near_far.x, _camera->near_far.y, projection_matrix);
 
 	current_batch_3d.draw_mesh_wireframe = _draw_wireframe_over_mesh;
 }
@@ -8390,14 +8441,7 @@ void rde_rendering_3d_draw_skybox(rde_camera* _camera) {
 	mat4 _view_projection_matrix = GLM_MAT4_IDENTITY_INIT;
 
 	mat4 _view_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_vec_3F _cam_pos = _camera->transform->position;
-	rde_vec_3F _cam_direction = _camera->direction;
-	rde_vec_3F _cam_up = _camera->up;
-	glm_lookat( (vec3) { _cam_pos.x, _cam_pos.y, _cam_pos.z },
-				(vec3) { _cam_pos.x + _cam_direction.x, _cam_pos.y + _cam_direction.y, _cam_pos.z + _cam_direction.z },
-				(vec3) { _cam_up.x, _cam_up.y, _cam_up.z },
-				_view_matrix
-	);
+	rde_inner_rendering_get_camera_view_matrix(current_drawing_camera, &_view_matrix);
 	_view_matrix[3][0] = 0.0f;
 	_view_matrix[3][1] = 0.0f;
 	_view_matrix[3][2] = 0.0f;
@@ -8423,22 +8467,28 @@ void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
 	
 	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_DEPTH;
 
-	mat4 _light_projection;
-	mat4 _light_view;
-	mat4 _light_space_matrix;
-	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection);
-	vec3 _dir = (vec3) { -ENGINE.illumination.directional_light.direction.x, -ENGINE.illumination.directional_light.direction.y, -ENGINE.illumination.directional_light.direction.z };
-	glm_normalize(_dir);
-	glm_lookat(_dir,
-				(vec3) { 0.0f, 0.0f, 0.0f },
-				(vec3) { 0.0f, 1.0f, 0.0f },
-				_light_view
-	);
-	glm_mul(_light_projection, _light_view, _light_space_matrix);
+	// mat4 _light_projection;
+	// mat4 _light_view;
+	mat4 _light_space_matrix = GLM_MAT4_IDENTITY_INIT;
+	rde_inner_rendering_get_light_view_projection_matrix(current_drawing_window, current_drawing_camera, ENGINE.illumination.directional_light.direction, _camera->near_far.x, _camera->near_far.y, &_light_space_matrix);
+	// glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection);
+	// vec3 _dir = (vec3) { -ENGINE.illumination.directional_light.direction.x, -ENGINE.illumination.directional_light.direction.y, -ENGINE.illumination.directional_light.direction.z };
+	// glm_normalize(_dir);
+	// glm_lookat(_dir,
+	// 			(vec3) { 0.0f, 0.0f, 0.0f },
+	// 			(vec3) { 0.0f, 1.0f, 0.0f },
+	// 			_light_view
+	// );
+	// glm_mul(_light_projection, _light_view, _light_space_matrix);
+	
 	glm_mat4_copy(_light_space_matrix, ENGINE.shadows.light_space_matrix);
 
 	RDE_CHECK_GL(glUseProgram, ENGINE.shadows_shader->compiled_program_id);
 	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(ENGINE.shadows_shader->compiled_program_id, "light_space_matrix"), 1, GL_FALSE, (const void*)_light_space_matrix);
+	
+	mat4 _camera_view_matrix = GLM_MAT4_IDENTITY_INIT;
+	rde_inner_rendering_get_camera_view_matrix(current_drawing_camera, &_camera_view_matrix);
+	RDE_CHECK_GL(glUniformMatrix4fv, glGetUniformLocation(ENGINE.shadows_shader->compiled_program_id, "camera_view_matrix"), 1, GL_FALSE, (const void*)_camera_view_matrix);
 
 	RDE_CHECK_GL(glViewport, 0, 0, RDE_SHADOW_MAP_SIZE_WIDTH, RDE_SHADOW_MAP_SIZE_HEIGHT);
 	RDE_CHECK_GL(glBindFramebuffer, GL_FRAMEBUFFER, ENGINE.shadows.render_texture->opengl_framebuffer_id);

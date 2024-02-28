@@ -40,6 +40,8 @@ void draw_grid(rde_camera* _camera, rde_window* _window) {
 }
 
 void draw_imgui_transform(const char* _name, rde_transform* _transform);
+void common_keyboard_controller(rde_camera* _camera, float _dt);
+void common_mouse_controller(rde_camera* _camera, float _dt);
 
 #if !RDE_IS_ANDROID()
 #include "model_viewer.c"
@@ -246,6 +248,101 @@ void draw_imgui_transform(const char* _name, rde_transform* _transform) {
 	rde_imgui_end();
 	
 	id_counter = 0;
+}
+
+void common_keyboard_controller(rde_camera* _camera, float _dt) {
+	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
+		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
+		_position.x += _camera->v_front.x * 10 * _dt;
+		_position.y += _camera->v_front.y * 10 * _dt;
+		_position.z += _camera->v_front.z * 10 * _dt;
+		rde_transform_set_position(_camera->transform, _position);
+	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
+		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
+		_position.x -= _camera->v_front.x * 10 * _dt;
+		_position.y -= _camera->v_front.y * 10 * _dt;
+		_position.z -= _camera->v_front.z * 10 * _dt;
+		rde_transform_set_position(_camera->transform, _position);
+	}
+
+	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
+		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
+		_position.y -= 10 * _dt;
+		rde_transform_set_position(_camera->transform, _position);
+	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
+		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
+		_position.y += 10 * _dt;
+		rde_transform_set_position(_camera->transform, _position);
+	}
+
+	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
+		rde_vec_3F _cp = rde_math_cross_product(_camera->v_front, shadows_camera_up);
+		rde_math_normalize(&_cp);
+		
+		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
+		_position.x -= _cp.x * 10 * _dt;
+		_position.y -= _cp.y * 10 * _dt;
+		_position.z -= _cp.z * 10 * _dt;
+		rde_transform_set_position(_camera->transform, _position);
+	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
+		rde_vec_3F _cp = rde_math_cross_product(_camera->v_front, shadows_camera_up);
+		rde_math_normalize(&_cp);
+
+		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
+		_position.x += _cp.x * 10 * _dt;
+		_position.y += _cp.y * 10 * _dt;
+		_position.z += _cp.z * 10 * _dt;
+		rde_transform_set_position(_camera->transform, _position);
+	}
+}
+
+void common_mouse_controller(rde_camera* _camera, float _dt) {
+	RDE_UNUSED(_dt)
+
+	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
+		shadows_first_mouse = true;
+	}
+
+#if !RDE_IS_MOBILE()
+	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
+#else
+	if(rde_events_is_mobile_touch_pressed(current_window, 0)) {
+#endif
+		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
+		float _x_pos = (float)_mouse_pos.x;
+		float _y_pos = (float)-_mouse_pos.y;
+
+		if(shadows_last_x == _x_pos && shadows_last_y == _y_pos) {
+			return;
+		}
+
+		if (shadows_first_mouse) {
+			shadows_last_x = _x_pos;
+			shadows_last_y = _y_pos;
+			shadows_first_mouse = false;
+		}
+
+		float _x_offset = _x_pos - shadows_last_x;
+		float _y_offset = _y_pos - shadows_last_y;
+		shadows_last_x = _x_pos;
+		shadows_last_y = _y_pos;
+
+		float _sensitivity = 0.1f;
+		_x_offset *= _sensitivity;
+		_y_offset *= _sensitivity;
+
+		rde_vec_3F _shadows_camera_rotation = rde_transform_get_rotation_degs(_camera->transform);
+		_shadows_camera_rotation.x += _y_offset;
+		_shadows_camera_rotation.y -= _x_offset;
+
+		if (_shadows_camera_rotation.x > 89.0f)
+			_shadows_camera_rotation.x = 89.0f;
+		
+		if (_shadows_camera_rotation.x < -89.0f)
+			_shadows_camera_rotation.x = -89.0f;
+
+		rde_transform_set_rotation(_camera->transform, _shadows_camera_rotation);
+	}
 }
 
 void init_func(int _argc, char** _argv) {

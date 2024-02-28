@@ -38,103 +38,6 @@ int android_msaa_samples = -1;
 
 rde_vec_2I android_mouse_pos;
 
-void android_keyboard_controller(float _dt) {
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
-		_position.x += android_camera_front.x * 10 * _dt;
-		_position.y += android_camera_front.y * 10 * _dt;
-		_position.z += android_camera_front.z * 10 * _dt;
-		rde_transform_set_position(android_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
-		_position.x -= android_camera_front.x * 10 * _dt;
-		_position.y -= android_camera_front.y * 10 * _dt;
-		_position.z -= android_camera_front.z * 10 * _dt;
-		rde_transform_set_position(android_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
-		_position.y -= 10 * _dt;
-		rde_transform_set_position(android_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
-		_position.y += 10 * _dt;
-		rde_transform_set_position(android_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
-		rde_vec_3F _cp = rde_math_cross_product(android_camera_front, android_camera_up);
-		rde_math_normalize(&_cp);
-		
-		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
-		_position.x -= _cp.x * 10 * _dt;
-		_position.y -= _cp.y * 10 * _dt;
-		_position.z -= _cp.z * 10 * _dt;
-		rde_transform_set_position(android_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
-		rde_vec_3F _cp = rde_math_cross_product(android_camera_front, android_camera_up);
-		rde_math_normalize(&_cp);
-
-		rde_vec_3F _position = rde_transform_get_position(android_camera.transform);
-		_position.x += _cp.x * 10 * _dt;
-		_position.y += _cp.y * 10 * _dt;
-		_position.z += _cp.z * 10 * _dt;
-		rde_transform_set_position(android_camera.transform, _position);
-	}
-}
-
-void android_mouse_controller(float _dt) {
-	RDE_UNUSED(_dt)
-
-	if(rde_events_is_mobile_touch_just_pressed(current_window, 0)) { 
-		android_first_mouse = true;
-	}
-
-	if(rde_events_is_mobile_touch_pressed(current_window, 0)) {
-		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
-		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)-_mouse_pos.y;
-
-		if(android_last_x == _x_pos && android_last_y == _y_pos) {
-			return;
-		}
-
-		if (android_first_mouse) {
-			android_last_x = _x_pos;
-			android_last_y = _y_pos;
-			android_first_mouse = false;
-		}
-
-		float _x_offset = _x_pos - android_last_x;
-		float _y_offset = _y_pos - android_last_y;
-		android_last_x = _x_pos;
-		android_last_y = _y_pos;
-
-		float _sensitivity = 0.1f;
-		_x_offset *= _sensitivity;
-		_y_offset *= _sensitivity;
-
-		android_yaw -= _x_offset;
-		android_pitch += _y_offset;
-
-		if (android_pitch > 89.0f)
-		android_pitch = 89.0f;
-		
-		if (android_pitch < -89.0f)
-		android_pitch = -89.0f;
-
-		rde_vec_3F _front;
-		_front.x = cos(rde_math_degrees_to_radians(android_yaw)) * cos(rde_math_degrees_to_radians(android_pitch));
-		_front.y = sin(rde_math_degrees_to_radians(android_pitch));
-		_front.z = sin(rde_math_degrees_to_radians(android_yaw)) * cos(rde_math_degrees_to_radians(android_pitch));
-		rde_math_normalize(&_front);
-
-		android_camera.direction = _front;
-		android_camera_front = _front;
-	}
-}
-
 void android_on_event(rde_event* _event, rde_window* _window) {
 	RDE_UNUSED(_window);
 	RDE_UNUSED(_event);
@@ -150,22 +53,7 @@ void android_on_update(float _dt) {
 		android_msaa_samples = -1;
 	}
 
-	// rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
-	// if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
-	// 	android_camera.transform->position.x += android_camera_front.x * 10 * _dt * (_scrolled.y * 3);
-	// 	android_camera.transform->position.y += android_camera_front.y * 10 * _dt * (_scrolled.y * 3);
-	// 	android_camera.transform->position.z += android_camera_front.z * 10 * _dt * (_scrolled.y * 3);
-	// }
-
-	android_mouse_controller(_dt);
-	android_keyboard_controller(_dt);
-
-	// if(android_model != NULL) {
-	// 	android_transform->rotation.y += _dt * 25.f;
-	// 	if(android_transform->rotation.y > 360.f) {
-	// 		android_transform->rotation.y = 0;
-	// 	}
-	// }
+	common_mouse_controller(&android_camera, _dt);
 }
 
 void android_on_fixed_update(float _dt) {

@@ -6,9 +6,7 @@ rde_model* shadows_model;
 rde_transform* shadows_transform_0;
 rde_transform* shadows_transform_1;
 
-float shadows_yaw = -90.0f;
 bool shadows_first_mouse = true;
-float shadows_pitch =  0.0f;
 float shadows_last_x =  1280.f * 0.5f;
 float shadows_last_y =  720.f * 0.5f;
 rde_vec_3F shadows_camera_front = { -0.31f, -0.24f, -0.91f };
@@ -20,105 +18,6 @@ rde_vec_3F shadows_directional_light_ambient_color = { 0.2f, 0.2f, 0.2f };
 rde_vec_3F shadows_directional_light_diffuse_color = { 0.5f, 0.5f, 0.5f };
 rde_vec_3F shadows_directional_light_specular_color = { 1.0f, 1.0f, 1.0f };
 
-void shadows_keyboard_controller(float _dt) {
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.x += shadows_camera_front.x * 10 * _dt;
-		_position.y += shadows_camera_front.y * 10 * _dt;
-		_position.z += shadows_camera_front.z * 10 * _dt;
-		rde_transform_set_position(shadows_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.x -= shadows_camera_front.x * 10 * _dt;
-		_position.y -= shadows_camera_front.y * 10 * _dt;
-		_position.z -= shadows_camera_front.z * 10 * _dt;
-		rde_transform_set_position(shadows_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.y -= 10 * _dt;
-		rde_transform_set_position(shadows_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.y += 10 * _dt;
-		rde_transform_set_position(shadows_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
-		rde_vec_3F _cp = rde_math_cross_product(shadows_camera_front, shadows_camera_up);
-		rde_math_normalize(&_cp);
-		
-		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.x -= _cp.x * 10 * _dt;
-		_position.y -= _cp.y * 10 * _dt;
-		_position.z -= _cp.z * 10 * _dt;
-		rde_transform_set_position(shadows_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
-		rde_vec_3F _cp = rde_math_cross_product(shadows_camera_front, shadows_camera_up);
-		rde_math_normalize(&_cp);
-
-		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.x += _cp.x * 10 * _dt;
-		_position.y += _cp.y * 10 * _dt;
-		_position.z += _cp.z * 10 * _dt;
-		rde_transform_set_position(shadows_camera.transform, _position);
-	}
-}
-
-void shadows_mouse_controller(float _dt) {
-	RDE_UNUSED(_dt)
-
-	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
-		shadows_first_mouse = true;
-	}
-
-	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
-		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
-		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)-_mouse_pos.y;
-
-		if(shadows_last_x == _x_pos && shadows_last_y == _y_pos) {
-			return;
-		}
-
-		if (shadows_first_mouse) {
-			shadows_last_x = _x_pos;
-			shadows_last_y = _y_pos;
-			shadows_first_mouse = false;
-		}
-
-		float _x_offset = _x_pos - shadows_last_x;
-		float _y_offset = _y_pos - shadows_last_y;
-		shadows_last_x = _x_pos;
-		shadows_last_y = _y_pos;
-
-		float _sensitivity = 0.1f;
-		_x_offset *= _sensitivity;
-		_y_offset *= _sensitivity;
-
-		shadows_yaw -= _x_offset;
-		shadows_pitch += _y_offset;
-
-		if (shadows_pitch > 89.0f)
-			shadows_pitch = 89.0f;
-		
-		if (shadows_pitch < -89.0f)
-			shadows_pitch = -89.0f;
-
-		rde_vec_3F _front;
-		_front.x = cos(rde_math_degrees_to_radians(shadows_yaw)) * cos(rde_math_degrees_to_radians(shadows_pitch));
-		_front.y = sin(rde_math_degrees_to_radians(shadows_pitch));
-		_front.z = sin(rde_math_degrees_to_radians(shadows_yaw)) * cos(rde_math_degrees_to_radians(shadows_pitch));
-		rde_math_normalize(&_front);
-
-		shadows_camera.direction = _front;
-		shadows_camera_front = _front;
-
-
-	}
-}
-
 void shadows_on_event(rde_event* _event, rde_window* _window) {
 	RDE_UNUSED(_window);
 	RDE_UNUSED(_event);
@@ -128,14 +27,14 @@ void shadows_on_update(float _dt) {
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
 		rde_vec_3F _position = rde_transform_get_position(shadows_camera.transform);
-		_position.x += shadows_camera_front.x * 10 * _dt * (_scrolled.y * 3);
-		_position.y += shadows_camera_front.y * 10 * _dt * (_scrolled.y * 3);
-		_position.z += shadows_camera_front.z * 10 * _dt * (_scrolled.y * 3);
+		_position.x += shadows_camera.v_front.x * 10 * _dt * (_scrolled.y * 3);
+		_position.y += shadows_camera.v_front.y * 10 * _dt * (_scrolled.y * 3);
+		_position.z += shadows_camera.v_front.z * 10 * _dt * (_scrolled.y * 3);
 		rde_transform_set_position(shadows_camera.transform, _position);
 	}
 
-	shadows_mouse_controller(_dt);
-	shadows_keyboard_controller(_dt);
+	common_mouse_controller(&shadows_camera, _dt);
+	common_keyboard_controller(&shadows_camera ,_dt);
 }
 
 void shadows_on_fixed_update(float _dt) {

@@ -19,103 +19,6 @@ rde_vec_3F performance_test_3d_directional_light_specular_color = { 1.0f, 1.0f, 
 rde_transform** performance_test_3d_transforms = NULL;
 int performance_test_3d_amount_to_show = 1;
 
-void performance_test_keyboard_controller(float _dt) {
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_transform_get_position(performance_test_3d_camera.transform);
-		_position.x += performance_test_3d_camera_front.x * 10 * _dt;
-		_position.y += performance_test_3d_camera_front.y * 10 * _dt;
-		_position.z += performance_test_3d_camera_front.z * 10 * _dt;
-		rde_transform_set_position(performance_test_3d_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_transform_get_position(performance_test_3d_camera.transform);
-		_position.x -= performance_test_3d_camera_front.x * 10 * _dt;
-		_position.y -= performance_test_3d_camera_front.y * 10 * _dt;
-		_position.z -= performance_test_3d_camera_front.z * 10 * _dt;
-		rde_transform_set_position(performance_test_3d_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_transform_get_position(performance_test_3d_camera.transform);
-		_position.y -= 10 * _dt;
-		rde_transform_set_position(performance_test_3d_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_transform_get_position(performance_test_3d_camera.transform);
-		_position.y += 10 * _dt;
-		rde_transform_set_position(performance_test_3d_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
-		rde_vec_3F _cp = rde_math_cross_product(performance_test_3d_camera_front, performance_test_3d_camera_up);
-		rde_math_normalize(&_cp);
-		
-		rde_vec_3F _position = rde_transform_get_position(performance_test_3d_camera.transform);
-		_position.x -= _cp.x * 10 * _dt;
-		_position.y -= _cp.y * 10 * _dt;
-		_position.z -= _cp.z * 10 * _dt;
-		rde_transform_set_position(performance_test_3d_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
-		rde_vec_3F _cp = rde_math_cross_product(performance_test_3d_camera_front, performance_test_3d_camera_up);
-		rde_math_normalize(&_cp);
-
-		rde_vec_3F _position = rde_transform_get_position(performance_test_3d_camera.transform);
-		_position.x += _cp.x * 10 * _dt;
-		_position.y += _cp.y * 10 * _dt;
-		_position.z += _cp.z * 10 * _dt;
-		rde_transform_set_position(performance_test_3d_camera.transform, _position);
-	}
-}
-
-void performance_test_mouse_controller(float _dt) {
-	RDE_UNUSED(_dt)
-
-	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
-		performance_test_3d_first_mouse = true;
-	}
-
-	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
-		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
-		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)-_mouse_pos.y;
-
-		if(performance_test_3d_last_x == _x_pos && performance_test_3d_last_y == _y_pos) {
-			return;
-		}
-
-		if (performance_test_3d_first_mouse) {
-			performance_test_3d_last_x = _x_pos;
-			performance_test_3d_last_y = _y_pos;
-			performance_test_3d_first_mouse = false;
-		}
-
-		float _x_offset = _x_pos - performance_test_3d_last_x;
-		float _y_offset = _y_pos - performance_test_3d_last_y;
-		performance_test_3d_last_x = _x_pos;
-		performance_test_3d_last_y = _y_pos;
-
-		float _sensitivity = 0.1f;
-		_x_offset *= _sensitivity;
-		_y_offset *= _sensitivity;
-
-		performance_test_3d_yaw -= _x_offset;
-		performance_test_3d_pitch += _y_offset;
-
-		if (performance_test_3d_pitch > 89.0f)
-			performance_test_3d_pitch = 89.0f;
-		
-		if (performance_test_3d_pitch < -89.0f)
-			performance_test_3d_pitch = -89.0f;
-
-		rde_vec_3F _front;
-		_front.x = cos(rde_math_degrees_to_radians(performance_test_3d_yaw)) * cos(rde_math_degrees_to_radians(performance_test_3d_pitch));
-		_front.y = sin(rde_math_degrees_to_radians(performance_test_3d_pitch));
-		_front.z = sin(rde_math_degrees_to_radians(performance_test_3d_yaw)) * cos(rde_math_degrees_to_radians(performance_test_3d_pitch));
-		rde_math_normalize(&_front);
-
-		performance_test_3d_camera.direction = _front;
-		performance_test_3d_camera_front = _front;
-	}
-}
-
 void performance_test_3d_on_update(float _dt) {
 	rde_vec_2F _scrolled = rde_events_mouse_get_scrolled(current_window);
 	if(_scrolled.x != 0.f || _scrolled.y != 0.f) {
@@ -126,8 +29,8 @@ void performance_test_3d_on_update(float _dt) {
 		rde_transform_set_position(performance_test_3d_camera.transform, _position);
 	}
 
-	performance_test_mouse_controller(_dt);
-	performance_test_keyboard_controller(_dt);
+	common_mouse_controller(&performance_test_3d_camera, _dt);
+	common_keyboard_controller(&performance_test_3d_camera ,_dt);
 }
 
 void performance_test_3d_on_fixed_update(float _dt) {

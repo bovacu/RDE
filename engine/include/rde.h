@@ -169,19 +169,19 @@ extern "C" {
 
 // Constant: RDE_FLOAT_MAX
 // Max value of a float 3.402823466 E+38
-#define RDE_FLOAT_MAX 3.402823466 E + 38
+#define RDE_FLOAT_MAX (3.402823466E+38)
 
 // Constant: RDE_FLOAT_MIN
 // Min value of a float 1.175494351 E-38
-#define RDE_FLOAT_MIN 1.175494351 E - 38
+#define RDE_FLOAT_MIN 1.175494351E-38
 
 // Constant: RDE_DOUBLE_MAX
 // Max value of n double 1.7976931348623158 E+308
-#define RDE_DOUBLE_MAX 1.7976931348623158 E + 308
+#define RDE_DOUBLE_MAX 1.7976931348623158E+308
 
 // Constant: RDE_DOUBLE_MIN
 // Min value of a double 2.2250738585072014 E-308
-#define RDE_DOUBLE_MIN 2.2250738585072014 E - 308
+#define RDE_DOUBLE_MIN 2.2250738585072014E-308
 
 // Constant: RDE_UINT_MAX
 // Max value of an unsifned int 4294967295
@@ -2966,8 +2966,10 @@ struct rde_camera {
 	float zoom;
 	float fov;
 	rde_transform* transform;
-	rde_vec_3F direction;
-	rde_vec_3F up;
+	rde_vec_3F v_up;
+	rde_vec_3F v_front;
+	rde_vec_3F v_right;
+	rde_vec_3F world_up;
 	rde_vec_2F near_far;
 	RDE_CAMERA_TYPE_ camera_type;
 	bool enabled;

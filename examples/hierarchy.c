@@ -17,105 +17,6 @@ float hierarchy_last_y =  720.f * 0.5f;
 rde_vec_3F hierarchy_camera_front = { -0.31f, -0.24f, -0.91f };
 rde_vec_3F hierarchy_camera_up = { 0.0, 1.0f, 0.0f };
 
-void hierarchy_keyboard_controller(float _dt) {
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_W)) {
-		rde_vec_3F _position = rde_transform_get_position(hierarchy_camera.transform);
-		_position.x += hierarchy_camera_front.x * 10 * _dt;
-		_position.y += hierarchy_camera_front.y * 10 * _dt;
-		_position.z += hierarchy_camera_front.z * 10 * _dt;
-		rde_transform_set_position(hierarchy_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_S)) {
-		rde_vec_3F _position = rde_transform_get_position(hierarchy_camera.transform);
-		_position.x -= hierarchy_camera_front.x * 10 * _dt;
-		_position.y -= hierarchy_camera_front.y * 10 * _dt;
-		_position.z -= hierarchy_camera_front.z * 10 * _dt;
-		rde_transform_set_position(hierarchy_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_DOWN)) {
-		rde_vec_3F _position = rde_transform_get_position(hierarchy_camera.transform);
-		_position.y -= 10 * _dt;
-		rde_transform_set_position(hierarchy_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_UP)) {
-		rde_vec_3F _position = rde_transform_get_position(hierarchy_camera.transform);
-		_position.y += 10 * _dt;
-		rde_transform_set_position(hierarchy_camera.transform, _position);
-	}
-
-	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
-		rde_vec_3F _cp = rde_math_cross_product(hierarchy_camera_front, hierarchy_camera_up);
-		rde_math_normalize(&_cp);
-		
-		rde_vec_3F _position = rde_transform_get_position(hierarchy_camera.transform);
-		_position.x -= _cp.x * 10 * _dt;
-		_position.y -= _cp.y * 10 * _dt;
-		_position.z -= _cp.z * 10 * _dt;
-		rde_transform_set_position(hierarchy_camera.transform, _position);
-	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
-		rde_vec_3F _cp = rde_math_cross_product(hierarchy_camera_front, hierarchy_camera_up);
-		rde_math_normalize(&_cp);
-
-		rde_vec_3F _position = rde_transform_get_position(hierarchy_camera.transform);
-		_position.x += _cp.x * 10 * _dt;
-		_position.y += _cp.y * 10 * _dt;
-		_position.z += _cp.z * 10 * _dt;
-		rde_transform_set_position(hierarchy_camera.transform, _position);
-	}
-}
-
-void hierarchy_mouse_controller(float _dt) {
-	RDE_UNUSED(_dt)
-
-	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
-		hierarchy_first_mouse = true;
-	}
-
-	if(rde_events_is_mouse_button_pressed(current_window, RDE_MOUSE_BUTTON_1)) {
-		rde_vec_2I _mouse_pos = rde_events_mouse_get_position(current_window);
-		float _x_pos = (float)_mouse_pos.x;
-		float _y_pos = (float)-_mouse_pos.y;
-
-		if(hierarchy_last_x == _x_pos && hierarchy_last_y == _y_pos) {
-			return;
-		}
-
-		if (hierarchy_first_mouse) {
-			hierarchy_last_x = _x_pos;
-			hierarchy_last_y = _y_pos;
-			hierarchy_first_mouse = false;
-		}
-
-		float _x_offset = _x_pos - hierarchy_last_x;
-		float _y_offset = _y_pos - hierarchy_last_y;
-		hierarchy_last_x = _x_pos;
-		hierarchy_last_y = _y_pos;
-
-		float _sensitivity = 0.1f;
-		_x_offset *= _sensitivity;
-		_y_offset *= _sensitivity;
-
-		hierarchy_yaw -= _x_offset;
-		hierarchy_pitch += _y_offset;
-
-		if (hierarchy_pitch > 89.0f)
-			hierarchy_pitch = 89.0f;
-		
-		if (hierarchy_pitch < -89.0f)
-			hierarchy_pitch = -89.0f;
-
-		rde_vec_3F _front;
-		_front.x = cos(rde_math_degrees_to_radians(hierarchy_yaw)) * cos(rde_math_degrees_to_radians(hierarchy_pitch));
-		_front.y = sin(rde_math_degrees_to_radians(hierarchy_pitch));
-		_front.z = sin(rde_math_degrees_to_radians(hierarchy_yaw)) * cos(rde_math_degrees_to_radians(hierarchy_pitch));
-		rde_math_normalize(&_front);
-
-		hierarchy_camera.direction = _front;
-		hierarchy_camera_front = _front;
-
-
-	}
-}
-
 void hierarchy_on_event(rde_event* _event, rde_window* _window) {
 	RDE_UNUSED(_window);
 	RDE_UNUSED(_event);
@@ -131,8 +32,8 @@ void hierarchy_on_update(float _dt) {
 		rde_transform_set_position(hierarchy_camera.transform, _position);
 	}
 
-	hierarchy_mouse_controller(_dt);
-	hierarchy_keyboard_controller(_dt);
+	common_mouse_controller(&hierarchy_camera, _dt);
+	common_keyboard_controller(&hierarchy_camera ,_dt);
 }
 
 void hierarchy_on_fixed_update(float _dt) {
