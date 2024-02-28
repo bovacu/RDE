@@ -1,10 +1,6 @@
 #ifndef RDE_H
 #define RDE_H
 
-#ifndef RDE_AUDIO_MODULE
-#define RDE_AUDIO_MODULE
-#endif
-
 // This is needed because of C++ name mangling, if this lib is linked to a C++ project and is compiled
 // without extern "C" won't work.
 #ifdef __cplusplus
@@ -92,6 +88,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h> 
+
+#include "rde_config.h"
 
 // 											==============================================================================
 // 											=									DEFINES					 	   	 		 =

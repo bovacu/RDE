@@ -1152,14 +1152,14 @@ const char* MODULES_STR[MAX_MODULES] = {
 	"error",
 	"imgui"
 };
-char* MODULES_DEFINES[MAX_MODULES] = {
-	"-DRDE_AUDIO_MODULE",
-	"-DRDE_PHYSICS_MODULE",
-	"-DRDE_FBX_MODULE",
-	"-DRDE_OBJ_MODULE",
-	"-DRDE_UI_MODULE",
-	"-DRDE_ERROR_MODULE",
-	"-DRDE_IMGUI_MODULE"
+char* MODULES_DEFINES_H[MAX_MODULES] = {
+	"#define RDE_AUDIO_MODULE",
+	"#define RDE_PHYSICS_MODULE",
+	"#define RDE_FBX_MODULE",
+	"#define RDE_OBJ_MODULE",
+	"#define RDE_UI_MODULE",
+	"#define RDE_ERROR_MODULE",
+	"#define RDE_IMGUI_MODULE"
 };
 RDE_MODULES_ modules;
 
@@ -1628,14 +1628,6 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 
 	arrput(_build_command, "clang");
 
-	unsigned int _module = 1;
-	for(int _i = 0; _i < MAX_MODULES; _i++) {
-		if((modules & _module) == _module) {
-			ADD_FLAG(MODULES_DEFINES[_i]);
-		}
-		_module = _module << 1;
-	}
-
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
 		ADD_FLAG("-O0");
@@ -1849,14 +1841,6 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 	}
 
 	arrput(_build_command, "clang");
-
-	unsigned int _module = 1;
-	for(int _i = 0; _i < MAX_MODULES; _i++) {
-		if((modules & _module) == _module) {
-			ADD_FLAG(MODULES_DEFINES[_i]);
-		}
-		_module = _module << 1;
-	}
 
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
@@ -2132,14 +2116,6 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 	}
 
 	arrput(_build_command, "clang");
-
-	unsigned int _module = 1;
-	for(int _i = 0; _i < MAX_MODULES; _i++) {
-		if((modules & _module) == _module) {
-			ADD_FLAG(MODULES_DEFINES[_i]);
-		}
-		_module = _module << 1;
-	}
 
 	if(strcmp(build_type, DEBUG_STR) == 0) {
 		ADD_FLAG("-g");
@@ -2617,17 +2593,6 @@ bool build_android_project() {
 	char* _final_cmake_code = (char*)malloc(sizeof(char) * _final_cmake_size);
 	memset(_final_cmake_code, 0, _final_cmake_size);
 
-	dyn_str* _modules = dyn_str_new("");
-	unsigned int _module_shift = 1;
-	for(int _i = 0; _i < MAX_MODULES; _i++) {
-		if((modules & (RDE_MODULES_)_module_shift) == (RDE_MODULES_)_module_shift) {
-			dyn_str_append(_modules, (char*)MODULES_DEFINES[_i]);
-			dyn_str_append(_modules, " ");
-		}
-
-		_module_shift = _module_shift << 1;
-	}
-
 	dyn_str* _app_source_code = dyn_str_new(working_dir);
 	for(size_t _i = 0; _i < arrlenu(project_compile_files); _i++) {
 		dyn_str_append(_app_source_code, dyn_str_get(project_compile_files[_i]));
@@ -2637,7 +2602,6 @@ bool build_android_project() {
 	snprintf(_final_cmake_code, _final_cmake_size, _template_code, 
 	         build_type, 
 	         builder_exe_full_path_dir, 
-	         dyn_str_get(_modules),
 	         dyn_str_get(_app_source_code)
 	);
 
@@ -3148,6 +3112,12 @@ void parse_arguments(int _argc, char** _argv) {
 			memset(_modules_str, 0, 256);
 			strcat(_modules_str, _value);
 
+			dyn_str* _config_file_path = dyn_str_new(builder_exe_full_path_dir);
+			dyn_str_append(_config_file_path, "engine/include/rde_config.h");
+			FILE* _file = fopen(dyn_str_get(_config_file_path), "wb");
+
+			dyn_str* _config_file_contents = dyn_str_new("// This file is auto-generated when compiling the library \n");
+
 			char* _module = strtok(_modules_str, ",");
 			while( _module != NULL ) {
 				const char* _trimed_module = trim(_module);
@@ -3158,6 +3128,8 @@ void parse_arguments(int _argc, char** _argv) {
 					if(strcmp(MODULES_STR[_i], _trimed_module) == 0) {
 						modules |= (RDE_MODULES_)_m;
 						rde_log_level(RDE_LOG_LEVEL_INFO, "Added module '%s'", _trimed_module);
+						dyn_str_append(_config_file_contents, MODULES_DEFINES_H[_i]);
+						dyn_str_append(_config_file_contents, "\n");
 						break;
 					}
 					_m = _m << 1;
@@ -3169,6 +3141,10 @@ void parse_arguments(int _argc, char** _argv) {
 				
 				_module = strtok(NULL, ",");
 			}
+
+			fprintf(_file, "%s", dyn_str_get(_config_file_contents));
+			fclose(_file);
+			dyn_str_free(_config_file_path);
 		} 
 		
 		

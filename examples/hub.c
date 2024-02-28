@@ -1,12 +1,3 @@
-#ifndef __ANDROID__
-//#define RDE_AUDIO_MODULE
-#define RDE_RENDERING_MODULE
-#define RDE_FBX_MODULE
-#define RDE_OBJ_MODULE
-#define RDE_PHYSICS_MODULE
-#define RDE_IMGUI_MODULE
-#endif
-
 #include "rde.h"
 #include <math.h>
 #include <string.h>
