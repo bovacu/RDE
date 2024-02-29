@@ -350,7 +350,7 @@ void init_func(int _argc, char** _argv) {
 
 	// rde_window_set_window_icon(current_window, "logo.ico");
 
-	hub_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
+	hub_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_ORTHOGRAPHIC);
 	rde_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 #if RDE_IS_MOBILE()

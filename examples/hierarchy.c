@@ -139,7 +139,7 @@ void hierarchy_unload() {
 }
 
 void hierarchy_init() {
-	hierarchy_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
+	hierarchy_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_PERSPECTIVE);
 	rde_transform_set_position(hierarchy_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	hierarchy_transform_0 = rde_transform_load();

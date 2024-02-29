@@ -672,7 +672,7 @@ struct rde_font {
 	rde_texture* texture;
 	rde_arr_rde_font_char_info chars;
 };
-	
+
 #define RDE_MESH_NAME_MAX 512
 struct rde_mesh {
 	char name[RDE_MESH_NAME_MAX];
@@ -689,13 +689,15 @@ struct rde_mesh {
 				 // 2 -> texture coords (static)
 				 // 3 -> transforms to render (dynamic)
 	rde_material material;
+	rde_bounding_box bounding_box;
 };
 	
 struct rde_model {
 	rde_arr_rde_mesh mesh_array;
 	char file_path[RDE_MAX_PATH];
+	rde_bounding_box bounding_box;
 };
-	
+
 typedef struct {
 	uint vao;
 	uint vbo;
@@ -1105,7 +1107,77 @@ rde_event_data rde_struct_create_event_data(void) {
 	return _e;
 }
 
-rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
+rde_frustum_plane rde_struct_create_frustum_plane(vec3 _p, vec3 _norm) {
+	rde_frustum_plane _f;
+	vec3 _normal = GLM_VEC3_ZERO_INIT;
+	glm_vec3_normalize_to(_norm, _normal);
+	_f.distance = glm_dot(_normal, _p);
+	_f.normal = (rde_vec_3F) { _normal[0], _normal[1], _normal[2] };
+	return _f;
+}
+
+rde_frustum rde_struct_create_frustum(rde_window* _window, rde_camera* _camera) {
+	rde_frustum _f;
+
+	float _half_v_size = _camera->near_far.y * tanf(rde_math_degrees_to_radians(_camera->fov) * 0.5f);
+	float _half_h_size = _half_v_size * rde_window_get_aspect_ratio(_window);
+	
+	vec3 _front_far = GLM_VEC3_ZERO_INIT;
+	glm_vec3_scale((vec3) { _camera->v_front.x, _camera->v_front.y, _camera->v_front.z }, _camera->near_far.y, _front_far);
+
+	vec3 _front_near = GLM_VEC3_ZERO_INIT;
+	glm_vec3_scale((vec3) { _camera->v_front.x, _camera->v_front.y, _camera->v_front.z }, _camera->near_far.x, _front_near);
+
+	rde_vec_3F _pos = rde_transform_get_position(_camera->transform);
+	vec3 _cam_pos = (vec3) { _pos.x, _pos.y, _pos.z };
+
+	
+	_f.near_face = rde_struct_create_frustum_plane(
+		(vec3) { _cam_pos[0] + _front_near[0], _cam_pos[1] + _front_near[1], _cam_pos[2] + _front_near[2] },
+		(vec3) { _camera->v_front.x, _camera->v_front.y, _camera->v_front.z }
+	);
+
+	_f.far_face = rde_struct_create_frustum_plane(
+		(vec3) { _cam_pos[0] + _front_far[0], _cam_pos[1] + _front_far[1], _cam_pos[2] + _front_far[2] },
+		(vec3) { -_camera->v_front.x, -_camera->v_front.y, -_camera->v_front.z }
+	);
+
+	vec3 _right_norm = GLM_VEC3_ZERO_INIT;
+	glm_cross(
+		(vec3) { _front_far[0] - _camera->v_right.x * _half_h_size, _front_far[1] - _camera->v_right.y * _half_h_size, _front_far[2] - _camera->v_right.z * _half_h_size },
+		(vec3) { _camera->v_up.x, _camera->v_up.y, _camera->v_up.z },
+		_right_norm
+	);
+	_f.right_face = rde_struct_create_frustum_plane(_cam_pos, _right_norm);
+
+	vec3 _left_norm = GLM_VEC3_ZERO_INIT;
+	glm_cross(
+		(vec3) { _camera->v_up.x, _camera->v_up.y, _camera->v_up.z },
+		(vec3) { _front_far[0] + _camera->v_right.x * _half_h_size, _front_far[1] + _camera->v_right.y * _half_h_size, _front_far[2] + _camera->v_right.z * _half_h_size },
+		_left_norm
+	);
+	_f.left_face = rde_struct_create_frustum_plane(_cam_pos, _left_norm);
+
+	vec3 _top_norm = GLM_VEC3_ZERO_INIT;
+	glm_cross(
+		(vec3) { _camera->v_right.x, _camera->v_right.y, _camera->v_right.z },
+		(vec3) { _front_far[0] - _camera->v_up.x * _half_v_size, _front_far[1] - _camera->v_up.y * _half_v_size, _front_far[2] - _camera->v_up.z * _half_v_size },
+		_top_norm
+	);
+	_f.top_face = rde_struct_create_frustum_plane(_cam_pos, _top_norm);
+
+	vec3 _bottom_norm = GLM_VEC3_ZERO_INIT;
+	glm_cross(
+		(vec3) { _front_far[0] + _camera->v_up.x * _half_v_size, _front_far[1] + _camera->v_up.y * _half_v_size, _front_far[2] + _camera->v_up.z * _half_v_size },
+		(vec3) { _camera->v_right.x, _camera->v_right.y, _camera->v_right.z },
+		_bottom_norm
+	);
+	_f.bottom_face = rde_struct_create_frustum_plane(_cam_pos, _bottom_norm);
+
+	return _f;
+}
+
+rde_camera rde_struct_create_camera(rde_window* _window, RDE_CAMERA_TYPE_ _camera_type) {
 	static size_t _camera_counter = 0;
 	rde_camera _c;
 	_c.id = _camera_counter++;
@@ -1117,6 +1189,7 @@ rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type) {
 	_c.v_front = (rde_vec_3F) { 0.0f, 0.0f, -1.0f };
 	_c.world_up = (rde_vec_3F) { 0.0f, 1.0f, 0.0f };
 	_c.near_far = (rde_vec_2F) { 0.1f, 100.f };
+	_c.frustum = rde_struct_create_frustum(_window, &_c);
 	return _c;
 }
 
@@ -1349,6 +1422,13 @@ rde_batch_3d rde_struct_create_batch_3d(void) {
 	_b.line_batch = rde_struct_create_line_batch();
 	_b.draw_mesh_wireframe = false;
 	_b.use_shadows = RDE_SHADOW_PASS_STATE_NONE;
+	return _b;
+}
+
+rde_bounding_box rde_struct_create_bounding_box(void) {
+	rde_bounding_box _b;
+	_b.center = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	_b.half_size = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
 	return _b;
 }
 
@@ -1850,7 +1930,7 @@ void rde_inner_parse_3_vertices_face_fbx(uint _i, uint _v, uint* _mesh_indices,
                            	   uint* _texcoords_pointer);
 #endif
 
-rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data);
+rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data, rde_vec_3F* _min_point, rde_vec_3F* _max_point);
 void rde_inner_rendering_try_flush_batch_3d(rde_shader* _shader, rde_mesh* _mesh, size_t _extra_floats);
 void rde_inner_rendering_try_flush_line_batch(rde_shader* _shader, unsigned short _thickness, size_t _extra_floats);
 void rde_inner_rendering_try_create_batch_3d(rde_shader* _shader, rde_mesh* _mesh);
@@ -1867,6 +1947,10 @@ void rde_inner_rendering_transform_to_glm_mat4_3d(const rde_transform* _transfor
 float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size_t _indices_count, size_t _vertex_count, uint* _indices);
 bool rde_inner_rendering_is_mesh_ok_to_render(rde_mesh* _mesh);
 void rde_inner_rendering_get_camera_view_matrix(rde_camera* _camera, mat4* _out_view_matrix);
+void rde_inner_rendering_get_camera_frustum_corners(mat4 _projection_matrix, mat4 _view_matrix, vec4 _corners_arr[8]);
+void rde_inner_rendering_get_light_view_projection_matrix(rde_window* _window, rde_camera* _camera, rde_vec_3F _light_direction, float _near_plane, float _far_plane, mat4* _out_matrix);
+bool rde_inner_rendering_is_bb_in_frustum(rde_frustum* _frustum, rde_bounding_box* _bb, rde_transform* _transform);
+bool rde_inner_rendering_is_bb_in_or_forward_plane(rde_frustum_plane* _plane, rde_bounding_box* _bb);
 
 rde_texture* red_inner_rendering_texture_load_data(const char* _file_path, rde_texture_load_data* _in_out_data);
 void rde_inner_rendering_texture_load_data_with_texture_provided(const char* _file_path, rde_texture_load_data* _in_out_data);
@@ -5079,6 +5163,18 @@ void rde_inner_fill_obj_mesh_data(rde_obj_mesh_data* _data, fastObjGroup* _group
 	rde_engine_supress_logs(false);
 }
 
+void rde_inner_rendering_compare_vertices_for_bounding_box_min(rde_vec_3F _new_vertex, rde_vec_3F* _bb_vertex) {
+	_bb_vertex->x = RDE_MIN(_new_vertex.x, _bb_vertex->x);
+	_bb_vertex->y = RDE_MIN(_new_vertex.y, _bb_vertex->y);
+	_bb_vertex->z = RDE_MIN(_new_vertex.z, _bb_vertex->z);
+}
+
+void rde_inner_rendering_compare_vertices_for_bounding_box_max(rde_vec_3F _new_vertex, rde_vec_3F* _bb_vertex) {
+	_bb_vertex->x = RDE_MAX(_new_vertex.x, _bb_vertex->x);
+	_bb_vertex->y = RDE_MAX(_new_vertex.y, _bb_vertex->y);
+	_bb_vertex->z = RDE_MAX(_new_vertex.z, _bb_vertex->z);
+}
+
 void rde_inner_parse_3_vertices_face_obj(uint _v, uint _offset, fastObjMesh* _mesh, rde_obj_mesh_data* _obj_mesh_data) {
 	fastObjIndex _face_index = rde_arr_s_get_fastObjIndex(_offset + 0, _mesh->indices, _mesh->index_count * 3, "Face Index");
 	rde_arr_s_set_float(_obj_mesh_data->positions_pointer + 0, rde_arr_s_get_float(_face_index.p * 3 + 0, _mesh->positions, _mesh->position_count * 3, "Positions Obj -> (%u, %u, %u)", _face_index.p, _face_index.t, _face_index.n), _obj_mesh_data->positions, _obj_mesh_data->positions_size, "Positions Mesh");
@@ -5307,6 +5403,8 @@ rde_model* rde_inner_obj_load_model_threaded(const char* _obj_path, uint _thread
 		rde_engine_supress_logs(false);
 	}
 
+	rde_vec_3F _model_min_point = { RDE_FLOAT_MAX, RDE_FLOAT_MAX, RDE_FLOAT_MAX };
+	rde_vec_3F _model_max_point = { -RDE_FLOAT_MAX, -RDE_FLOAT_MAX, -RDE_FLOAT_MAX };
 	for(unsigned int _i = 0; _i < _material_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = &_threads_data[_i].mesh_data;
 
@@ -5343,7 +5441,7 @@ rde_model* rde_inner_obj_load_model_threaded(const char* _obj_path, uint _thread
 		}
 		
 		rde_engine_supress_logs(true);
-		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
+		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data, &_model_min_point, &_model_max_point);
 		rde_engine_supress_logs(false);
 		rde_free(_mesh.vertex_positions);
 		rde_free(_mesh.vertex_texcoords);
@@ -5357,6 +5455,9 @@ rde_model* rde_inner_obj_load_model_threaded(const char* _obj_path, uint _thread
 	_t_end = clock();
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Model loaded in %f""s", (_t_end - _t_start) / 1000.f);
+
+	_model->bounding_box.center = (rde_vec_3F) { (_model_min_point.x + _model_max_point.x) * 0.5f, (_model_min_point.y + _model_max_point.y) * 0.5f, (_model_min_point.z + _model_max_point.z) * 0.5f };
+	_model->bounding_box.half_size = (rde_vec_3F) { _model_max_point.x - _model->bounding_box.center.x, _model_max_point.y - _model->bounding_box.center.y, _model_max_point.z - _model->bounding_box.center.z };
 
 	return _model;
 }
@@ -5453,6 +5554,8 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		}
 	}
 
+	rde_vec_3F _model_min_point = { RDE_FLOAT_MAX, RDE_FLOAT_MAX, RDE_FLOAT_MAX };
+	rde_vec_3F _model_max_point = { -RDE_FLOAT_MAX, -RDE_FLOAT_MAX, -RDE_FLOAT_MAX };
 	for(unsigned int _i = 0; _i < _material_count; _i++) {
 		rde_obj_mesh_data* _obj_mesh_data = &_obj[_i];
 
@@ -5489,7 +5592,7 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 		}
 		
 		rde_engine_supress_logs(true);
-		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data);
+		rde_mesh _mesh = rde_inner_struct_create_mesh(&_data, &_model_min_point, &_model_max_point);
 		rde_engine_supress_logs(false);
 		rde_free(_mesh.vertex_positions);
 		rde_free(_mesh.vertex_texcoords);
@@ -5505,6 +5608,9 @@ rde_model* rde_inner_obj_load_model(const char* _obj_path) {
 	_t_end = clock();
 
 	rde_log_color(RDE_LOG_COLOR_GREEN, "Model loaded in %f""s", (_t_end - _t_start) / 1000.f);
+
+	_model->bounding_box.center = (rde_vec_3F) { (_model_min_point.x + _model_max_point.x) * 0.5f, (_model_min_point.y + _model_max_point.y) * 0.5f, (_model_min_point.z + _model_max_point.z) * 0.5f };
+	_model->bounding_box.half_size = (rde_vec_3F) { _model_max_point.x - _model->bounding_box.center.x, _model_max_point.y - _model->bounding_box.center.y, _model_max_point.z - _model->bounding_box.center.z };
 
 	return _model;
 }
@@ -5782,7 +5888,7 @@ float* rde_inner_rendering_mesh_calculate_normals(float* _vertex_positions, size
 	return _normals;
 }
 
-rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
+rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data, rde_vec_3F* _min_point, rde_vec_3F* _max_point) {
 	rde_mesh _mesh;
 	_mesh.vao = 0;
 
@@ -5804,6 +5910,33 @@ rde_mesh rde_inner_struct_create_mesh(rde_mesh_gen_data* _data) {
 	for(unsigned int _i = 0; _i < RDE_MAX_MODELS_PER_DRAW; _i++) {
 		glm_mat4_zero(_mesh.transformation_matrices[_i]);
 	}
+
+	rde_vec_3F _min_p = { RDE_FLOAT_MAX, RDE_FLOAT_MAX, RDE_FLOAT_MAX };
+	rde_vec_3F _max_p = { -RDE_FLOAT_MAX, -RDE_FLOAT_MAX, -RDE_FLOAT_MAX };
+	for(uint _i = 0; _i < _mesh.vertex_count; _i++) {
+		float _a = _mesh.vertex_positions[_i * 3 + 0];
+		float _b = _mesh.vertex_positions[_i * 3 + 1];
+		float _c = _mesh.vertex_positions[_i * 3 + 2];
+
+		_min_p.x = RDE_MIN(_a, _min_p.x);
+		_min_p.y = RDE_MIN(_b, _min_p.y);
+		_min_p.z = RDE_MIN(_c, _min_p.z);
+
+		_max_p.x = RDE_MAX(_a, _max_p.x);
+		_max_p.y = RDE_MAX(_b, _max_p.y);
+		_max_p.z = RDE_MAX(_c, _max_p.z);
+	}
+	
+	_min_point->x = RDE_MIN(_min_point->x, _min_p.x);
+	_min_point->y = RDE_MIN(_min_point->y, _min_p.y);
+	_min_point->z = RDE_MIN(_min_point->z, _min_p.z);
+
+	_max_point->x = RDE_MAX(_max_point->x, _max_p.x);
+	_max_point->y = RDE_MAX(_max_point->y, _max_p.y);
+	_max_point->z = RDE_MAX(_max_point->z, _max_p.z);
+
+	_mesh.bounding_box.center = (rde_vec_3F) { (_max_p.x + _min_p.x) * 0.5f, (_max_p.y + _min_p.y) * 0.5f, (_max_p.z + _min_p.z) * 0.5f };
+	_mesh.bounding_box.half_size = (rde_vec_3F) { _max_p.x - _mesh.bounding_box.center.x, _max_p.y - _mesh.bounding_box.center.y, _max_p.z - _mesh.bounding_box.center.z };
 
 	RDE_CHECK_GL(glBindVertexArray, _mesh.vao);
 	
@@ -6248,6 +6381,46 @@ void rde_inner_rendering_get_light_view_projection_matrix(rde_window* _window, r
 	glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection_matrix);
 	glm_mat4_mul(_light_projection_matrix, _light_view_matrix, *_out_matrix);
 } 
+
+bool rde_inner_rendering_is_bb_in_or_forward_plane(rde_frustum_plane* _plane, rde_bounding_box* _bb) {
+	float _r = _bb->half_size.x * RDE_ABS(_plane->normal.x) + _bb->half_size.y * RDE_ABS(_plane->normal.y) + _bb->half_size.z * RDE_ABS(_plane->normal.z);
+	float _signed_distance_to_plane = glm_dot((vec3) { _plane->normal.x, _plane->normal.y, _plane->normal.z }, (vec3) { _bb->center.x, _bb->center.y, _bb->center.z }) - _plane->distance;
+	return -_r <= _signed_distance_to_plane;
+}
+
+bool rde_inner_rendering_is_bb_in_frustum(rde_frustum* _frustum, rde_bounding_box* _bb, rde_transform* _transform) {
+	mat4 _matrix = GLM_MAT4_ZERO_INIT;
+	rde_inner_rendering_transform_to_glm_mat4_3d(_transform, _matrix);
+
+	vec4 _c = GLM_VEC4_ZERO_INIT;
+	glm_mat4_mulv(_matrix, (vec4) {_bb->center.x, _bb->center.y, _bb->center.z, 1.0f}, _c);
+	vec3 _global_center = { _c[0], _c[1], _c[2] };
+	
+	vec3 _right = GLM_VEC3_ZERO_INIT;
+	glm_vec3_scale_as(_matrix[0], _bb->half_size.x, _right);
+
+	vec3 _up = GLM_VEC3_ZERO_INIT;
+	glm_vec3_scale_as(_matrix[1], _bb->half_size.y, _up);
+
+	vec3 _forward = GLM_VEC3_ZERO_INIT;
+	glm_vec3_scale_as(_matrix[2], -_bb->half_size.z, _forward);
+
+	float _new_i_i = RDE_ABS(glm_dot((vec3) { 1.0f, 0.0f, 0.0f }, _right)) + RDE_ABS(glm_dot((vec3) { 1.0f, 0.0f, 0.0f }, _up)) + RDE_ABS(glm_dot((vec3) { 1.0f, 0.0f, 0.0f }, _forward));
+	float _new_i_j = RDE_ABS(glm_dot((vec3) { 0.0f, 1.0f, 0.0f }, _right)) + RDE_ABS(glm_dot((vec3) { 0.0f, 1.0f, 0.0f }, _up)) + RDE_ABS(glm_dot((vec3) { 0.0f, 1.0f, 0.0f }, _forward));
+	float _new_i_k = RDE_ABS(glm_dot((vec3) { 0.0f, 0.0f, 1.0f }, _right)) + RDE_ABS(glm_dot((vec3) { 0.0f, 0.0f, 1.0f }, _up)) + RDE_ABS(glm_dot((vec3) { 0.0f, 0.0f, 1.0f }, _forward));
+
+	rde_bounding_box _global_bb = {
+		.center = (rde_vec_3F) { _global_center[0], _global_center[1], _global_center[2] },
+		.half_size = (rde_vec_3F) { _new_i_i, _new_i_j, _new_i_k }
+	};
+
+	return rde_inner_rendering_is_bb_in_or_forward_plane(&_frustum->left_face, &_global_bb) &&
+		   rde_inner_rendering_is_bb_in_or_forward_plane(&_frustum->right_face, &_global_bb) &&
+		   rde_inner_rendering_is_bb_in_or_forward_plane(&_frustum->top_face, &_global_bb) &&
+		   rde_inner_rendering_is_bb_in_or_forward_plane(&_frustum->bottom_face, &_global_bb) &&
+		   rde_inner_rendering_is_bb_in_or_forward_plane(&_frustum->near_face, &_global_bb) &&
+		   rde_inner_rendering_is_bb_in_or_forward_plane(&_frustum->far_face, &_global_bb);
+}
 
 // ==============================================================================
 // =							PUBLIC API - RENDERING					 	 =
@@ -8271,6 +8444,16 @@ void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bo
 	current_batch_3d.draw_mesh_wireframe = _draw_wireframe_over_mesh;
 }
 
+bool rde_rendering_3d_is_mesh_in_camera_frustum(rde_window* _window, rde_camera* _camera, rde_mesh* _mesh, rde_transform* _transform) {
+	_camera->frustum = rde_struct_create_frustum(_window, _camera);
+	return rde_inner_rendering_is_bb_in_frustum(&_camera->frustum, &_mesh->bounding_box, _transform);
+}
+
+bool rde_rendering_3d_is_model_in_camera_frustum(rde_window* _window, rde_camera* _camera, rde_model* _model, rde_transform* _transform) {
+	_camera->frustum = rde_struct_create_frustum(_window, _camera);
+	return rde_inner_rendering_is_bb_in_frustum(&_camera->frustum, &_model->bounding_box, _transform);
+}
+
 void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_color _color, unsigned short _thickness, rde_shader* _shader) {
 	const size_t _line_vertex_count = 2;
 
@@ -8305,11 +8488,143 @@ void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh
 	current_batch_3d.amount_of_models_per_draw++;
 }
 
+void rde_inner_rendering_3d_draw_bounding_box(const rde_transform* _transform, rde_bounding_box* _bb) {
+	vec4 _c = (vec4) { _bb->center.x, _bb->center.y, _bb->center.z, 1.0f };
+	glm_mat4_mulv(ENGINE.world_transforms[_transform->index], _c, _c);
+
+	rde_vec_3F _center = (rde_vec_3F) { _c[0], _c[1], _c[2] };
+	rde_vec_3F _h_size = (rde_vec_3F) { RDE_ABS(_bb->half_size.x), RDE_ABS(_bb->half_size.y), RDE_ABS(_bb->half_size.z) };
+	
+	// TOP
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y + _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y + _h_size.y, _center.z + _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y + _h_size.y, _center.z - _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y + _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y + _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y + _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y + _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y + _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	// BOTTOM
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y - _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y - _h_size.y, _center.z + _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y - _h_size.y, _center.z - _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y - _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y - _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y - _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y - _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y - _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	// BORDERS
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y + _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y - _h_size.y, _center.z + _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y + _h_size.y, _center.z + _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y - _h_size.y, _center.z + _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y + _h_size.y, _center.z - _h_size.z },
+		(rde_vec_3F) { _center.x - _h_size.x, _center.y - _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+
+	rde_rendering_3d_draw_line(
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y + _h_size.y, _center.z - _h_size.z },
+		(rde_vec_3F) { _center.x + _h_size.x, _center.y - _h_size.y, _center.z - _h_size.z },
+		RDE_COLOR_RDE_DUCK_YELLOW,
+		1,
+		NULL
+	);
+}
+
+void rde_rendering_3d_draw_mesh_bounding_box(const rde_transform* _transform, rde_mesh* _mesh) {
+	rde_inner_rendering_3d_draw_bounding_box(_transform, &_mesh->bounding_box);
+}
+
+void rde_rendering_3d_draw_model_bounding_box(const rde_transform* _transform, rde_model* _model, bool _draw_sub_meshes_bb) {
+	if(_draw_sub_meshes_bb) {
+		for(uint _i = 0; _i < _model->mesh_array.used; _i++) {
+			rde_inner_rendering_3d_draw_bounding_box(_transform, &_model->mesh_array.memory[_i].bounding_box);
+		}
+	}
+
+	rde_inner_rendering_3d_draw_bounding_box(_transform, &_model->bounding_box);
+}
+
 void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
 	for(uint _i = 0; _i < rde_arr_get_length(&_model->mesh_array); _i++) {
 		rde_mesh* _mesh = NULL;
 		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
 		rde_rendering_3d_draw_mesh(_transform, _mesh, _shader);
+	}
+}
+
+void rde_rendering_3d_draw_model_frustum_sub_meshes(rde_window* _window, rde_camera* _camera, rde_transform* _transform, rde_model* _model, rde_shader* _shader) {
+	for(uint _i = 0; _i < rde_arr_get_length(&_model->mesh_array); _i++) {
+		rde_mesh* _mesh = NULL;
+		rde_arr_get_element_ptr(&_model->mesh_array, _i, _mesh);
+
+		if(rde_rendering_3d_is_mesh_in_camera_frustum(_window, _camera, _mesh, _transform)) {
+			rde_rendering_3d_draw_mesh(_transform, _mesh, _shader);
+		}
 	}
 }
 

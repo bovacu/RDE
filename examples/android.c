@@ -255,7 +255,7 @@ void android_unload() {
 }
 
 void android_init() {
-	android_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
+	android_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_PERSPECTIVE);
 	rde_transform_set_position(android_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	android_model = rde_rendering_model_load("assets/skatepark/park.obj");

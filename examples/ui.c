@@ -67,8 +67,8 @@ void button_1_callback(rde_ui_container* _container, int _button_down) {
 }
 
 void ui_init() {
-	ui_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
-	ui_hud_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_ORTHOGRAPHIC);
+	ui_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_PERSPECTIVE);
+	ui_hud_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_ORTHOGRAPHIC);
 	rde_transform_set_position(ui_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 	
 	rde_vec_2I _screen_size = rde_window_get_window_size(current_window);

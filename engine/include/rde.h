@@ -2945,6 +2945,20 @@ struct rde_str {
 
 // =================================================================== CAMERA ===================================================================
 
+typedef struct {
+	rde_vec_3F normal;
+	float distance;
+} rde_frustum_plane;
+
+typedef struct {
+	rde_frustum_plane top_face;
+	rde_frustum_plane bottom_face;
+	rde_frustum_plane right_face;
+	rde_frustum_plane left_face;
+	rde_frustum_plane far_face;
+	rde_frustum_plane near_face;
+} rde_frustum;
+
 // Type: rde_camera
 // Struct that contains the information to let the renderer know what is being seen, so it can render properly.
 //
@@ -2956,7 +2970,7 @@ struct rde_str {
 //	direction - (<rde_vec_3F>) where the camera is looking to.
 //	up - (<rde_vec_3F>) what axis is Up, usually (0, 1, 0).
 // 	near_far - (<rde_vec_2F) near and far clip of the camera. Anything behind near or beyond far won't be rendered.
-//	camera_type - (<RDE_CAMERA_TYPE_>) Orthographic (2D) or Perspective (3D.
+//	camera_type - (<RDE_CAMERA_TYPE_>) Orthographic (2D) or Perspective (3D).
 //	enabled - (bool) if the camera is in use.
 typedef struct rde_camera rde_camera;
 struct rde_camera {
@@ -2970,6 +2984,7 @@ struct rde_camera {
 	rde_vec_3F world_up;
 	rde_vec_2F near_far;
 	RDE_CAMERA_TYPE_ camera_type;
+	rde_frustum frustum;
 	bool enabled;
 };
 
@@ -3529,6 +3544,11 @@ typedef struct {
 	rde_material material;
 } rde_mesh_gen_data;
 
+typedef struct {
+	rde_vec_3F center;
+	rde_vec_3F half_size;
+} rde_bounding_box;
+
 // Type: rde_mesh_data
 // Information about a mesh.
 //
@@ -3841,7 +3861,7 @@ RDE_FUNC rde_probability rde_struct_create_probability(void);
 // 
 // Parameters:
 //	_camera_type - type of camera.
-RDE_FUNC rde_camera rde_struct_create_camera(RDE_CAMERA_TYPE_ _camera_type);
+RDE_FUNC rde_camera rde_struct_create_camera(rde_window* _window, RDE_CAMERA_TYPE_ _camera_type);
 
 // Constructor: rde_struct_create_event_window
 RDE_FUNC rde_event_window rde_struct_create_event_window(void);
@@ -5249,6 +5269,9 @@ RDE_FUNC void rde_rendering_model_unload(rde_model* _model);
 // _draw_wireframe_over_mesh - if set to true, a wireframe is rendered on top of the models. Might affect performance.
 RDE_FUNC void rde_rendering_3d_begin_drawing(rde_camera* _camera, rde_window* _window, bool _draw_wireframe_over_mesh);
 
+RDE_FUNC bool rde_rendering_3d_is_mesh_in_camera_frustum(rde_window* _window, rde_camera* _camera, rde_mesh* _mesh, rde_transform* _transform);
+RDE_FUNC bool rde_rendering_3d_is_model_in_camera_frustum(rde_window* _window, rde_camera* _camera, rde_model* _model, rde_transform* _transform);
+
 // Function: rde_rendering_3d_draw_point
 // Draws a 3D point on the screen.
 //
@@ -5278,6 +5301,8 @@ RDE_FUNC void rde_rendering_3d_draw_line(rde_vec_3F _init, rde_vec_3F _end, rde_
 //	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_mesh* _mesh, rde_shader* _shader);
 
+RDE_FUNC void rde_rendering_3d_draw_mesh_bounding_box(const rde_transform* _transform, rde_mesh* _mesh);
+
 // Function: rde_rendering_3d_draw_model
 // Draws a 3D model on the screen.
 //
@@ -5286,6 +5311,10 @@ RDE_FUNC void rde_rendering_3d_draw_mesh(const rde_transform* _transform, rde_me
 //	_model - model data.
 //	_shader - shader that will be used to render. NULL can be passed and then the default shader will be used.
 RDE_FUNC void rde_rendering_3d_draw_model(const rde_transform* _transform, rde_model* _model, rde_shader* _shader);
+
+RDE_FUNC void rde_rendering_3d_draw_model_frustum_sub_meshes(rde_window* _window, rde_camera* _camera, rde_transform* _transform, rde_model* _model, rde_shader* _shader);
+
+RDE_FUNC void rde_rendering_3d_draw_model_bounding_box(const rde_transform* _transform, rde_model* _model, bool _draw_sub_meshes_bb);
 
 // Function: rde_rendering_3d_draw_model
 // Draws a skybox. This function is called outside of the block <rde_rendering_3d_begin_drawing>/<rde_rendering_3d_end_drawing>.

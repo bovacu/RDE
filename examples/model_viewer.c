@@ -420,7 +420,7 @@ void model_viewer_unload() {
 }
 
 void model_viewer_init() {
-	model_viewer_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
+	model_viewer_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_PERSPECTIVE);
 	rde_transform_set_position(model_viewer_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	model_viewer_transform = rde_transform_load();

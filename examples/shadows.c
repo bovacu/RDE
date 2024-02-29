@@ -49,7 +49,7 @@ void shadows_draw_3d(rde_window* _window, float _dt) {
 	RDE_UNUSED(_dt)
 
 	rde_render_3d_with_shadows(_window, &shadows_camera, false, {
-		rde_rendering_3d_draw_model(shadows_transform_0, shadows_model, rde_rendering_shader_get_by_name(RDE_SHADER_MESH_SHADOWS));
+		rde_rendering_3d_draw_model_frustum_sub_meshes(_window, &shadows_camera, shadows_transform_0, shadows_model, rde_rendering_shader_get_by_name(RDE_SHADER_MESH_SHADOWS));
 	})
 }
 
@@ -149,7 +149,7 @@ void shadows_unload() {
 }
 
 void shadows_init() {
-	shadows_camera = rde_struct_create_camera(RDE_CAMERA_TYPE_PERSPECTIVE);
+	shadows_camera = rde_struct_create_camera(current_window, RDE_CAMERA_TYPE_PERSPECTIVE);
 	rde_transform_set_position(shadows_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 	shadows_transform_0 = rde_transform_load();
