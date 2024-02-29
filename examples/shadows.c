@@ -5,6 +5,8 @@ rde_mesh* plain_mesh;
 rde_model* shadows_model;
 rde_transform* shadows_transform_0;
 rde_transform* shadows_transform_1;
+rde_transform* shadows_cube_transform;
+rde_mesh* shadows_cube_mesh;
 
 bool shadows_first_mouse = true;
 float shadows_last_x =  1280.f * 0.5f;
@@ -50,6 +52,7 @@ void shadows_draw_3d(rde_window* _window, float _dt) {
 
 	rde_render_3d_with_shadows(_window, &shadows_camera, false, {
 		rde_rendering_3d_draw_model_frustum_sub_meshes(_window, &shadows_camera, shadows_transform_0, shadows_model, rde_rendering_shader_get_by_name(RDE_SHADER_MESH_SHADOWS));
+		rde_rendering_3d_draw_mesh(shadows_cube_transform, shadows_cube_mesh, rde_rendering_shader_get_by_name(RDE_SHADER_MESH_SHADOWS));
 	})
 }
 
@@ -63,6 +66,10 @@ void shadows_draw_imgui(float _dt, rde_window* _window) {
 
 	rde_imgui_push_id(2);
 	draw_imgui_transform("1", shadows_transform_1);
+	rde_imgui_pop_id();
+
+	rde_imgui_push_id(2);
+	draw_imgui_transform("Cube", shadows_cube_transform);
 	rde_imgui_pop_id();
 
 	{
@@ -154,8 +161,10 @@ void shadows_init() {
 
 	shadows_transform_0 = rde_transform_load();
 	shadows_transform_1 = rde_transform_load();
+	shadows_cube_transform = rde_transform_load();
 
 	rde_transform_set_position(shadows_transform_1, (rde_vec_3F) { 0, 5, 0 });
+	rde_transform_set_position(shadows_cube_transform, (rde_vec_3F) { -6, 2, -2 });
 
 	events_callback = &shadows_on_event;
 	update_callback = &shadows_on_update;
@@ -172,4 +181,10 @@ void shadows_init() {
 
 	// rde_rendering_lighting_set_directional_light_position((rde_vec_3F) { 0.0f, 112.0f, 38.0f });
 	// shadows_directional_light_direction = rde_rendering_lighting_get_directional_light().position;
+
+	rde_material _light_cube_material = rde_struct_create_material();
+	_light_cube_material.material_light_data.ka = (rde_vec_3F) { 1.0f, 1.0f, 1.0f };
+	_light_cube_material.material_light_data.kd = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	_light_cube_material.material_light_data.ks = (rde_vec_3F) { 0.0f, 0.0f, 0.0f };
+	shadows_cube_mesh = rde_rendering_mesh_create_cube(0.25f, &_light_cube_material);
 }
