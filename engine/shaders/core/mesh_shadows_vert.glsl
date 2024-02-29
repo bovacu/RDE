@@ -22,12 +22,11 @@ out VS_OUT {
 } vs_out;
 
 void main(){
-	mat4 _model = in_model;
-	gl_Position = view_projection_matrix * _model * vec4(in_pos, 1);
+	gl_Position = view_projection_matrix * in_model * vec4(in_pos, 1);
 	normal = transpose(inverse(mat3(in_model))) * in_normal;
 	frag_pos = in_pos;
 	text_coord = in_text_coord;
-	model_matrix = _model;
+	model_matrix = in_model;
 
 	vs_out.frag_pos = vec3(in_model * vec4(in_pos, 1.0));
 	vs_out.normal = normal;

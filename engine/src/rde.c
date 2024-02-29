@@ -153,7 +153,7 @@
 //			- [] Model animations
 //			- [] Text
 //			- [DONE] Line rendering
-//			- [] Frustum Culling
+//			- [DONE] Frustum Culling
 //			- [DONE] Simple Shadows
 //			- [] Cascade Shadow Map
 //			- [] Normal Mapping
@@ -8782,20 +8782,8 @@ void rde_rendering_shadows_begin(rde_window* _window, rde_camera* _camera) {
 	
 	current_batch_3d.use_shadows = RDE_SHADOW_PASS_STATE_DEPTH;
 
-	// mat4 _light_projection;
-	// mat4 _light_view;
 	mat4 _light_space_matrix = GLM_MAT4_IDENTITY_INIT;
-	rde_inner_rendering_get_light_view_projection_matrix(current_drawing_window, current_drawing_camera, ENGINE.illumination.directional_light.direction, _camera->near_far.x, _camera->near_far.y, &_light_space_matrix);
-	// glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, _camera->near_far.x, _camera->near_far.y, _light_projection);
-	// vec3 _dir = (vec3) { -ENGINE.illumination.directional_light.direction.x, -ENGINE.illumination.directional_light.direction.y, -ENGINE.illumination.directional_light.direction.z };
-	// glm_normalize(_dir);
-	// glm_lookat(_dir,
-	// 			(vec3) { 0.0f, 0.0f, 0.0f },
-	// 			(vec3) { 0.0f, 1.0f, 0.0f },
-	// 			_light_view
-	// );
-	// glm_mul(_light_projection, _light_view, _light_space_matrix);
-	
+	rde_inner_rendering_get_light_view_projection_matrix(current_drawing_window, current_drawing_camera, ENGINE.illumination.directional_light.direction, _camera->near_far.x, _camera->near_far.y, &_light_space_matrix);	
 	glm_mat4_copy(_light_space_matrix, ENGINE.shadows.light_space_matrix);
 
 	RDE_CHECK_GL(glUseProgram, ENGINE.shadows_shader->compiled_program_id);
