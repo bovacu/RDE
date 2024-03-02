@@ -1348,6 +1348,14 @@ typedef struct {			\
         }                                                                               \
     } while(0)
 	
+#define rde_str_new_with_size(_rde_str, _size)											\
+	do {																				\
+		rde_critical_error((_rde_str)->str != NULL, "rde_str_new -> Tried to allocate to _rde_str, but it str was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+																						\
+		(_rde_str)->size = _size; 														\
+		rde_calloc((_rde_str)->str, char, _size);										\
+	} while(0)
+
 // Macro: rde_str_new
 // Creates a new dynamic string, allocating necessary data. This needs to be freed with <rde_str_free> once it is not longer needed.
 //
@@ -1361,12 +1369,12 @@ typedef struct {			\
 //	=================
 #define rde_str_new(_rde_str, _init_src_value)											\
 	do {																				\
-		rde_critical_error(_rde_str != NULL, "rde_str_new -> Tried to allocate to _rde_str, but it src was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+		rde_critical_error((_rde_str)->str != NULL, "rde_str_new -> Tried to allocate to _rde_str, but it str was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
 																						\
-		_rde_str->size = MAX(strlen(_init_src_value) + 1, RDE_STR_DEFAULT_SIZE);		\
-		rde_calloc(_rde_str.src, char, _s->size);										\
+		(_rde_str)->size = MAX(strlen(_init_src_value) + 1, RDE_STR_DEFAULT_SIZE);		\
+		rde_calloc((_rde_str)->str, char, (_rde_str)->size);							\
 		if(_init_src_value != NULL) {													\
-			rde_strcpy(_rde_str.str, _rde_str.size, _init_src_value);					\
+			rde_strcpy((_rde_str)->str, (_rde_str)->size, _init_src_value);				\
 		}																				\
 	} while(0)
 
@@ -1384,15 +1392,15 @@ typedef struct {			\
 //	=================
 #define rde_str_resize(_rde_str, _new_size)												\
 	do {																				\
-		if(_new_size <= _rde_str.size) {												\
+		if(_new_size <= (_rde_str)->size) {												\
 			break;																		\
 		}																				\
-		uint _old_size = _rde_str.size;													\
-		while(_rde_str.size < _new_size) {												\
-			_rde_str.size *= 2;															\
+		uint _old_size = (_rde_str)->size;												\
+		while((_rde_str)->size < _new_size) {											\
+			(_rde_str)->size *= 2;														\
 		}																				\
-		rde_realloc(_rde_str.src, _rde_str.src, char, _rde_str.size);					\
-		memset((void*)(_rde_str->str + _old_size), '\0', _rde_str->size - _old_size);	\
+		rde_realloc((_rde_str)->str, (_rde_str)->str, char, (_rde_str)->size);			\
+		memset((void*)((_rde_str)->str + _old_size), '\0', (_rde_str)->size - _old_size);\
 	} while(0)
 
 // Macro: rde_str_append_str
@@ -1409,12 +1417,12 @@ typedef struct {			\
 //	=================
 #define rde_str_append_str(_rde_str, _str)																		\
 	do {																										\
-		rde_critical_error(_rde_str.src == NULL, "rde_str_append_str -> Tried to use a NULL _rde_str.src.\n");	\
-		rde_critical_error(_str == NULL, "rde_str_append_str -> Tried to use a NULL _str in .\n");				\
-		uint _rde_str_size = rde_str_size(_rde_str_size);														\
-		rde_str_resize(_rde_str, _rde_str_size + strlen(_str));													\
-		for(uint _i = 0; _i < strlen(_str); _i++) {																\
-			_rde_str.str[_rde_str_size + _i] = _str[_i];														\
+		rde_critical_error((_rde_str)->str == NULL, "rde_str_append_str -> Tried to use a NULL _rde_str.str.\n");	\
+		rde_critical_error((_str) == NULL, "rde_str_append_str -> Tried to use a NULL _str in .\n");				\
+		uint _rde_str_size = rde_str_size((_rde_str));														\
+		rde_str_resize((_rde_str), _rde_str_size + strlen((_str)));													\
+		for(uint _i = 0; _i < strlen((_str)); _i++) {																\
+			(_rde_str)->str[_rde_str_size + _i] = (_str)[_i];														\
 		}																										\
 	} while(0)
 	
@@ -1432,7 +1440,7 @@ typedef struct {			\
 //	rde_str_new(_str_1, "And other animals!");
 //	rde_str_append_rde_rde_str(_str, _str_1);
 //	=================
-#define rde_str_append_rde_str(_rde_str, _other_rde_str) rde_str_append_str(_rde_str, _other_rde_str.src)
+#define rde_str_append_rde_str(_rde_str, _other_rde_str) rde_str_append_str((_rde_str), (_other_rde_str)->str)
 
 // Macro: rde_str_to_char_ptr
 // Gets the inner char* of the rde_str.
@@ -1445,7 +1453,7 @@ typedef struct {			\
 //	rde_str_new(_str, "Hello, Duck!");
 //	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", rde_str_get_char_ptr(_str));
 //	=================
-#define rde_str_to_char_ptr(_rde_str) _rde_str.src
+#define rde_str_to_char_ptr(_rde_str) (_rde_str)->str
 
 // Macro: rde_str_total_size
 // Gets the full size of the char array, with used and unused parts.
@@ -1458,7 +1466,7 @@ typedef struct {			\
 //	rde_str_new(_str, "Hello, Duck!");
 //	uint _size = rde_str_total_size(_str);
 //	=================
-#define rde_str_total_size(_rde_str) _rde_str.size
+#define rde_str_total_size(_rde_str) (_rde_str)->size
 	
 // Macro: rde_str_size
 // Gets the size of the used part of the char array.
@@ -1471,7 +1479,7 @@ typedef struct {			\
 //	rde_str_new(_str, "Hello, Duck!");
 //	uint _size = rde_str_total_size(_str);
 //	=================
-#define rde_str_size(_rde_str) strlen(_rde_str.src)
+#define rde_str_size(_rde_str) strlen((_rde_str)->str)
 	
 // Macro: rde_str_replace_sub_str
 // Replaces a given string with another given string.
@@ -1488,13 +1496,13 @@ typedef struct {			\
 //	=================
 #define rde_str_replace_sub_str(_rde_str, _old_str, _new_str) 									\
 	do {																						\
-		char* _sub = rde_util_string_replace_sub_str(_rde_str.str, _old_str, _new_str, NULL);	\
+		char* _sub = rde_util_string_replace_sub_str((_rde_str)->str, _old_str, _new_str, NULL);\
 		rde_critical_error(_sub == NULL, "rde_str_replace_sub_str -> error during replace \n");	\
-		rde_str_free(_rde_str);																	\
-		_rde_str.str = _sub;																	\
-		uint _new_size = rde_str_len(_rde_str);													\
-		if(_new_size > _rde_str.size) {															\
-			_rde_str.size = _new_size;															\
+		rde_str_free((_rde_str));																\
+		(_rde_str)->str = _sub;																	\
+		uint _new_size = rde_str_len((_rde_str));												\
+		if(_new_size > (_rde_str)->size) {														\
+			(_rde_str)->size = _new_size;														\
 		}																						\
 	} while(0)
 
@@ -1509,9 +1517,9 @@ typedef struct {			\
 //	rde_str_new(_str, "Hello, Duck!");
 //	rde_str_clear(_str);
 //	=================	
-#define rde_str_clear(_rde_str)					\
-	do {										\
-		memset(_rde_str.str, 0, _rde_str.size);	\
+#define rde_str_clear(_rde_str)							\
+	do {												\
+		memset((_rde_str)->str, 0, (_rde_str)->size);	\
 	} while(0)
 	
 // Macro: rde_str_free
@@ -1527,8 +1535,8 @@ typedef struct {			\
 //	=================
 #define rde_str_free(_rde_str)		\
 	do {							\
-		_rde_str.size = 0;			\
-		rde_free(_rde_str.str);		\
+		(_rde_str)->size = 0;		\
+		rde_free((_rde_str)->str);	\
 	} while(0)
 
 /// =================================================================== WARNING SILENCER ===================================================================
