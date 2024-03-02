@@ -1186,7 +1186,7 @@ typedef struct {			\
         rde_hash_map_hash_to_index((_hash_map), *(_ptr_key), _index);           	\
         bool _found = false;                                                    	\
                                                                                 	\
-        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                 	\
+        for(uint _i_ = 0; _i_ < (_hash_map)->actual_size; _i_++) {                 	\
             typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];	\
             if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY)) {    	\
                 _out_ptr_entry = _entry;                                        	\
@@ -1210,15 +1210,15 @@ typedef struct {			\
                                                                                                                                         \
         typeof((_hash_map)->entries) _new_entries = (typeof((_hash_map)->entries))calloc(_new_size, sizeof(*((_hash_map)->entries)));   \
         assert(_new_entries != NULL && "Could not allocate memory");                                                                    \
-        for(uint _i = 0; _i < _new_size; _i++) _new_entries[_i].state = RDE_HASH_MAP_STATE_EMPTY;                                       \
+        for(uint _i_ = 0; _i_ < _new_size; _i_++) _new_entries[_i_].state = RDE_HASH_MAP_STATE_EMPTY;                                   \
                                                                                                                                         \
         uint _old_size = (_hash_map)->actual_size;                                                                                      \
         typeof((_hash_map)->entries) _old_entries = (_hash_map)->entries;                                                               \
         (_hash_map)->actual_size = _new_size;                                                                                           \
         (_hash_map)->entries = _new_entries;                                                                                            \
                                                                                                                                         \
-        for(uint _i = 0; _i < _old_size; _i++) {                                                                                        \
-            typeof((_hash_map)->entries) _old_entry = &_old_entries[_i];                                                                \
+        for(uint _i_ = 0; _i_ < _old_size; _i_++) {                                                                                     \
+            typeof((_hash_map)->entries) _old_entry = &_old_entries[_i_];                                                               \
             if(rde_util_flag_has(_old_entry->state, RDE_HASH_MAP_STATE_EMPTY) ||                                                        \
                 rde_util_flag_has(_old_entry->state, RDE_HASH_MAP_STATE_DELETED)) {                                                     \
                 continue;                                                                                                               \
@@ -1243,7 +1243,7 @@ typedef struct {			\
         uint _index = 0;                                                            \
         rde_hash_map_hash_to_index((_hash_map), *(_ptr_key), _index);               \
                                                                                     \
-        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                     \
+        for(uint _i_ = 0; _i_ < (_hash_map)->actual_size; _i_++) {                  \
             typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];    \
             if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY) ||        \
                 rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_DELETED)) {     \
@@ -1291,7 +1291,7 @@ typedef struct {			\
         uint _index = 0;                                                        	\
         rde_hash_map_hash_to_index((_hash_map), *(_ptr_key), _index);           	\
                                                                                 	\
-        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                 	\
+        for(uint _i_ = 0; _i_ < (_hash_map)->actual_size; _i_++) {                 	\
             typeof((_hash_map)->entries) _entry = &(_hash_map)->entries[_index];	\
             if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY)) {    	\
                 _out_value = false;                                             	\
@@ -1315,7 +1315,7 @@ typedef struct {			\
         (_hash_map)->used--;                                                            \
         uint _index = (_removed_index + 1) & ((_hash_map)->actual_size - 1);            \
                                                                                         \
-        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                         \
+        for(uint _i_ = 0; _i_ < (_hash_map)->actual_size; _i_++) {                      \
             typeof((_hash_map)->entries) _entry = &((_hash_map)->entries[_index]);      \
             if(rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_EMPTY) ||            \
                 rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_DELETED)) {         \
@@ -1339,8 +1339,8 @@ typedef struct {			\
 #define rde_hash_map_foreach(_hash_map, _out_ptr_key, _out_ptr_value, _block_of_code)   \
     do {                                                                                \
 		rde_critical_error(_hash_map == NULL, "Tried to use a NULL _hash_map\n");		\
-        for(uint _i = 0; _i < (_hash_map)->actual_size; _i++) {                         \
-            typeof((_hash_map)->entries) _entry = &((_hash_map)->entries[_i]);          \
+        for(uint _i_ = 0; _i_ < (_hash_map)->actual_size; _i_++) {                      \
+            typeof((_hash_map)->entries) _entry = &((_hash_map)->entries[_i_]);         \
             if(!rde_util_flag_has(_entry->state, RDE_HASH_MAP_STATE_USED)) continue;    \
             (_out_ptr_key) = &(_entry->key);                                            \
             (_out_ptr_value) = &(_entry->value);                                        \
@@ -1415,15 +1415,15 @@ typedef struct {			\
 //	rde_str_new(_str, "Hello, Duck!");
 //	rde_str_append_str(_str, " And other animals!");
 //	=================
-#define rde_str_append_str(_rde_str, _str)																		\
-	do {																										\
+#define rde_str_append_str(_rde_str, _str)																			\
+	do {																											\
 		rde_critical_error((_rde_str)->str == NULL, "rde_str_append_str -> Tried to use a NULL _rde_str.str.\n");	\
 		rde_critical_error((_str) == NULL, "rde_str_append_str -> Tried to use a NULL _str in .\n");				\
-		uint _rde_str_size = rde_str_size((_rde_str));														\
+		uint _rde_str_size = rde_str_size((_rde_str));																\
 		rde_str_resize((_rde_str), _rde_str_size + strlen((_str)));													\
-		for(uint _i = 0; _i < strlen((_str)); _i++) {																\
-			(_rde_str)->str[_rde_str_size + _i] = (_str)[_i];														\
-		}																										\
+		for(uint _i_ = 0; _i_ < strlen((_str)); _i_++) {															\
+			(_rde_str)->str[_rde_str_size + _i_] = (_str)[_i_];														\
+		}																											\
 	} while(0)
 	
 // Macro: rde_str_append_rde_str
