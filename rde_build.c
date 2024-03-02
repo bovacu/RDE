@@ -1651,6 +1651,7 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	INCLUDE_PATH(_rde_include_path, "engine/include/");
 	INCLUDE_PATH(_rde_src_include_path, "engine/src/");
 	INCLUDE_PATH(_external_include_path, "external/include/");
+	INCLUDE_PATH(_external_curl_include_path, "external/include/curl/include");
 
 	dyn_str* _external_imgui_include_path = NULL;
 	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
@@ -1670,6 +1671,7 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-ljolt");
 	}
 
+	ADD_FLAG("-llibcurl");
 	ADD_FLAG("-ldbghelp")
 	ADD_FLAG("-lshlwapi")
 	ADD_FLAG("-lAdvapi32")
@@ -1780,6 +1782,8 @@ bool compile_windows_rde() {
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/examples/SDL3.dll")
 				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/debug/examples/jolt.dll")
 				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/debug/examples/imgui.dll")
+				COPY_FILE("external/libs/windows/libcurl.dll", "build/windows/debug/examples/libcurl.dll")
+				COPY_FILE("external/libs/windows/libssh2.dll", "build/windows/debug/examples/libssh2.dll")
 				COPY_FILE("external/libs/windows/pthreadVC3.dll", "build/windows/debug/examples/pthreadVC3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/examples/")
@@ -1788,6 +1792,8 @@ bool compile_windows_rde() {
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/examples/SDL3.dll")
 				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/release/examples/jolt.dll")
 				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/examples/imgui.dll")
+				COPY_FILE("external/libs/windows/libcurl.dll", "build/windows/release/examples/libcurl.dll")
+				COPY_FILE("external/libs/windows/libssh2.dll", "build/windows/release/examples/libssh2.dll")
 				COPY_FILE("external/libs/windows/pthreadVC3.dll", "build/windows/release/examples/pthreadVC3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/examples/")
@@ -1810,6 +1816,8 @@ bool compile_windows_rde() {
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/debug/unit_tests/SDL3.dll")
 				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/debug/unit_tests/jolt.dll")
 				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/debug/unit_tests/imgui.dll")
+				COPY_FILE("external/libs/windows/libcurl.dll", "build/windows/debug/unit_tests/libcurl.dll")
+				COPY_FILE("external/libs/windows/libssh2.dll", "build/windows/debug/unit_tests/libssh2.dll")
 				COPY_FILE("external/libs/windows/pthreadVC3.dll", "build/windows/debug/unit_tests/pthreadVC3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/debug/unit_tests/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/debug/unit_tests/shaders/")	
@@ -1818,6 +1826,8 @@ bool compile_windows_rde() {
 				COPY_FILE("external/libs/windows/SDL3.dll", "build/windows/release/unit_tests/SDL3.dll")
 				COPY_FILE("external/libs/windows/jolt.dll", "build/windows/release/unit_tests/jolt.dll")
 				COPY_FILE("external/libs/windows/imgui.dll", "build/windows/release/unit_tests/imgui.dll")
+				COPY_FILE("external/libs/windows/libcurl.dll", "build/windows/release/unit_tests/libcurl.dll")
+				COPY_FILE("external/libs/windows/libssh2.dll", "build/windows/release/unit_tests/libssh2.dll")
 				COPY_FILE("external/libs/windows/pthreadVC3.dll", "build/windows/release/unit_tests/pthreadVC3.dll")
 				COPY_FOLDER("examples/hub_assets", "build/windows/release/unit_tests/hub_assets/")
 				COPY_FOLDER("engine/shaders", "build/windows/release/unit_tests/shaders/")

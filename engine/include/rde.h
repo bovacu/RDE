@@ -3719,6 +3719,15 @@ RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 
 // =================================================================== PHYSICS ===========================================================================================
 
+typedef struct {
+	rde_str header_data;
+	rde_str body_data;
+	long response_code;
+	double total_time;
+} rde_network_response;
+
+// =================================================================== NETWORK ===========================================================================================
+
 #ifdef RDE_PHYSICS_MODULE
 typedef struct {
 	rde_physics_error_fn error_fn;
@@ -3944,6 +3953,8 @@ RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
 
 // Constructor: rde_struct_create_ui_container_callbacks
 RDE_FUNC rde_ui_container_callbacks rde_struct_create_ui_container_callbacks(void);
+
+RDE_FUNC rde_network_response rde_struct_create_network_response(uint _header_size, uint _body_size);
 
 // =================================================================== LOG ===================================================================
 
@@ -5740,6 +5751,11 @@ RDE_FUNC void rde_physics_end(void);
 #endif
 
 
+// =================================================================== NETWORK =================================================================
+
+RDE_FUNC void rde_network_http_get(const char* _url, rde_network_response* _response);
+RDE_FUNC void rde_network_http_get_async(const char* _url, rde_network_response* _respone, void (*_callback)(rde_network_response*));
+RDE_FUNC void rde_network_http_post(const char* _url, const char* _fields[], uint _fields_count, rde_network_response* _response);
 
 // =================================================================== ERROR ===================================================================
 

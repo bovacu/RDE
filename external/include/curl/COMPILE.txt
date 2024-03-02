@@ -1,0 +1,6 @@
+Curl is a complex one, to compile it and make it work with RDE do the following:
+- Download curl from github: https://github.com/curl/curl
+- Install OpenSSL via vcpkg (or install it from source)
+- Download LibSSH2 from github: https://github.com/libssh2/libssh2 and build it
+- go to curl folder and "cmake -G "Ninja" -DENABLE_WEBSOCKETS=ON -DUSE_WEBSOCKETS=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="C:/Users/vazqu/vcpkg/installed/x64-windows" -DCURL_USE_LIBSSH=ON -DCURL_USE_LIBSSH2=ON -DUSE_LIBSSH2=ON -DLIBSSH2_INCLUDE_DIR="C:/path_to/libssh2/include" -DLIBSSH2_LIBRARY="C:/path_to/libssh2/build/src/libssh2.lib" -DCMAKE_BUILD_TYPE=Release -B./build -S.", "cd build", "cmake --build ."
+- This will create the libs for curl. If libcurl_impl.lib is generated, rename to libcurl.lib

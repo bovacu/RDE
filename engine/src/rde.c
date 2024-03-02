@@ -120,6 +120,8 @@
 
 #endif
 
+#include "curl/curl.h"
+
 // TODO TASK
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
@@ -1601,6 +1603,26 @@ rde_sound_config rde_struct_create_audio_config(void) {
 }
 #endif
 
+rde_network_response rde_struct_create_network_response(uint _header_size, uint _body_size) {
+	rde_network_response _n;
+	RDE_UNUSED(_header_size)
+	RDE_UNUSED(_body_size)
+	
+	_n.header_data.str = NULL;
+	if(_header_size > 0) {
+		rde_str_new_with_size(&_n.header_data, _header_size);
+	}
+
+	_n.body_data.str = NULL;
+	if(_body_size > 0) {
+		rde_str_new_with_size(&_n.body_data, _body_size);
+	}
+
+	_n.response_code = 0;
+
+	return _n;
+}
+
 rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_engine _e;
 
@@ -2396,6 +2418,9 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 	rde_inner_audio_init();
 #endif
 
+	// TODO: put this behind MODULE
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+
 	srand(time(NULL));
 
 	_instantiated = true;
@@ -2722,6 +2747,9 @@ void rde_engine_destroy_engine(void) {
 		rde_window_destroy_window(&ENGINE.windows[_i]);
 	}
 	rde_free(ENGINE.windows);
+
+	// TODO: put this behind MODULE
+	curl_global_cleanup();
 
 	SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS);
 	SDL_Quit();
@@ -10500,7 +10528,7 @@ void rde_ui_element_set_percentual_size(rde_ui_element* _element, rde_vec_2F _pe
 
 #if RDE_IS_MOBILE()
 // ==============================================================================
-// =							PUBLIC API - MOBILE					 	    =
+// =							PUBLIC API - MOBILE					 	    	=
 // ==============================================================================
 
 #if RDE_IS_ANDROID()
@@ -10512,13 +10540,129 @@ ANativeWindow* rde_android_get_native_window(void) {
 
 
 
+// ==============================================================================
+// =							PRIVATE API - NETWORK					 	    =
+// ==============================================================================
 
+size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void* _user_data) {
+	if(_user_data != NULL) {
+		rde_str_append_str((rde_str*)_user_data, (char*)_data);
+	}
+
+    return _size * _nmemb;
+}
+
+// ==============================================================================
+// =							PUBLIC API - NETWORK					 	    =
+// ==============================================================================
+
+void rde_network_http_get(const char* _url, rde_network_response* _response) {
+	CURL* _curl = curl_easy_init();
+	rde_critical_error(_curl == NULL, "Error creating http GET request\n");
+
+	CURLcode _code = curl_easy_setopt(_curl, CURLOPT_URL, _url);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_URL for http GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_HTTPGET, 1L);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HTTPGET for http GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
+	rde_critical_error(_code != CURLE_OK, "Error setting WRITEFUNCTION for http GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_WRITEDATA, (void*)&_response->body_data);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_WRITEDATA for http GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_HEADERDATA, (void*)&_response->header_data);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HEADERDATA for http GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_perform(_curl);
+	rde_critical_error(_code != CURLE_OK, "Error performing GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_getinfo(_curl, CURLINFO_RESPONSE_CODE, &_response->response_code);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_RESPONSE_CODE for http GET request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_getinfo(_curl, CURLINFO_TOTAL_TIME, &_response->total_time);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_TOTAL_TIME for http GET request: %s\n", curl_easy_strerror(_code));
+
+	curl_easy_cleanup(_curl);
+}
+
+void rde_network_http_post(const char* _url, const char* _fields[], uint _fields_count, rde_network_response* _response) {
+	rde_critical_error(_fields_count <= 0, "rde_network_http_post - _fields_count must be > 0 \n");
+	
+	CURL* _curl = curl_easy_init();
+	rde_critical_error(_curl == NULL, "Error creating http POST request\n");
+
+	curl_easy_setopt(_curl, CURLOPT_VERBOSE, 1);
+
+	CURLcode _code = curl_easy_setopt(_curl, CURLOPT_URL, _url);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_URL for http POST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_HTTPPOST, 1L);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HTTPGET for http POST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
+	rde_critical_error(_code != CURLE_OK, "Error setting WRITEFUNCTION for http POST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_WRITEDATA, (void*)&_response->body_data);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_WRITEDATA for http POST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_HEADERDATA, (void*)&_response->header_data);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HEADERDATA for http POST request: %s\n", curl_easy_strerror(_code));
+
+	uint _alloc_size = 0;
+	rde_str _parameters = { 0 };
+
+	for(uint _i = 0; _i < _fields_count; _i++) {
+		_alloc_size += strlen(_fields[_i]);
+	}
+
+	rde_critical_error(_alloc_size == 0, "rde_network_http_post - size of fields must be > 0 \n");
+
+	_alloc_size += sizeof(char) * (_fields_count - 1); // Add extra '&'
+
+	rde_str_new_with_size(&_parameters, _alloc_size);
+	for(uint _i = 0; _i < _fields_count; _i++) {
+		rde_str_append_str(&_parameters, _fields[_i]);
+		if(_i < _fields_count - 1) {
+			rde_str_append_str(&_parameters, "&");
+		}
+	}
+
+	_code = curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, rde_str_to_char_ptr(&_parameters));
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_POSTFIELDS request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_SSL_VERIFYPEER request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_SSL_VERIFYHOST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_CA_CACHE_TIMEOUT request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_setopt(_curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_USERAGENT request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_perform(_curl);
+	rde_critical_error(_code != CURLE_OK, "Error performing POST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_getinfo(_curl, CURLINFO_RESPONSE_CODE, &_response->response_code);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_RESPONSE_CODE for http POST request: %s\n", curl_easy_strerror(_code));
+
+	_code = curl_easy_getinfo(_curl, CURLINFO_TOTAL_TIME, &_response->total_time);
+	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_TOTAL_TIME for http POST request: %s\n", curl_easy_strerror(_code));
+
+	curl_easy_cleanup(_curl);
+
+	rde_str_free(&_parameters);
+}
 
 
 #ifdef RDE_ERROR_MODULE
 
 // ==============================================================================
-// =							PRIVATE API - ERROR					 	    =
+// =							PRIVATE API - ERROR					 	    	=
 // ==============================================================================
 
 #if RDE_IS_WINDOWS()
