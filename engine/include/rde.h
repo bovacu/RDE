@@ -3719,6 +3719,7 @@ RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 
 // =================================================================== PHYSICS ===========================================================================================
 
+#ifdef RDE_PHYSICS_MODULE
 typedef struct {
 	rde_physics_error_fn error_fn;
 	rde_physics_log_fn log_fn;
@@ -3727,6 +3728,7 @@ typedef struct {
 	rde_physics_transform_set_pos set_pos_fn;
 	rde_physics_transform_set_rot set_rot_fn;
 } rde_physics_callbacks;
+#endif
 
 // 											==============================================================================
 // 											=								GLOBAL VARIABLES					 	   	 =
