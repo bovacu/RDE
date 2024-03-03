@@ -518,7 +518,6 @@ size_t current_frame = 0;
 /// *                                INNER STRUCT DEFINITIONS                         			  *
 /// *************************************************************************************************
 
-rde_arr_decl(int);
 rde_arr_decl(rde_mesh);
 
 struct rde_transform {
@@ -1605,8 +1604,6 @@ rde_sound_config rde_struct_create_audio_config(void) {
 
 rde_network_response rde_struct_create_network_response(uint _header_size, uint _body_size) {
 	rde_network_response _n;
-	RDE_UNUSED(_header_size)
-	RDE_UNUSED(_body_size)
 	
 	_n.header_data.str = NULL;
 	if(_header_size > 0) {
@@ -1621,6 +1618,25 @@ rde_network_response rde_struct_create_network_response(uint _header_size, uint 
 	_n.response_code = 0;
 
 	return _n;
+}
+
+rde_network_request rde_struct_create_network_request(bool _allocate_header_list, bool _allocate_post_field_list) {
+	rde_network_request _r;
+	_r.url = NULL;
+	_r.port = -1;
+	_r.verbose = false;
+	_r.free_headers_list_on_end = false;
+	_r.free_post_fields_list_on_end = false;
+	
+	if(_allocate_header_list) {
+		rde_arr_new(&_r.headers_list);
+	}
+
+	if(_allocate_post_field_list) {
+		rde_arr_new(&_r.post_fields_list);
+	}
+
+	return _r;
 }
 
 rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
@@ -10556,65 +10572,112 @@ size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void
 // =							PUBLIC API - NETWORK					 	    =
 // ==============================================================================
 
-void rde_network_http_get(const char* _url, rde_network_response* _response) {
-	CURL* _curl = curl_easy_init();
-	rde_critical_error(_curl == NULL, "Error creating http GET request\n");
+#define rde_curl_init() curl_easy_init(); rde_critical_error(_curl == NULL, "Error creating http GET request\n")
 
-	CURLcode _code = curl_easy_setopt(_curl, CURLOPT_URL, _url);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_URL for http GET request: %s\n", curl_easy_strerror(_code));
+#define rde_curl_setopt(_opt, _val)				\
+	_code = curl_easy_setopt(_curl, _opt, _val);\
+	rde_critical_error(_code != CURLE_OK, "Error setting " #_opt " for http GET request: %s\n", curl_easy_strerror(_code))
 
-	_code = curl_easy_setopt(_curl, CURLOPT_HTTPGET, 1L);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HTTPGET for http GET request: %s\n", curl_easy_strerror(_code));
+#define rde_curl_perform()				\
+	_code = curl_easy_perform(_curl);	\
+	rde_critical_error(_code != CURLE_OK, "Error performing GET request: %s\n", curl_easy_strerror(_code))
 
-	_code = curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
-	rde_critical_error(_code != CURLE_OK, "Error setting WRITEFUNCTION for http GET request: %s\n", curl_easy_strerror(_code));
+#define rde_curl_getinfo(_opt, _val)				\
+	_code = curl_easy_getinfo(_curl, _opt, _val);	\
+	rde_critical_error(_code != CURLE_OK, "Error setting " #_opt " for http GET request: %s\n", curl_easy_strerror(_code))
 
-	_code = curl_easy_setopt(_curl, CURLOPT_WRITEDATA, (void*)&_response->body_data);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_WRITEDATA for http GET request: %s\n", curl_easy_strerror(_code));
+#define rde_curl_check_for_automatic_dealloc()													\
+	do {																						\
+		if(_request->free_headers_list_on_end && _request->headers_list.memory != NULL) {		\
+			for(uint _i = 0; _i < rde_arr_get_length(&_request->headers_list); _i++) {			\
+				rde_str* _str = NULL;															\
+				rde_arr_get_element_ptr(&_request->headers_list, _i, _str);						\
+				rde_str_free(_str);																\
+			}																					\
+			rde_arr_free(&_request->headers_list);												\
+		}																						\
+																								\
+		if(_request->free_post_fields_list_on_end&& _request->post_fields_list.memory != NULL) {\
+			for(uint _i = 0; _i < rde_arr_get_length(&_request->post_fields_list); _i++) {		\
+				rde_str* _str = NULL;															\
+				rde_arr_get_element_ptr(&_request->post_fields_list, _i, _str);					\
+				rde_str_free(_str);																\
+			}																					\
+			rde_arr_free(&_request->post_fields_list);											\
+		}																						\
+	} while(0)
 
-	_code = curl_easy_setopt(_curl, CURLOPT_HEADERDATA, (void*)&_response->header_data);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HEADERDATA for http GET request: %s\n", curl_easy_strerror(_code));
+void rde_network_http_get(rde_network_request* _request, rde_network_response* _response) {
+	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
+	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
 
-	_code = curl_easy_perform(_curl);
-	rde_critical_error(_code != CURLE_OK, "Error performing GET request: %s\n", curl_easy_strerror(_code));
+	CURL* _curl = rde_curl_init();
+	CURLcode _code = CURLE_OK;
 
-	_code = curl_easy_getinfo(_curl, CURLINFO_RESPONSE_CODE, &_response->response_code);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_RESPONSE_CODE for http GET request: %s\n", curl_easy_strerror(_code));
+	if(_request->verbose) {
+		rde_curl_setopt(CURLOPT_VERBOSE, 1L);
+	}
+	
+	rde_curl_setopt(CURLOPT_URL, _request->url);
+	rde_curl_setopt(CURLOPT_HTTPGET, 1L);
+	rde_curl_setopt(CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
+	rde_curl_setopt(CURLOPT_FOLLOWLOCATION, 1L);
 
-	_code = curl_easy_getinfo(_curl, CURLINFO_TOTAL_TIME, &_response->total_time);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_TOTAL_TIME for http GET request: %s\n", curl_easy_strerror(_code));
+	if(_request->port > 0) {
+		rde_curl_setopt(CURLOPT_PORT, _request->port);
+	}
+
+	if(_response != NULL) {
+		rde_curl_setopt(CURLOPT_WRITEDATA, (void*)&_response->body_data);
+		rde_curl_setopt(CURLOPT_HEADERDATA, (void*)&_response->header_data);
+	}
+
+	rde_curl_perform();
+
+	if(_response != NULL) {
+		rde_curl_getinfo(CURLINFO_RESPONSE_CODE, (void*)&_response->response_code);
+		rde_curl_getinfo(CURLINFO_TOTAL_TIME, (void*)&_response->total_time);
+	}
+
+	rde_curl_check_for_automatic_dealloc();
 
 	curl_easy_cleanup(_curl);
 }
 
-void rde_network_http_post(const char* _url, const char* _fields[], uint _fields_count, rde_network_response* _response) {
-	rde_critical_error(_fields_count <= 0, "rde_network_http_post - _fields_count must be > 0 \n");
+void rde_network_http_post(rde_network_request* _request, rde_network_response* _response) {
+	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
+	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
+	rde_critical_error(_request->post_fields_list.memory == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_post - _request.post_field_list \n");
+	rde_critical_error(rde_arr_get_length(&_request->post_fields_list) <= 0, "rde_network_http_post - _fields_count must be > 0 \n");
 	
-	CURL* _curl = curl_easy_init();
-	rde_critical_error(_curl == NULL, "Error creating http POST request\n");
+	CURL* _curl = rde_curl_init();
+	CURLcode _code = CURLE_OK;
 
-	curl_easy_setopt(_curl, CURLOPT_VERBOSE, 1);
+	if(_request->verbose) {
+		rde_curl_setopt(CURLOPT_VERBOSE, 1L);
+	}
 
-	CURLcode _code = curl_easy_setopt(_curl, CURLOPT_URL, _url);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_URL for http POST request: %s\n", curl_easy_strerror(_code));
+	rde_curl_setopt(CURLOPT_URL, _request->url);
+	rde_curl_setopt(CURLOPT_HTTPPOST, 1L);
+	rde_curl_setopt(CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
 
-	_code = curl_easy_setopt(_curl, CURLOPT_HTTPPOST, 1L);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HTTPGET for http POST request: %s\n", curl_easy_strerror(_code));
+	if(_request->port > 0) {
+		rde_curl_setopt(CURLOPT_PORT, _request->port);
+	}
 
-	_code = curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
-	rde_critical_error(_code != CURLE_OK, "Error setting WRITEFUNCTION for http POST request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_setopt(_curl, CURLOPT_WRITEDATA, (void*)&_response->body_data);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_WRITEDATA for http POST request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_setopt(_curl, CURLOPT_HEADERDATA, (void*)&_response->header_data);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_HEADERDATA for http POST request: %s\n", curl_easy_strerror(_code));
+	if(_response != NULL) {
+		rde_curl_setopt(CURLOPT_WRITEDATA, (void*)&_response->body_data);
+		rde_curl_setopt(CURLOPT_HEADERDATA, (void*)&_response->header_data);
+	}
 
 	uint _alloc_size = 0;
 	rde_str _parameters = { 0 };
+	uint _fields_count = rde_arr_get_length(&_request->post_fields_list);
 
 	for(uint _i = 0; _i < _fields_count; _i++) {
-		_alloc_size += strlen(_fields[_i]);
+		rde_str* _str = NULL;
+		rde_arr_get_element_ptr(&_request->post_fields_list, _i, _str);
+		_alloc_size += rde_str_size(_str);
 	}
 
 	rde_critical_error(_alloc_size == 0, "rde_network_http_post - size of fields must be > 0 \n");
@@ -10623,39 +10686,30 @@ void rde_network_http_post(const char* _url, const char* _fields[], uint _fields
 
 	rde_str_new_with_size(&_parameters, _alloc_size);
 	for(uint _i = 0; _i < _fields_count; _i++) {
-		rde_str_append_str(&_parameters, _fields[_i]);
+		rde_str* _str = NULL;
+		rde_arr_get_element_ptr(&_request->post_fields_list, _i, _str);
+		rde_str_append_str(&_parameters, rde_str_to_char_ptr(_str));
 		if(_i < _fields_count - 1) {
 			rde_str_append_str(&_parameters, "&");
 		}
 	}
 
-	_code = curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, rde_str_to_char_ptr(&_parameters));
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_POSTFIELDS request: %s\n", curl_easy_strerror(_code));
+	rde_curl_setopt(CURLOPT_POSTFIELDS, rde_str_to_char_ptr(&_parameters));
+	rde_curl_setopt(CURLOPT_SSL_VERIFYPEER, 0L);
+	rde_curl_setopt(CURLOPT_SSL_VERIFYHOST, 0L);
+	rde_curl_setopt(CURLOPT_CA_CACHE_TIMEOUT, 604800L);
 
-	_code = curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_SSL_VERIFYPEER request: %s\n", curl_easy_strerror(_code));
+	rde_curl_perform();
 
-	_code = curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_SSL_VERIFYHOST request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_setopt(_curl, CURLOPT_CA_CACHE_TIMEOUT, 604800L);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_CA_CACHE_TIMEOUT request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_setopt(_curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLOPT_USERAGENT request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_perform(_curl);
-	rde_critical_error(_code != CURLE_OK, "Error performing POST request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_getinfo(_curl, CURLINFO_RESPONSE_CODE, &_response->response_code);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_RESPONSE_CODE for http POST request: %s\n", curl_easy_strerror(_code));
-
-	_code = curl_easy_getinfo(_curl, CURLINFO_TOTAL_TIME, &_response->total_time);
-	rde_critical_error(_code != CURLE_OK, "Error setting CURLINFO_TOTAL_TIME for http POST request: %s\n", curl_easy_strerror(_code));
+	if(_response != NULL) {
+		rde_curl_getinfo(CURLINFO_RESPONSE_CODE, (void*)&_response->response_code);
+		rde_curl_getinfo(CURLINFO_TOTAL_TIME, (void*)&_response->total_time);
+	}
 
 	curl_easy_cleanup(_curl);
 
 	rde_str_free(&_parameters);
+	rde_curl_check_for_automatic_dealloc();
 }
 
 
