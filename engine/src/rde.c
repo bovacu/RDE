@@ -120,6 +120,10 @@
 
 #endif
 
+#ifdef RDE_NETWORK_MODULE
+#include "curl/curl.h"
+#endif
+
 // TODO TASK
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
 //		  the format is BGRA instead of RGBA (problem solved by first method) and the second fixes
@@ -516,7 +520,6 @@ size_t current_frame = 0;
 /// *                                INNER STRUCT DEFINITIONS                         			  *
 /// *************************************************************************************************
 
-rde_arr_decl(int);
 rde_arr_decl(rde_mesh);
 
 struct rde_transform {
@@ -1601,6 +1604,44 @@ rde_sound_config rde_struct_create_audio_config(void) {
 }
 #endif
 
+#ifdef RDE_NETWORK_MODULE
+rde_network_response rde_struct_create_network_response() {
+	rde_network_response _n;
+
+	rde_str_init(&_n.header_data);
+	rde_str_new_with_size(&_n.header_data, 1024);
+	
+	rde_str_init(&_n.body_data);
+	rde_str_new_with_size(&_n.body_data, 1024); 
+
+	_n.response_code = 0;
+	_n.total_time = 0;
+
+	return _n;
+}
+
+rde_network_request rde_struct_create_network_request(bool _allocate_header_list, bool _allocate_post_field_list) {
+	rde_network_request _r;
+	_r.url = NULL;
+	_r.port = -1;
+	_r.verbose = false;
+	_r.free_headers_list_on_end = false;
+	_r.free_post_fields_list_on_end = false;
+	
+	if(_allocate_header_list) {
+		rde_arr_new(&_r.headers_list);
+	}
+
+	if(_allocate_post_field_list) {
+		rde_arr_new(&_r.post_fields_list);
+	}
+
+	_r.user_agent = NULL;
+
+	return _r;
+}
+#endif
+
 rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_engine _e;
 
@@ -2396,6 +2437,10 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 	rde_inner_audio_init();
 #endif
 
+	#ifdef RDE_NETWORK_MODULE
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+	#endif
+
 	srand(time(NULL));
 
 	_instantiated = true;
@@ -2723,6 +2768,10 @@ void rde_engine_destroy_engine(void) {
 	}
 	rde_free(ENGINE.windows);
 
+	#ifdef RDE_NETWORK_MODULE
+	curl_global_cleanup();
+	#endif
+
 	SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS);
 	SDL_Quit();
 	rde_log_level(RDE_LOG_LEVEL_INFO, "%s", "Exited cleanly");
@@ -2903,7 +2952,6 @@ void rde_thread_detach(rde_thread* _thread) {
 }
 
 void rde_thread_end(rde_thread* _thread) {
-	RDE_UNUSED(_thread)
 	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_end - _thread");
 	_thread->fn = NULL;
 	_thread->params = NULL;
@@ -10500,7 +10548,7 @@ void rde_ui_element_set_percentual_size(rde_ui_element* _element, rde_vec_2F _pe
 
 #if RDE_IS_MOBILE()
 // ==============================================================================
-// =							PUBLIC API - MOBILE					 	    =
+// =							PUBLIC API - MOBILE					 	    	=
 // ==============================================================================
 
 #if RDE_IS_ANDROID()
@@ -10512,13 +10560,229 @@ ANativeWindow* rde_android_get_native_window(void) {
 
 
 
+// ==============================================================================
+// =							PRIVATE API - NETWORK					 	    =
+// ==============================================================================
 
+#ifdef RDE_NETWORK_MODULE
+size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void* _user_data) {
+	size_t _real_size = _size * _nmemb;
+	
+	if(_user_data != NULL) {
+		rde_str* _str = (rde_str*)_user_data;
+		rde_str_append_str_limit(_str, (char*)_data, _real_size);
+	}
 
+	return _real_size;
+}
+
+typedef enum {
+	RDE_NETWORK_REQUEST_TYPE_GET,
+	RDE_NETWORK_REQUEST_TYPE_POST
+} RDE_NETWORK_REQUEST_TYPE_;
+
+typedef struct {
+	rde_network_request request;
+	rde_network_response response;
+	void (*callback)(rde_network_response*, long);
+	RDE_NETWORK_REQUEST_TYPE_ type;
+} rde_network_async_data;
+
+#define rde_curl_init() curl_easy_init(); rde_critical_error(_curl == NULL, "Error creating http GET request\n")
+
+#define rde_curl_setopt(_opt, _val)				\
+	_code = curl_easy_setopt(_curl, _opt, _val);\
+	if(_code != CURLE_OK) goto cleanup_tag
+
+#define rde_curl_perform()				\
+	_code = curl_easy_perform(_curl);	\
+	if(_code != CURLE_OK) goto cleanup_tag
+
+#define rde_curl_getinfo(_opt, _val)				\
+	_code = curl_easy_getinfo(_curl, _opt, _val);	\
+	if(_code != CURLE_OK) goto cleanup_tag
+
+#define rde_curl_check_for_automatic_dealloc()													\
+	do {																						\
+		if(_request->free_headers_list_on_end && _request->headers_list.memory != NULL) {		\
+			for(uint _i = 0; _i < rde_arr_get_length(&_request->headers_list); _i++) {			\
+				rde_str* _str = NULL;															\
+				rde_arr_get_element_ptr(&_request->headers_list, _i, _str);						\
+				rde_str_free(_str);																\
+			}																					\
+			rde_arr_free(&_request->headers_list);												\
+		}																						\
+																								\
+		if(_request->free_post_fields_list_on_end&& _request->post_fields_list.memory != NULL) {\
+			for(uint _i = 0; _i < rde_arr_get_length(&_request->post_fields_list); _i++) {		\
+				rde_str* _str = NULL;															\
+				rde_arr_get_element_ptr(&_request->post_fields_list, _i, _str);					\
+				rde_str_free(_str);																\
+			}																					\
+			rde_arr_free(&_request->post_fields_list);											\
+		}																						\
+	} while(0)
+
+void* rde_inner_network_async_fn(rde_thread* _thread, void* _user_data) {
+	RDE_UNUSED(_thread);
+	rde_network_async_data* _async_data = (rde_network_async_data*)_user_data;
+	rde_network_request* _request = (rde_network_request*)&_async_data->request;
+	rde_network_response* _response = (rde_network_response*)&_async_data->response;
+	rde_network_async_callback _callback = (rde_network_async_callback)_async_data->callback;
+	
+	long _err_code = 0;
+
+	switch(_async_data->type) {
+		case RDE_NETWORK_REQUEST_TYPE_GET: rde_network_http_get(_request, _response); break;
+		case RDE_NETWORK_REQUEST_TYPE_POST: rde_network_http_post(_request, _response); break;
+		default: rde_critical_error(true, "Wrong RDE_NETWORK_REQUEST_TYPE_ %d", _async_data->type);
+	}
+
+	_callback(_response, _err_code);
+	rde_curl_check_for_automatic_dealloc();
+	return NULL;
+}
+
+// ==============================================================================
+// =							PUBLIC API - NETWORK					 	    =
+// ==============================================================================
+
+long rde_network_http_get(rde_network_request* _request, rde_network_response* _response) {
+	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
+	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
+
+	CURL* _curl = rde_curl_init();
+	CURLcode _code = CURLE_OK;
+
+	if(_request->verbose) {
+		rde_curl_setopt(CURLOPT_VERBOSE, 1L);
+	}
+	
+	rde_curl_setopt(CURLOPT_URL, _request->url);
+	rde_curl_setopt(CURLOPT_HTTPGET, 1L);
+	rde_curl_setopt(CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
+	rde_curl_setopt(CURLOPT_FOLLOWLOCATION, 1L);
+	rde_curl_setopt(CURLOPT_SSL_VERIFYPEER, 0L);
+	rde_curl_setopt(CURLOPT_SSL_VERIFYHOST, 0L);
+
+	if(_request->port > 0) {
+		rde_curl_setopt(CURLOPT_PORT, _request->port);
+	}
+
+	if(_response != NULL) {
+		rde_curl_setopt(CURLOPT_WRITEDATA, (void*)&(_response->body_data));
+		rde_curl_setopt(CURLOPT_HEADERDATA, (void*)&(_response->header_data));
+	}
+
+	rde_curl_setopt(CURLOPT_USERAGENT, _request->user_agent != NULL ? _request->user_agent : "libcurl-agent/1.0");
+
+	rde_curl_perform();
+
+	if(_response != NULL) {
+		rde_curl_getinfo(CURLINFO_RESPONSE_CODE, (void*)&_response->response_code);
+		rde_curl_getinfo(CURLINFO_TOTAL_TIME, (void*)&_response->total_time);
+	}
+
+cleanup_tag:
+	rde_curl_check_for_automatic_dealloc();
+	curl_easy_cleanup(_curl);
+	return (long)_code;
+}
+
+void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback) {
+	rde_calloc_init(_data, rde_network_async_data, 1);
+	_data->request = *_request;
+	_data->response = *_response;
+	_data->callback = _callback;
+	_data->type = RDE_NETWORK_REQUEST_TYPE_GET;
+	rde_thread_run(rde_inner_network_async_fn, _data);
+}
+
+long rde_network_http_post(rde_network_request* _request, rde_network_response* _response) {
+	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
+	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
+	rde_critical_error(_request->post_fields_list.memory == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_post - _request.post_field_list \n");
+	rde_critical_error(rde_arr_get_length(&_request->post_fields_list) <= 0, "rde_network_http_post - _fields_count must be > 0 \n");
+	
+	CURL* _curl = rde_curl_init();
+	CURLcode _code = CURLE_OK;
+
+	if(_request->verbose) {
+		rde_curl_setopt(CURLOPT_VERBOSE, 1L);
+	}
+
+	rde_curl_setopt(CURLOPT_URL, _request->url);
+	rde_curl_setopt(CURLOPT_HTTPPOST, 1L);
+	rde_curl_setopt(CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
+
+	if(_request->port > 0) {
+		rde_curl_setopt(CURLOPT_PORT, _request->port);
+	}
+
+	if(_response != NULL) {
+		rde_curl_setopt(CURLOPT_WRITEDATA, (void*)&_response->body_data);
+		rde_curl_setopt(CURLOPT_HEADERDATA, (void*)&_response->header_data);
+	}
+
+	uint _alloc_size = 0;
+	rde_str _parameters = { 0 };
+	uint _fields_count = rde_arr_get_length(&_request->post_fields_list);
+
+	for(uint _i = 0; _i < _fields_count; _i++) {
+		rde_str* _str = NULL;
+		rde_arr_get_element_ptr(&_request->post_fields_list, _i, _str);
+		_alloc_size += rde_str_size(_str);
+	}
+
+	rde_critical_error(_alloc_size == 0, "rde_network_http_post - size of fields must be > 0 \n");
+
+	_alloc_size += sizeof(char) * (_fields_count - 1); // Add extra '&'
+
+	rde_str_new_with_size(&_parameters, _alloc_size);
+	for(uint _i = 0; _i < _fields_count; _i++) {
+		rde_str* _str = NULL;
+		rde_arr_get_element_ptr(&_request->post_fields_list, _i, _str);
+		rde_str_append_str(&_parameters, rde_str_to_char_ptr(_str));
+		if(_i < _fields_count - 1) {
+			rde_str_append_str(&_parameters, "&");
+		}
+	}
+
+	rde_curl_setopt(CURLOPT_POSTFIELDS, rde_str_to_char_ptr(&_parameters));
+	rde_curl_setopt(CURLOPT_SSL_VERIFYPEER, 0L);
+	rde_curl_setopt(CURLOPT_SSL_VERIFYHOST, 0L);
+	rde_curl_setopt(CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+	rde_curl_setopt(CURLOPT_USERAGENT, _request->user_agent != NULL ? _request->user_agent : "libcurl-agent/1.0");
+
+	rde_curl_perform();
+
+	if(_response != NULL) {
+		rde_curl_getinfo(CURLINFO_RESPONSE_CODE, (void*)&_response->response_code);
+		rde_curl_getinfo(CURLINFO_TOTAL_TIME, (void*)&_response->total_time);
+	}
+
+cleanup_tag:
+	rde_str_free(&_parameters);
+	rde_curl_check_for_automatic_dealloc();
+	curl_easy_cleanup(_curl);
+	return (long)_code;
+}
+
+void rde_network_http_post_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback) {
+	rde_calloc_init(_data, rde_network_async_data, 1);
+	_data->request = *_request;
+	_data->response = *_response;
+	_data->callback = _callback;
+	_data->type = RDE_NETWORK_REQUEST_TYPE_POST;
+	rde_thread_run(rde_inner_network_async_fn, _data);
+}
+
+#endif
 
 #ifdef RDE_ERROR_MODULE
 
 // ==============================================================================
-// =							PRIVATE API - ERROR					 	    =
+// =							PRIVATE API - ERROR					 	    	=
 // ==============================================================================
 
 #if RDE_IS_WINDOWS()

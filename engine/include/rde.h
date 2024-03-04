@@ -872,6 +872,15 @@ typedef unsigned int uint;
 //	=================
 #define RDE_MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b));
 
+// Macro: RDE_ABS
+// Gets the absolute value of the input.
+//
+// Parameters:
+//	_a - value a.
+//
+//	======= C =======
+//	int _min = RDE_ABS(-5)
+//	=================
 #define RDE_ABS(_a) ((_a) < 0 ? -(_a) : (_a))
 
 // Macro: rde_arr_decl
@@ -893,6 +902,40 @@ typedef struct {			\
 	unsigned long capacity;	\
 	unsigned long used;		\
 } rde_arr_##_type
+
+// Macro: rde_arr_ptr_decl
+// Inits a dynamic array of pointers inner fields to the default values.
+//
+// Parameters:
+//	_type - the type of data that the array will hold.
+//	_type_name - name of the struct.
+//
+//	======= C =======
+// 	rde_arr_ptr_decl(my_struct*, my_struct_ptr);
+//	=================
+#define rde_arr_ptr_decl(_type, _type_name)	\
+typedef struct {							\
+	_type* memory;							\
+	unsigned long capacity;					\
+	unsigned long used;						\
+} rde_arr_##_type_name
+
+// Macro: rde_arr_fixed_strings_decl
+// Inits a dynamic array of strings with fixed size of the inner strings.
+//
+// Parameters:
+//	_type_name - name of the struct.
+//	_string_size - size of each fixed string in the array of strings.
+//
+//	======= C =======
+// 	rde_arr_fixed_strings_decl(specific_string, 256);
+//	=================
+#define rde_arr_fixed_strings_decl(_type_name, _string_size)\
+typedef struct {											\
+	char* memory[_string_size];								\
+	unsigned long capacity;									\
+	unsigned long used;										\
+} rde_arr_##_type_name
 
 // Macro: rde_arr_init
 // Inits a dynamic array inner fields to the default values.
@@ -1148,6 +1191,18 @@ typedef struct {			\
         value_dbg_fn_##_name value_dbg_fn;                	\
     }
     
+// Macro: rde_hash_map_init
+// Sets all _hash_map fields to valid default values and sets internal function pointers
+//
+// Parameters:
+//	_hash_map - hash_map to init.
+//	_hash_fn - hash function to use within this hash_map. Won't be shared accross different hash_map structs.
+//	_cmp_fn - key compare function to use within this hash_map. Won't be shared accross different hash_map structs.
+//
+//	======= C =======
+//	hash_map_test _hash_map = {0};
+//	rde_hash_map_init(_hash_map, _hash_fn, _cmp_fn);
+//	================= 
 #define rde_hash_map_init(_hash_map, _hash_fn, _cmp_fn)                                                                         															\
     do {                                                                                                                            														\
 		rde_critical_error(_hash_fn == NULL, "Tried to use a NULL _hash_fn\n");																												\
@@ -1348,9 +1403,37 @@ typedef struct {			\
         }                                                                               \
     } while(0)
 	
+// Macro: rde_str_init
+// Sets all rde_str fields to valid default values.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_init(_str, 256);
+//	=================
+#define rde_str_init(_rde_str)		\
+	do {							\
+		(_rde_str)->str = NULL;		\
+		(_rde_str)->size = 0;		\
+	} while(0)
+
+// Macro: rde_str_new_with_size
+// Creates a new dynamic string, allocating necessary data. This needs to be freed with <rde_str_free> once it is not longer needed.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_size - internal size of the string.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new_with_size(_str, 256);
+//	=================
 #define rde_str_new_with_size(_rde_str, _size)											\
 	do {																				\
-		rde_critical_error((_rde_str)->str != NULL, "rde_str_new -> Tried to allocate to _rde_str, but it str was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+		rde_critical_error((_rde_str)->str != NULL, "rde_str_new - Tried to allocate to _rde_str, but it str was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
+		rde_critical_error(_size <= 0, "rde_str_new - Tried to allocate to _rde_str, with a _size <= 0, this is not allowed. \n"); \
 																						\
 		(_rde_str)->size = _size; 														\
 		rde_calloc((_rde_str)->str, char, _size);										\
@@ -1371,11 +1454,47 @@ typedef struct {			\
 	do {																				\
 		rde_critical_error((_rde_str)->str != NULL, "rde_str_new -> Tried to allocate to _rde_str, but it str was not NULL, check if _rde_str.src has been initialized to NULL, otherwise it may be pointing to already allocated memory and cause a memory leak. \n"); \
 																						\
-		(_rde_str)->size = MAX(strlen(_init_src_value) + 1, RDE_STR_DEFAULT_SIZE);		\
+		(_rde_str)->size = RDE_MAX(strlen(_init_src_value) + 1, RDE_STR_DEFAULT_SIZE);	\
 		rde_calloc((_rde_str)->str, char, (_rde_str)->size);							\
 		if(_init_src_value != NULL) {													\
 			rde_strcpy((_rde_str)->str, (_rde_str)->size, _init_src_value);				\
 		}																				\
+	} while(0)
+
+// Macro: rde_str_decl_and_alloc
+// Declares, inits and allocs a new rde_str with a specific string value. The _rde_str_var_name is usable right after this function. This needs to be freed with <rde_str_free> once it is not longer needed.
+//
+// Parameters:
+//	_rde_str_var_name - name of the new rde_str variable.
+//	_init_src_value - initial string value for the rde_str. Can be NULL.
+//
+//	======= C =======
+//	rde_str_decl_and_alloc(_str, "Hello, Duck!");
+//	rde_str_append_str(&_str, "aaaa");
+//	=================
+#define rde_str_decl_and_alloc(_rde_str_var_name, _init_string)	\
+	rde_str _rde_str_var_name;									\
+	do {														\
+		rde_str_init(&_rde_str_var_name);						\
+		rde_str_new(&_rde_str_var_name, _init_string);			\
+	} while(0)
+
+// Macro: rde_str_decl_and_alloc
+// Declares, inits and allocs a new rde_str with a specific size. The _rde_str_var_name is usable right after this function. This needs to be freed with <rde_str_free> once it is not longer needed.
+//
+// Parameters:
+//	_rde_str_var_name - name of the new rde_str variable.
+//	_size - internal size of the string.
+//
+//	======= C =======
+//	rde_str_decl_and_alloc_with_size(_str, 256);
+//	rde_str_append_str(&_str, "aaaa");
+//	=================
+#define rde_str_decl_and_alloc_with_size(_rde_str_var_name, _size)	\
+	rde_str _rde_str_var_name;										\
+	do {															\
+		rde_str_init(&_rde_str_var_name);							\
+		rde_str_new_with_size(&_rde_str_var_name, _size);			\
 	} while(0)
 
 // Macro: rde_str_resize
@@ -1395,12 +1514,12 @@ typedef struct {			\
 		if(_new_size <= (_rde_str)->size) {												\
 			break;																		\
 		}																				\
-		uint _old_size = (_rde_str)->size;												\
 		while((_rde_str)->size < _new_size) {											\
 			(_rde_str)->size *= 2;														\
 		}																				\
-		rde_realloc((_rde_str)->str, (_rde_str)->str, char, (_rde_str)->size);			\
-		memset((void*)((_rde_str)->str + _old_size), '\0', (_rde_str)->size - _old_size);\
+		char* _ptr = (char*)realloc((_rde_str)->str, (_rde_str)->size + 1);				\
+		rde_critical_error(_ptr == NULL, "No memory for reallocating rde_str\n");		\
+		(_rde_str)->str = _ptr;															\
 	} while(0)
 
 // Macro: rde_str_append_str
@@ -1422,6 +1541,30 @@ typedef struct {			\
 		uint _rde_str_size = rde_str_size((_rde_str));																\
 		rde_str_resize((_rde_str), _rde_str_size + strlen((_str)));													\
 		for(uint _i_ = 0; _i_ < strlen((_str)); _i_++) {															\
+			(_rde_str)->str[_rde_str_size + _i_] = (_str)[_i_];														\
+		}																											\
+	} while(0)
+
+// Macro: rde_str_append_str_limit
+// Appends a string limiting its size to an existing rde_str.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_str - string to append.
+//	_size - amount of bytes from _str to append.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_append_str_limit(_str, " And other animals!", 10);
+//	=================
+#define rde_str_append_str_limit(_rde_str, _str, _size)																\
+	do {																											\
+		rde_critical_error((_rde_str)->str == NULL, "rde_str_append_str -> Tried to use a NULL _rde_str.str.\n");	\
+		rde_critical_error((_str) == NULL, "rde_str_append_str -> Tried to use a NULL _str in .\n");				\
+		size_t _rde_str_size = rde_str_size((_rde_str));															\
+		rde_str_resize((_rde_str), _rde_str_size + _size);															\
+		for(uint _i_ = 0; _i_ < _size; _i_++) {																		\
 			(_rde_str)->str[_rde_str_size + _i_] = (_str)[_i_];														\
 		}																											\
 	} while(0)
@@ -2792,6 +2935,13 @@ RDE_SPECIALIZED_MAT4(unsigned long, rde_mat_4UL);
 // Matrix 4x4 of size_t. See <RDE_SPECIALIZED_MAT4>.
 RDE_SPECIALIZED_MAT4(size_t, 		rde_mat_4ST);
 
+rde_arr_decl(int);
+rde_arr_decl(long);
+rde_arr_decl(uint);
+rde_arr_decl(float);
+rde_arr_decl(double);
+rde_arr_decl(ulong);
+
 // Type: rde_quaternion
 // Represents a mathematical quaternion for rotations.
 //
@@ -2937,6 +3087,11 @@ typedef struct rde_thread_pool rde_thread_pool;
 typedef void* rde_audio_device_id;
 #endif
 
+#ifdef RDE_NETWORK_MODULE
+typedef struct rde_network_request rde_network_request;
+typedef struct rde_network_response rde_network_response;
+#endif
+
 // =================================================================== UTIL ====================================================================
 
 // Type: rde_str
@@ -2950,6 +3105,7 @@ struct rde_str {
     char* str;
     unsigned int size;
 };
+rde_arr_ptr_decl(rde_str, str);
 
 // =================================================================== CAMERA ===================================================================
 
@@ -3281,6 +3437,10 @@ typedef void (*rde_ui_container_callback_scroll)(rde_ui_container*, rde_vec_2F);
 // Callback: rde_ui_container_callback_mouse_entered_exited
 // Represents a callback in the UI system for mouse entering or exiting a container.
 typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container*);
+
+#ifdef RDE_NETWORK_MODULE
+typedef void (*rde_network_async_callback)(rde_network_response*, long);
+#endif
 
 // =================================================================== ENGINE ===================================================================
 
@@ -3719,6 +3879,28 @@ RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 
 // =================================================================== PHYSICS ===========================================================================================
 
+#ifdef RDE_NETWORK_MODULE
+struct rde_network_request {
+	char* url;
+	int port;
+	rde_arr_str headers_list;
+	bool free_headers_list_on_end;
+	rde_arr_str post_fields_list;
+	bool free_post_fields_list_on_end;
+	bool verbose;
+	char* user_agent;
+};
+
+struct rde_network_response {
+	rde_str header_data;
+	rde_str body_data;
+	long response_code;
+	double total_time;
+};
+#endif
+
+// =================================================================== NETWORK ===========================================================================================
+
 #ifdef RDE_PHYSICS_MODULE
 typedef struct {
 	rde_physics_error_fn error_fn;
@@ -3944,6 +4126,16 @@ RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
 
 // Constructor: rde_struct_create_ui_container_callbacks
 RDE_FUNC rde_ui_container_callbacks rde_struct_create_ui_container_callbacks(void);
+
+#ifdef RDE_NETWORK_MODULE
+// Constructor: rde_struct_create_network_response
+// Creates a network response. Any rde_str field must be release by the end-user.
+RDE_FUNC rde_network_response rde_struct_create_network_response();
+
+// Constructor: rde_struct_create_network_response
+// Creates a network request. The header_list and post_fields_list are not initialize by default. End user must allocate it and the release it any header or post field needs to be set. Can be let unallocated if not needed.
+RDE_FUNC rde_network_request rde_struct_create_network_request(bool _allocate_header_list, bool _allocate_post_field_list);
+#endif
 
 // =================================================================== LOG ===================================================================
 
@@ -5740,6 +5932,14 @@ RDE_FUNC void rde_physics_end(void);
 #endif
 
 
+// =================================================================== NETWORK =================================================================
+
+#ifdef RDE_NETWORK_MODULE
+RDE_FUNC long rde_network_http_get(rde_network_request* _request, rde_network_response* _response);
+RDE_FUNC void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback);
+RDE_FUNC long rde_network_http_post(rde_network_request* _request, rde_network_response* _response);
+RDE_FUNC void rde_network_http_post_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback);
+#endif
 
 // =================================================================== ERROR ===================================================================
 
