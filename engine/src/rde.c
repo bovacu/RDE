@@ -10572,22 +10572,22 @@ size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void
 typedef struct {
 	rde_network_request request;
 	rde_network_response response;
-	void (*callback)(rde_network_response*);
+	void (*callback)(rde_network_response*, long);
 } rde_network_async_data;
 
 #define rde_curl_init() curl_easy_init(); rde_critical_error(_curl == NULL, "Error creating http GET request\n")
 
 #define rde_curl_setopt(_opt, _val)				\
 	_code = curl_easy_setopt(_curl, _opt, _val);\
-	rde_critical_error(_code != CURLE_OK, "Error setting " #_opt " for http GET request: %s\n", curl_easy_strerror(_code))
+	if(_code != CURLE_OK) goto cleanup_tag
 
 #define rde_curl_perform()				\
 	_code = curl_easy_perform(_curl);	\
-	rde_critical_error(_code != CURLE_OK, "Error performing GET request: %s\n", curl_easy_strerror(_code))
+	if(_code != CURLE_OK) goto cleanup_tag
 
 #define rde_curl_getinfo(_opt, _val)				\
 	_code = curl_easy_getinfo(_curl, _opt, _val);	\
-	rde_critical_error(_code != CURLE_OK, "Error setting " #_opt " for http GET request: %s\n", curl_easy_strerror(_code))
+	if(_code != CURLE_OK) goto cleanup_tag
 
 #define rde_curl_check_for_automatic_dealloc()													\
 	do {																						\
@@ -10615,10 +10615,10 @@ void* rde_inner_network_async_fn(rde_thread* _thread, void* _user_data) {
 	rde_network_async_data* _async_data = (rde_network_async_data*)_user_data;
 	rde_network_request* _request = (rde_network_request*)&_async_data->request;
 	rde_network_response* _response = (rde_network_response*)&_async_data->response;
-	void (*_callback)(rde_network_response*) = (void (*)(rde_network_response*))_async_data->callback;
+	rde_network_async_callback _callback = (rde_network_async_callback)_async_data->callback;
 	
-	rde_network_http_get(_request, _response);
-	_callback(_response);
+	long _err_code = rde_network_http_get(_request, _response);
+	_callback(_response, _err_code);
 	rde_curl_check_for_automatic_dealloc();
 	return NULL;
 }
@@ -10627,7 +10627,7 @@ void* rde_inner_network_async_fn(rde_thread* _thread, void* _user_data) {
 // =							PUBLIC API - NETWORK					 	    =
 // ==============================================================================
 
-void rde_network_http_get(rde_network_request* _request, rde_network_response* _response) {
+long rde_network_http_get(rde_network_request* _request, rde_network_response* _response) {
 	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
 	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
 
@@ -10663,12 +10663,13 @@ void rde_network_http_get(rde_network_request* _request, rde_network_response* _
 		rde_curl_getinfo(CURLINFO_TOTAL_TIME, (void*)&_response->total_time);
 	}
 
+cleanup_tag:
 	rde_curl_check_for_automatic_dealloc();
-
 	curl_easy_cleanup(_curl);
+	return (long)_code;
 }
 
-void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, void (*_callback)(rde_network_response*)) {
+void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback) {
 	rde_calloc_init(_data, rde_network_async_data, 1);
 	_data->request = *_request;
 	_data->response = *_response;
@@ -10676,7 +10677,7 @@ void rde_network_http_get_async(rde_network_request* _request, rde_network_respo
 	rde_thread_run(rde_inner_network_async_fn, _data);
 }
 
-void rde_network_http_post(rde_network_request* _request, rde_network_response* _response) {
+long rde_network_http_post(rde_network_request* _request, rde_network_response* _response) {
 	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
 	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
 	rde_critical_error(_request->post_fields_list.memory == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_post - _request.post_field_list \n");
@@ -10739,10 +10740,11 @@ void rde_network_http_post(rde_network_request* _request, rde_network_response* 
 		rde_curl_getinfo(CURLINFO_TOTAL_TIME, (void*)&_response->total_time);
 	}
 
-	curl_easy_cleanup(_curl);
-
+cleanup_tag:
 	rde_str_free(&_parameters);
 	rde_curl_check_for_automatic_dealloc();
+	curl_easy_cleanup(_curl);
+	return (long)_code;
 }
 
 

@@ -3087,6 +3087,9 @@ typedef struct rde_thread_pool rde_thread_pool;
 typedef void* rde_audio_device_id;
 #endif
 
+typedef struct rde_network_request rde_network_request;
+typedef struct rde_network_response rde_network_response;
+
 // =================================================================== UTIL ====================================================================
 
 // Type: rde_str
@@ -3432,6 +3435,8 @@ typedef void (*rde_ui_container_callback_scroll)(rde_ui_container*, rde_vec_2F);
 // Callback: rde_ui_container_callback_mouse_entered_exited
 // Represents a callback in the UI system for mouse entering or exiting a container.
 typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container*);
+
+typedef void (*rde_network_async_callback)(rde_network_response*, long);
 
 // =================================================================== ENGINE ===================================================================
 
@@ -3870,7 +3875,7 @@ RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 
 // =================================================================== PHYSICS ===========================================================================================
 
-typedef struct {
+struct rde_network_request {
 	char* url;
 	int port;
 	rde_arr_str headers_list;
@@ -3879,14 +3884,14 @@ typedef struct {
 	bool free_post_fields_list_on_end;
 	bool verbose;
 	char* user_agent;
-} rde_network_request;
+};
 
-typedef struct {
+struct rde_network_response {
 	rde_str header_data;
 	rde_str body_data;
 	long response_code;
 	double total_time;
-} rde_network_response;
+};
 
 // =================================================================== NETWORK ===========================================================================================
 
@@ -5921,9 +5926,9 @@ RDE_FUNC void rde_physics_end(void);
 
 // =================================================================== NETWORK =================================================================
 
-RDE_FUNC void rde_network_http_get(rde_network_request* _request, rde_network_response* _response);
-RDE_FUNC void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, void (*_callback)(rde_network_response*));
-RDE_FUNC void rde_network_http_post(rde_network_request* _request, rde_network_response* _response);
+RDE_FUNC long rde_network_http_get(rde_network_request* _request, rde_network_response* _response);
+RDE_FUNC void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback);
+RDE_FUNC long rde_network_http_post(rde_network_request* _request, rde_network_response* _response);
 
 // =================================================================== ERROR ===================================================================
 
