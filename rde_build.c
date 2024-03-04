@@ -3026,6 +3026,11 @@ void parse_arguments(int _argc, char** _argv) {
 
 	const char* _delimiter = "=";
 	const char _delimiter_2 = '=';
+
+	dyn_str* _config_file_path = dyn_str_new(builder_exe_full_path_dir);
+	dyn_str_append(_config_file_path, "engine/include/rde_config.h");
+	FILE* _file = fopen(dyn_str_get(_config_file_path), "wb");
+
 	for(int _i = 1; _i < _argc; _i++) {
 		char _command_copy[256];
 		memset(_command_copy, 0, 256);
@@ -3122,10 +3127,6 @@ void parse_arguments(int _argc, char** _argv) {
 			memset(_modules_str, 0, 256);
 			strcat(_modules_str, _value);
 
-			dyn_str* _config_file_path = dyn_str_new(builder_exe_full_path_dir);
-			dyn_str_append(_config_file_path, "engine/include/rde_config.h");
-			FILE* _file = fopen(dyn_str_get(_config_file_path), "wb");
-
 			dyn_str* _config_file_contents = dyn_str_new("// This file is auto-generated when compiling the library \n");
 
 			char* _module = strtok(_modules_str, ",");
@@ -3153,7 +3154,6 @@ void parse_arguments(int _argc, char** _argv) {
 			}
 
 			fprintf(_file, "%s", dyn_str_get(_config_file_contents));
-			fclose(_file);
 			dyn_str_free(_config_file_path);
 		} 
 		
@@ -3231,6 +3231,13 @@ void parse_arguments(int _argc, char** _argv) {
 		} 
 		
 		
+		else if (strcmp(_command, "--embed_default_assets") == 0) {
+			fprintf(_file, "\n// Modifying this after compiling the lib makes no difference on runtime behaviour");
+			fprintf(_file, "\n");
+			fprintf(_file, "#define RDE_EMBED_DEFAULT_ASSETS");
+			fprintf(_file, "\n\n");
+		}
+
 		
 		else if(strcmp(_command, "-h") == 0 || strcmp(_command, "--help") == 0) {
 			print_help();
@@ -3372,6 +3379,8 @@ void parse_arguments(int _argc, char** _argv) {
 	if(strlen(build_type) == 0) {
 		strcat(build_type, DEBUG_STR);
 	}
+
+	fclose(_file);
 }
 
 void execute_build_option() {

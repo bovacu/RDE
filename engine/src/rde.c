@@ -92,6 +92,10 @@
 #include "ufbx/ufbx.c"
 #endif
 
+#ifdef RDE_EMBED_DEFAULT_ASSETS
+#include "ui_bytes.c"
+#endif
+
 #if !RDE_IS_WINDOWS()
 #include <pthread.h>
 #include <errno.h>
