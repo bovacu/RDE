@@ -1514,12 +1514,12 @@ typedef struct {											\
 		if(_new_size <= (_rde_str)->size) {												\
 			break;																		\
 		}																				\
-		uint _old_size = (_rde_str)->size;												\
 		while((_rde_str)->size < _new_size) {											\
 			(_rde_str)->size *= 2;														\
 		}																				\
-		rde_realloc((_rde_str)->str, (_rde_str)->str, char, (_rde_str)->size);			\
-		memset((void*)((_rde_str)->str + _old_size), '\0', (_rde_str)->size - _old_size);\
+		char* _ptr = (char*)realloc((_rde_str)->str, (_rde_str)->size + 1);				\
+		rde_critical_error(_ptr == NULL, "No memory for reallocating rde_str\n");		\
+		(_rde_str)->str = _ptr;															\
 	} while(0)
 
 // Macro: rde_str_append_str
@@ -1541,6 +1541,30 @@ typedef struct {											\
 		uint _rde_str_size = rde_str_size((_rde_str));																\
 		rde_str_resize((_rde_str), _rde_str_size + strlen((_str)));													\
 		for(uint _i_ = 0; _i_ < strlen((_str)); _i_++) {															\
+			(_rde_str)->str[_rde_str_size + _i_] = (_str)[_i_];														\
+		}																											\
+	} while(0)
+
+// Macro: rde_str_append_str_limit
+// Appends a string limiting its size to an existing rde_str.
+//
+// Parameters:
+//	_rde_str - a rde_str variable.
+//	_str - string to append.
+//	_size - amount of bytes from _str to append.
+//
+//	======= C =======
+//	rde_str _str = {0};
+//	rde_str_new(_str, "Hello, Duck!");
+//	rde_str_append_str_limit(_str, " And other animals!", 10);
+//	=================
+#define rde_str_append_str_limit(_rde_str, _str, _size)																\
+	do {																											\
+		rde_critical_error((_rde_str)->str == NULL, "rde_str_append_str -> Tried to use a NULL _rde_str.str.\n");	\
+		rde_critical_error((_str) == NULL, "rde_str_append_str -> Tried to use a NULL _str in .\n");				\
+		size_t _rde_str_size = rde_str_size((_rde_str));															\
+		rde_str_resize((_rde_str), _rde_str_size + _size);															\
+		for(uint _i_ = 0; _i_ < _size; _i_++) {																		\
 			(_rde_str)->str[_rde_str_size + _i_] = (_str)[_i_];														\
 		}																											\
 	} while(0)
@@ -3854,6 +3878,7 @@ typedef struct {
 	rde_arr_str post_fields_list;
 	bool free_post_fields_list_on_end;
 	bool verbose;
+	char* user_agent;
 } rde_network_request;
 
 typedef struct {
@@ -4092,12 +4117,8 @@ RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
 RDE_FUNC rde_ui_container_callbacks rde_struct_create_ui_container_callbacks(void);
 
 // Constructor: rde_struct_create_network_response
-// Creates a network response. Either if is the engine who allocates or the end user, any rde_str field must be release by the end-user.
-//
-// Parameters:
-//	_header_size: amount of bytes to allocate for the header of the response. Pass 0 for no allocation (must be allocated by end-user if the header is relevant).
-//	body_size: amount of bytes to allocate for the body of the response. Pass 0 for no allocation (must be allocated by end-user if the body is relevant).
-RDE_FUNC rde_network_response rde_struct_create_network_response(uint _header_size, uint _body_size);
+// Creates a network response. Any rde_str field must be release by the end-user.
+RDE_FUNC rde_network_response rde_struct_create_network_response();
 
 // Constructor: rde_struct_create_network_response
 // Creates a network request. The header_list and post_fields_list are not initialize by default. End user must allocate it and the release it any header or post field needs to be set. Can be let unallocated if not needed.
@@ -5901,7 +5922,7 @@ RDE_FUNC void rde_physics_end(void);
 // =================================================================== NETWORK =================================================================
 
 RDE_FUNC void rde_network_http_get(rde_network_request* _request, rde_network_response* _response);
-RDE_FUNC void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _respone, void (*_callback)(rde_network_response*));
+RDE_FUNC void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, void (*_callback)(rde_network_response*));
 RDE_FUNC void rde_network_http_post(rde_network_request* _request, rde_network_response* _response);
 
 // =================================================================== ERROR ===================================================================

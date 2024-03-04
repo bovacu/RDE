@@ -1602,20 +1602,17 @@ rde_sound_config rde_struct_create_audio_config(void) {
 }
 #endif
 
-rde_network_response rde_struct_create_network_response(uint _header_size, uint _body_size) {
+rde_network_response rde_struct_create_network_response() {
 	rde_network_response _n;
-	
-	_n.header_data.str = NULL;
-	if(_header_size > 0) {
-		rde_str_new_with_size(&_n.header_data, _header_size);
-	}
 
-	_n.body_data.str = NULL;
-	if(_body_size > 0) {
-		rde_str_new_with_size(&_n.body_data, _body_size);
-	}
+	rde_str_init(&_n.header_data);
+	rde_str_new_with_size(&_n.header_data, 1024);
+	
+	rde_str_init(&_n.body_data);
+	rde_str_new_with_size(&_n.body_data, 1024); 
 
 	_n.response_code = 0;
+	_n.total_time = 0;
 
 	return _n;
 }
@@ -1635,6 +1632,8 @@ rde_network_request rde_struct_create_network_request(bool _allocate_header_list
 	if(_allocate_post_field_list) {
 		rde_arr_new(&_r.post_fields_list);
 	}
+
+	_r.user_agent = NULL;
 
 	return _r;
 }
@@ -2947,7 +2946,6 @@ void rde_thread_detach(rde_thread* _thread) {
 }
 
 void rde_thread_end(rde_thread* _thread) {
-	RDE_UNUSED(_thread)
 	rde_critical_error(_thread == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_thread_end - _thread");
 	_thread->fn = NULL;
 	_thread->params = NULL;
@@ -10561,16 +10559,21 @@ ANativeWindow* rde_android_get_native_window(void) {
 // ==============================================================================
 
 size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void* _user_data) {
+	size_t _real_size = _size * _nmemb;
+	
 	if(_user_data != NULL) {
-		rde_str_append_str((rde_str*)_user_data, (char*)_data);
+		rde_str* _str = (rde_str*)_user_data;
+		rde_str_append_str_limit(_str, (char*)_data, _real_size);
 	}
 
-    return _size * _nmemb;
+	return _real_size;
 }
 
-// ==============================================================================
-// =							PUBLIC API - NETWORK					 	    =
-// ==============================================================================
+typedef struct {
+	rde_network_request request;
+	rde_network_response response;
+	void (*callback)(rde_network_response*);
+} rde_network_async_data;
 
 #define rde_curl_init() curl_easy_init(); rde_critical_error(_curl == NULL, "Error creating http GET request\n")
 
@@ -10607,6 +10610,23 @@ size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void
 		}																						\
 	} while(0)
 
+void* rde_inner_network_async_fn(rde_thread* _thread, void* _user_data) {
+	RDE_UNUSED(_thread);
+	rde_network_async_data* _async_data = (rde_network_async_data*)_user_data;
+	rde_network_request* _request = (rde_network_request*)&_async_data->request;
+	rde_network_response* _response = (rde_network_response*)&_async_data->response;
+	void (*_callback)(rde_network_response*) = (void (*)(rde_network_response*))_async_data->callback;
+	
+	rde_network_http_get(_request, _response);
+	_callback(_response);
+	rde_curl_check_for_automatic_dealloc();
+	return NULL;
+}
+
+// ==============================================================================
+// =							PUBLIC API - NETWORK					 	    =
+// ==============================================================================
+
 void rde_network_http_get(rde_network_request* _request, rde_network_response* _response) {
 	rde_critical_error(_request == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request");
 	rde_critical_error(_request->url == NULL, RDE_ERROR_NO_NULL_ALLOWED, "rde_network_http_get - _request->url");
@@ -10622,15 +10642,19 @@ void rde_network_http_get(rde_network_request* _request, rde_network_response* _
 	rde_curl_setopt(CURLOPT_HTTPGET, 1L);
 	rde_curl_setopt(CURLOPT_WRITEFUNCTION, rde_inner_network_write_fn);
 	rde_curl_setopt(CURLOPT_FOLLOWLOCATION, 1L);
+	rde_curl_setopt(CURLOPT_SSL_VERIFYPEER, 0L);
+	rde_curl_setopt(CURLOPT_SSL_VERIFYHOST, 0L);
 
 	if(_request->port > 0) {
 		rde_curl_setopt(CURLOPT_PORT, _request->port);
 	}
 
 	if(_response != NULL) {
-		rde_curl_setopt(CURLOPT_WRITEDATA, (void*)&_response->body_data);
-		rde_curl_setopt(CURLOPT_HEADERDATA, (void*)&_response->header_data);
+		rde_curl_setopt(CURLOPT_WRITEDATA, (void*)&(_response->body_data));
+		rde_curl_setopt(CURLOPT_HEADERDATA, (void*)&(_response->header_data));
 	}
+
+	rde_curl_setopt(CURLOPT_USERAGENT, _request->user_agent != NULL ? _request->user_agent : "libcurl-agent/1.0");
 
 	rde_curl_perform();
 
@@ -10642,6 +10666,14 @@ void rde_network_http_get(rde_network_request* _request, rde_network_response* _
 	rde_curl_check_for_automatic_dealloc();
 
 	curl_easy_cleanup(_curl);
+}
+
+void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, void (*_callback)(rde_network_response*)) {
+	rde_calloc_init(_data, rde_network_async_data, 1);
+	_data->request = *_request;
+	_data->response = *_response;
+	_data->callback = _callback;
+	rde_thread_run(rde_inner_network_async_fn, _data);
 }
 
 void rde_network_http_post(rde_network_request* _request, rde_network_response* _response) {
@@ -10698,6 +10730,7 @@ void rde_network_http_post(rde_network_request* _request, rde_network_response* 
 	rde_curl_setopt(CURLOPT_SSL_VERIFYPEER, 0L);
 	rde_curl_setopt(CURLOPT_SSL_VERIFYHOST, 0L);
 	rde_curl_setopt(CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+	rde_curl_setopt(CURLOPT_USERAGENT, _request->user_agent != NULL ? _request->user_agent : "libcurl-agent/1.0");
 
 	rde_curl_perform();
 
