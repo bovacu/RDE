@@ -3087,8 +3087,10 @@ typedef struct rde_thread_pool rde_thread_pool;
 typedef void* rde_audio_device_id;
 #endif
 
+#ifdef RDE_NETWORK_MODULE
 typedef struct rde_network_request rde_network_request;
 typedef struct rde_network_response rde_network_response;
+#endif
 
 // =================================================================== UTIL ====================================================================
 
@@ -3436,7 +3438,9 @@ typedef void (*rde_ui_container_callback_scroll)(rde_ui_container*, rde_vec_2F);
 // Represents a callback in the UI system for mouse entering or exiting a container.
 typedef void (*rde_ui_container_callback_mouse_entered_exited)(rde_ui_container*);
 
+#ifdef RDE_NETWORK_MODULE
 typedef void (*rde_network_async_callback)(rde_network_response*, long);
+#endif
 
 // =================================================================== ENGINE ===================================================================
 
@@ -3875,6 +3879,7 @@ RDE_FUNC rde_sound_config rde_struct_create_audio_config(void);
 
 // =================================================================== PHYSICS ===========================================================================================
 
+#ifdef RDE_NETWORK_MODULE
 struct rde_network_request {
 	char* url;
 	int port;
@@ -3892,6 +3897,7 @@ struct rde_network_response {
 	long response_code;
 	double total_time;
 };
+#endif
 
 // =================================================================== NETWORK ===========================================================================================
 
@@ -4121,6 +4127,7 @@ RDE_FUNC rde_ui_button_data rde_struct_create_ui_container_button_data(void);
 // Constructor: rde_struct_create_ui_container_callbacks
 RDE_FUNC rde_ui_container_callbacks rde_struct_create_ui_container_callbacks(void);
 
+#ifdef RDE_NETWORK_MODULE
 // Constructor: rde_struct_create_network_response
 // Creates a network response. Any rde_str field must be release by the end-user.
 RDE_FUNC rde_network_response rde_struct_create_network_response();
@@ -4128,6 +4135,7 @@ RDE_FUNC rde_network_response rde_struct_create_network_response();
 // Constructor: rde_struct_create_network_response
 // Creates a network request. The header_list and post_fields_list are not initialize by default. End user must allocate it and the release it any header or post field needs to be set. Can be let unallocated if not needed.
 RDE_FUNC rde_network_request rde_struct_create_network_request(bool _allocate_header_list, bool _allocate_post_field_list);
+#endif
 
 // =================================================================== LOG ===================================================================
 
@@ -5926,9 +5934,12 @@ RDE_FUNC void rde_physics_end(void);
 
 // =================================================================== NETWORK =================================================================
 
+#ifdef RDE_NETWORK_MODULE
 RDE_FUNC long rde_network_http_get(rde_network_request* _request, rde_network_response* _response);
 RDE_FUNC void rde_network_http_get_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback);
 RDE_FUNC long rde_network_http_post(rde_network_request* _request, rde_network_response* _response);
+RDE_FUNC void rde_network_http_post_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback);
+#endif
 
 // =================================================================== ERROR ===================================================================
 

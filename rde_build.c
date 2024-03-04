@@ -1138,7 +1138,7 @@ typedef enum {
 	RDE_MODULES_PHYSICS = 2,
 	RDE_MODULES_FBX = 4,
 	RDE_MODULES_OBJ = 8,
-	RDE_MODULES_UI = 16,
+	RDE_MODULES_NETWORK = 16,
 	RDE_MODULES_ERROR = 32,
 	RDE_MODULES_IMGUI = 64,
 } RDE_MODULES_;
@@ -1148,7 +1148,7 @@ const char* MODULES_STR[MAX_MODULES] = {
 	"physics",
 	"fbx",
 	"obj",
-	"ui",
+	"network",
 	"error",
 	"imgui"
 };
@@ -1157,7 +1157,7 @@ char* MODULES_DEFINES_H[MAX_MODULES] = {
 	"#define RDE_PHYSICS_MODULE",
 	"#define RDE_FBX_MODULE",
 	"#define RDE_OBJ_MODULE",
-	"#define RDE_UI_MODULE",
+	"#define RDE_NETWORK_MODULE",
 	"#define RDE_ERROR_MODULE",
 	"#define RDE_IMGUI_MODULE"
 };

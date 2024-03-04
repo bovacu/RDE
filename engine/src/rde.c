@@ -120,7 +120,9 @@
 
 #endif
 
+#ifdef RDE_NETWORK_MODULE
 #include "curl/curl.h"
+#endif
 
 // TODO TASK
 // 		- [DONE] Set stbi_convert_iphone_png_to_rgb(1) and stbi_set_unpremultiply_on_load(1) for iOS, as 
@@ -1602,6 +1604,7 @@ rde_sound_config rde_struct_create_audio_config(void) {
 }
 #endif
 
+#ifdef RDE_NETWORK_MODULE
 rde_network_response rde_struct_create_network_response() {
 	rde_network_response _n;
 
@@ -1637,6 +1640,7 @@ rde_network_request rde_struct_create_network_request(bool _allocate_header_list
 
 	return _r;
 }
+#endif
 
 rde_engine rde_struct_create_engine(rde_engine_init_info _engine_init_info) {
 	rde_engine _e;
@@ -2433,8 +2437,9 @@ rde_window* rde_engine_create_engine(int _argc, char** _argv, const char* _confi
 	rde_inner_audio_init();
 #endif
 
-	// TODO: put this behind MODULE
+	#ifdef RDE_NETWORK_MODULE
 	curl_global_init(CURL_GLOBAL_DEFAULT);
+	#endif
 
 	srand(time(NULL));
 
@@ -2763,8 +2768,9 @@ void rde_engine_destroy_engine(void) {
 	}
 	rde_free(ENGINE.windows);
 
-	// TODO: put this behind MODULE
+	#ifdef RDE_NETWORK_MODULE
 	curl_global_cleanup();
+	#endif
 
 	SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS);
 	SDL_Quit();
@@ -10558,6 +10564,7 @@ ANativeWindow* rde_android_get_native_window(void) {
 // =							PRIVATE API - NETWORK					 	    =
 // ==============================================================================
 
+#ifdef RDE_NETWORK_MODULE
 size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void* _user_data) {
 	size_t _real_size = _size * _nmemb;
 	
@@ -10569,10 +10576,16 @@ size_t rde_inner_network_write_fn(void* _data, size_t _size, size_t _nmemb, void
 	return _real_size;
 }
 
+typedef enum {
+	RDE_NETWORK_REQUEST_TYPE_GET,
+	RDE_NETWORK_REQUEST_TYPE_POST
+} RDE_NETWORK_REQUEST_TYPE_;
+
 typedef struct {
 	rde_network_request request;
 	rde_network_response response;
 	void (*callback)(rde_network_response*, long);
+	RDE_NETWORK_REQUEST_TYPE_ type;
 } rde_network_async_data;
 
 #define rde_curl_init() curl_easy_init(); rde_critical_error(_curl == NULL, "Error creating http GET request\n")
@@ -10617,7 +10630,14 @@ void* rde_inner_network_async_fn(rde_thread* _thread, void* _user_data) {
 	rde_network_response* _response = (rde_network_response*)&_async_data->response;
 	rde_network_async_callback _callback = (rde_network_async_callback)_async_data->callback;
 	
-	long _err_code = rde_network_http_get(_request, _response);
+	long _err_code = 0;
+
+	switch(_async_data->type) {
+		case RDE_NETWORK_REQUEST_TYPE_GET: rde_network_http_get(_request, _response); break;
+		case RDE_NETWORK_REQUEST_TYPE_POST: rde_network_http_post(_request, _response); break;
+		default: rde_critical_error(true, "Wrong RDE_NETWORK_REQUEST_TYPE_ %d", _async_data->type);
+	}
+
 	_callback(_response, _err_code);
 	rde_curl_check_for_automatic_dealloc();
 	return NULL;
@@ -10674,6 +10694,7 @@ void rde_network_http_get_async(rde_network_request* _request, rde_network_respo
 	_data->request = *_request;
 	_data->response = *_response;
 	_data->callback = _callback;
+	_data->type = RDE_NETWORK_REQUEST_TYPE_GET;
 	rde_thread_run(rde_inner_network_async_fn, _data);
 }
 
@@ -10747,6 +10768,16 @@ cleanup_tag:
 	return (long)_code;
 }
 
+void rde_network_http_post_async(rde_network_request* _request, rde_network_response* _response, rde_network_async_callback _callback) {
+	rde_calloc_init(_data, rde_network_async_data, 1);
+	_data->request = *_request;
+	_data->response = *_response;
+	_data->callback = _callback;
+	_data->type = RDE_NETWORK_REQUEST_TYPE_POST;
+	rde_thread_run(rde_inner_network_async_fn, _data);
+}
+
+#endif
 
 #ifdef RDE_ERROR_MODULE
 
