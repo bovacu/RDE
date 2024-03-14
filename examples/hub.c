@@ -21,6 +21,10 @@ rde_camera hub_camera;
 rde_texture* duck_texture = NULL;
 rde_transform* duck_transform = NULL;
 
+float last_x =  1280.f * 0.5f;
+float last_y =  720.f * 0.5f;
+bool first_mouse = true;
+
 void draw_grid(rde_camera* _camera, rde_window* _window) {
 	const size_t _line_thickness = 1;
 	rde_rendering_3d_begin_drawing(_camera, _window, false);
@@ -267,7 +271,7 @@ void common_keyboard_controller(rde_camera* _camera, float _dt) {
 	}
 
 	if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_A)) {
-		rde_vec_3F _cp = rde_math_cross_product(_camera->v_front, shadows_camera_up);
+		rde_vec_3F _cp = rde_math_cross_product(_camera->v_front, _camera->v_up);
 		rde_math_normalize(&_cp);
 		
 		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
@@ -276,7 +280,7 @@ void common_keyboard_controller(rde_camera* _camera, float _dt) {
 		_position.z -= _cp.z * 10 * _dt;
 		rde_transform_set_position(_camera->transform, _position);
 	} else if(rde_events_is_key_pressed(current_window, RDE_KEYBOARD_KEY_D)) {
-		rde_vec_3F _cp = rde_math_cross_product(_camera->v_front, shadows_camera_up);
+		rde_vec_3F _cp = rde_math_cross_product(_camera->v_front, _camera->v_up);
 		rde_math_normalize(&_cp);
 
 		rde_vec_3F _position = rde_transform_get_position(_camera->transform);
@@ -291,7 +295,7 @@ void common_mouse_controller(rde_camera* _camera, float _dt) {
 	RDE_UNUSED(_dt)
 
 	if(rde_events_is_mouse_button_just_released(current_window, RDE_MOUSE_BUTTON_1)) { 
-		shadows_first_mouse = true;
+		first_mouse = true;
 	}
 
 #if !RDE_IS_MOBILE()
@@ -303,37 +307,44 @@ void common_mouse_controller(rde_camera* _camera, float _dt) {
 		float _x_pos = (float)_mouse_pos.x;
 		float _y_pos = (float)-_mouse_pos.y;
 
-		if(shadows_last_x == _x_pos && shadows_last_y == _y_pos) {
+		if(last_x == _x_pos && last_y == _y_pos) {
 			return;
 		}
 
-		if (shadows_first_mouse) {
-			shadows_last_x = _x_pos;
-			shadows_last_y = _y_pos;
-			shadows_first_mouse = false;
+		if (first_mouse) {
+			last_x = _x_pos;
+			last_y = _y_pos;
+			first_mouse = false;
 		}
 
-		float _x_offset = _x_pos - shadows_last_x;
-		float _y_offset = _y_pos - shadows_last_y;
-		shadows_last_x = _x_pos;
-		shadows_last_y = _y_pos;
+		float _x_offset = _x_pos - last_x;
+		float _y_offset = _y_pos - last_y;
+		last_x = _x_pos;
+		last_y = _y_pos;
 
 		float _sensitivity = 0.1f;
 		_x_offset *= _sensitivity;
 		_y_offset *= _sensitivity;
 
-		rde_vec_3F _shadows_camera_rotation = rde_transform_get_rotation_degs(_camera->transform);
-		_shadows_camera_rotation.x += _y_offset;
-		_shadows_camera_rotation.y -= _x_offset;
+		rde_vec_3F _camera_rotation = rde_transform_get_rotation_degs(_camera->transform);
+		_camera_rotation.x += _y_offset;
+		_camera_rotation.y -= _x_offset;
 
-		if (_shadows_camera_rotation.x > 89.0f)
-			_shadows_camera_rotation.x = 89.0f;
+		if (_camera_rotation.x > 89.0f)
+			_camera_rotation.x = 89.0f;
 		
-		if (_shadows_camera_rotation.x < -89.0f)
-			_shadows_camera_rotation.x = -89.0f;
+		if (_camera_rotation.x < -89.0f)
+			_camera_rotation.x = -89.0f;
 
-		rde_transform_set_rotation(_camera->transform, _shadows_camera_rotation);
+		rde_transform_set_rotation(_camera->transform, _camera_rotation);
 	}
+}
+
+void rde_async_get_callback(rde_network_response* _response, long _error_code) {
+	RDE_UNUSED(_error_code)
+	rde_log_level(RDE_LOG_LEVEL_INFO, "Body: %s\n", rde_str_to_char_ptr(&_response->body_data));
+	rde_str_free(&_response->header_data);
+	rde_str_free(&_response->body_data);
 }
 
 void init_func(int _argc, char** _argv) {
@@ -359,6 +370,22 @@ void init_func(int _argc, char** _argv) {
 	duck_texture = rde_rendering_texture_load("hub_assets/duck_yellow.png", NULL);
 #endif
 	duck_transform = rde_transform_load();
+
+	rde_network_response _resp = rde_struct_create_network_response();
+	rde_network_request _requ = rde_struct_create_network_request(false, true);
+	_requ.url = "https://learnopengl.com";
+	_requ.free_post_fields_list_on_end = true;
+
+	rde_network_http_get_async(&_requ, &_resp, rde_async_get_callback);
+	//rde_log_level(RDE_LOG_LEVEL_INFO, "Body: %s\n", rde_str_to_char_ptr(&_resp.body_data));
+
+//	rde_str_decl_and_alloc(_field_0, "name=borja");
+//	rde_str_decl_and_alloc(_field_1, "age=27");
+//
+//	rde_arr_add(&_requ.post_fields_list, _field_0);
+//	rde_arr_add(&_requ.post_fields_list, _field_1);
+//
+//	rde_network_http_post(&_requ, &_resp);
 }
 
 void end_func() {

@@ -8,11 +8,7 @@ rde_transform* shadows_transform_1;
 rde_transform* shadows_cube_transform;
 rde_mesh* shadows_cube_mesh;
 
-bool shadows_first_mouse = true;
-float shadows_last_x =  1280.f * 0.5f;
-float shadows_last_y =  720.f * 0.5f;
 rde_vec_3F shadows_camera_front = { -0.31f, -0.24f, -0.91f };
-rde_vec_3F shadows_camera_up = { 0.0, 1.0f, 0.0f };
 
 rde_vec_3F shadows_directional_light_direction = { -0.2f, -1.0f, -0.3f };
 rde_vec_3F shadows_directional_light_position = { 0.0f, 10.0f, 0.0f };
@@ -143,9 +139,11 @@ void shadows_unload() {
 	// }
 
 	rde_rendering_model_unload(shadows_model);
+	rde_rendering_mesh_destroy(shadows_cube_mesh, true);
 
 	rde_transform_unload(shadows_transform_0);
 	rde_transform_unload(shadows_transform_1);
+	rde_transform_unload(shadows_cube_transform);
 
 	events_callback = NULL;
 	update_callback = NULL;
