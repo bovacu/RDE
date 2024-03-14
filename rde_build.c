@@ -1,3 +1,7 @@
+//	=====================================================================================
+//	=				BEGIN OF COMMON AND UTIL FUNCTIONS FOR C BUILDING PROGRAM			=
+//	=====================================================================================
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -19,6 +23,9 @@
 // Fuck Windows deprecations
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsequenced"
 
 #define STB_DS_IMPLEMENTATION
 #define STBDS_SIPHASH_2_4
@@ -1069,6 +1076,29 @@ void dyn_str_append(dyn_str* _s, char* _string) {
     }
 }
 
+void dyn_str_append_fmt(dyn_str* _s, size_t _size_to_alloc, char* _fmt, ...) {
+	char* _tmp = (char*)calloc(_size_to_alloc, sizeof(char));
+	if(_tmp == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error allocating tmp\n");
+		return;
+	}
+
+	va_list _args;
+	va_start(_args, _fmt);
+	vsnprintf(_tmp, _size_to_alloc, _fmt, _args);
+	va_end(_args);
+
+    int _len = strlen(_tmp);
+	int _inner_len = strlen(_s->str);
+    dyn_str_growto(_s, _s->size + _len);
+
+    for(unsigned long long _i = 0; _i < _len; _i++) {
+        _s->str[_inner_len + _i] = _tmp[_i];
+    }
+
+	free(_tmp);
+}
+
 void dyn_str_cappend(dyn_str* _s, char _c) {
     unsigned int _len = strlen(_s->str);
 
@@ -1083,6 +1113,9 @@ void dyn_str_set(dyn_str* _s, char* _new_string) {
     strcpy(_s->str, _new_string);
 }
 
+//	=====================================================================================
+//	=				END OF COMMON AND UTIL FUNCTIONS FOR C BUILDING PROGRAM				=
+//	=====================================================================================
 
 
 
@@ -1174,6 +1207,7 @@ dyn_str** project_include_paths;
 dyn_str** project_link_paths;
 dyn_str** project_flags;
 char project_name[MAX_PATH];
+
 char android_sdk_build_tools[MAX_PATH];
 char android_ndk[MAX_PATH];
 char android_sign[MAX_PATH];
@@ -1185,6 +1219,57 @@ char android_alias[MAX_PATH];
 bool android_clean;
 
 bool is_god = false;
+
+typedef struct {
+	const char* key;
+	const char* value;
+} android_manifest_pair;
+
+typedef struct {
+	char* key;
+	android_manifest_pair* value;
+} android_manifest_group;
+
+#define build_android_project_manifest_get_kv(_group, _key)																		\
+	android_manifest_pair* _g = stbds_shget(_groups, _group);																\
+	if(_g == NULL) {																										\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error building manifest, group '%s' was not found", _group);					\
+		exit(-1);																											\
+	}																														\
+	const char* _v = stbds_shget(_g, _key);																					\
+	if(_v == NULL) {																										\
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error building manifest, key '%s' in group '%s' was not found", _key, _group);	\
+		exit(-1);																											\
+	}
+
+#define build_android_project_manifest_add_optional_v(_group, _key, _val)	\
+	do {																	\
+		build_android_project_manifest_get_kv(_group, _key);				\
+		if(strcmp(_v, "0") != 0) {											\
+			dyn_str_append_fmt(_manifest_contents, B_SIZE, _val, _v);		\
+		}																	\
+	} while(0)
+
+#define build_android_project_manifest_add_optional_k(_group, _key, _val)	\
+	do {																	\
+		build_android_project_manifest_get_kv(_group, _key);				\
+		if(strcmp(_v, "0") != 0) {											\
+			dyn_str_append_fmt(_manifest_contents, B_SIZE, _val, _key);		\
+		}																	\
+	} while(0)
+
+#define build_android_project_manifest_add_user_option(_type, _user_type, _extension)																			\
+	do {																																						\
+		android_manifest_pair* _permission_group = stbds_shget(_groups, _type);																					\
+		if(_permission_group != NULL) {																															\
+			for(unsigned int _i = 0; _i < stbds_shlen(_permission_group); _i++) {																				\
+				const char* _v = _permission_group[_i].value;																									\
+				if(strcmp(_v, "0") != 0) {																														\
+					dyn_str_append_fmt(_manifest_contents, B_SIZE, "	<uses-%s android:name=\"%s.%s\"/>\n", _user_type, _extension, _permission_group[_i].key);\
+				}																																				\
+			}																																					\
+		}																																						\
+	} while(0)
 
 bool compile_windows_rde();
 bool compile_osx_rde();
@@ -2552,9 +2637,137 @@ bool build_desktop_project() {
 	return true;
 }
 
+void build_android_project_configure_cmake(dyn_str* _cmake_lists) {
+	// Android is built via CMakeLists.txt. In the project, there is a template which it is going to be filled
+	// now and saved as a temporary valid CMakeLists.txt which will be deleted upon finishing the build.
+	dyn_str* _cmake_lists_template = dyn_str_new(android_rde_android);
+	dyn_str_append(_cmake_lists, "CMakeLists.txt");
+	dyn_str_append(_cmake_lists_template, "CMakeLists.txt.template");
+	remove_file_if_exists(dyn_str_get(_cmake_lists));
+	char* _template_code = read_full_file_if_exists(dyn_str_get(_cmake_lists_template));
+
+	size_t _final_cmake_size = 1024 * 1024;
+	char* _final_cmake_code = (char*)malloc(sizeof(char) * _final_cmake_size);
+	memset(_final_cmake_code, 0, _final_cmake_size);
+
+	dyn_str* _app_source_code = dyn_str_new(working_dir);
+	for(size_t _i = 0; _i < arrlenu(project_compile_files); _i++) {
+		dyn_str_append(_app_source_code, dyn_str_get(project_compile_files[_i]));
+		dyn_str_append(_app_source_code, " ");
+	}
+
+	snprintf(_final_cmake_code, _final_cmake_size, _template_code, 
+	         build_type, 
+	         builder_exe_full_path_dir, 
+	         dyn_str_get(_app_source_code)
+	         );
+
+	create_file_if_not_exists(dyn_str_get(_cmake_lists));
+	write_to_file_if_exists(dyn_str_get(_cmake_lists), _final_cmake_code);
+}
+
+void build_android_project_clean() {
+	rde_command _clean_command = NULL;
+	#if _WIN32
+	arrput(_clean_command, "cmd");
+	arrput(_clean_command, "/c");
+	#endif
+	arrput(_clean_command, "gradle");
+	arrput(_clean_command, "clean");
+
+	if(!run_command(_clean_command)) {
+		exit(-1);
+	}
+}
+
+void build_android_project_assamble_android_manifest(dyn_str* _android_manifest_path) {
+	dyn_str* _manifest_config_path = dyn_str_new(dyn_str_get(_android_manifest_path));
+	dyn_str_append(_manifest_config_path, "/manifest_config_default.rde");
+	
+	FILE* _manifest_config = fopen(dyn_str_get(_manifest_config_path), "r");
+	if(_manifest_config == NULL) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Error opening manifest config file at %s", dyn_str_get(_manifest_config_path));
+		return;
+	}
+
+	android_manifest_group* _groups = NULL;
+
+#define B_SIZE 1024
+	char buffer[B_SIZE];
+	while(fgets(buffer, B_SIZE, _manifest_config)) {
+		int _index = 0;
+		int _buffer_size = strlen(buffer);
+		
+		while(_index < _buffer_size && isspace(buffer[_index])) {
+			_index++;
+		}
+		
+		if(_buffer_size > 0 && _index < _buffer_size && buffer[_index] == '#') {
+			continue;
+		}
+
+		if(_buffer_size == 0 || _index == _buffer_size) {
+			continue;
+		}
+
+		const char* _group = strtok(buffer, ":");
+		if(_group == NULL) {
+			continue;
+		}
+		const char* _key = strtok(NULL, "=");
+		const char* _val = strtok(NULL, "");
+
+		if(stbds_shgeti(_groups, _group) == -1) {
+			char* _group_cpy = (char*)calloc(strlen(_group), sizeof(char));
+			strcpy(_group_cpy, _group);
+			stbds_shput(_groups, _group_cpy, NULL);
+		}
+
+		android_manifest_group* _pair = stbds_shgetp(_groups, _group);
+
+		char* _key_cpy = (char*)calloc(strlen(_key), sizeof(char));
+		strcpy(_key_cpy, _key);
+		char* _val_cpy = (char*)calloc(strlen(_val), sizeof(char));
+		strcpy(_val_cpy, _val);
+		trim(_val_cpy);
+		stbds_shput(_pair->value, _key_cpy, _val_cpy);
+	}
+
+    fclose(_manifest_config);
+
+	dyn_str_append(_android_manifest_path, "/app/src/main/AndroidManifest.xml");
+	create_file_if_not_exists(dyn_str_get(_android_manifest_path));
+	
+	dyn_str* _manifest_contents = dyn_str_new("");
+	dyn_str_append(_manifest_contents, 										"<?xml version=\"1.0\" ?>\n");
+	dyn_str_append_fmt(_manifest_contents, B_SIZE,							"<manifest android:installLocation=\"internalOnly\" android:versionName=\"%s\" xmlns:android=\"http://schemas.android.com/apk/res/android\">\n", stbds_shget(stbds_shget(_groups, "config"), "versionName"));
+	dyn_str_append_fmt(_manifest_contents, B_SIZE,							"	<uses-feature android:glEsVersion=\"%s\" android:required=\"true\" />\n", stbds_shget(stbds_shget(_groups, "config"), "glEsVersion"));
+	build_android_project_manifest_add_user_option("permission", "permission", "android.permission");
+	build_android_project_manifest_add_user_option("hardware", "feature", "android.hardware");
+	build_android_project_manifest_add_user_option("software", "feature", "android.software");
+	dyn_str_append_fmt(_manifest_contents, B_SIZE,							"	<application android:appCategory=\"game\" android:label=\"%s\" android:hardwareAccelerated=\"true\" android:icon=\"@mipmap/ic_launcher_default\" android:theme=\"@android:style/Theme.NoTitleBar.Fullscreen\">\n", stbds_shget(stbds_shget(_groups, "config"), "appName"));
+	dyn_str_append_fmt(_manifest_contents, B_SIZE,							"		<activity android:configChanges=\"keyboard|keyboardHidden|orientation|screenSize\" android:exported=\"true\" android:name=\".MainActivity\" android:screenOrientation=\"%s\">\n", stbds_shget(stbds_shget(_groups, "config"), "screenOrientation"));
+	dyn_str_append(_manifest_contents, 										"			<intent-filter>\n");
+	dyn_str_append(_manifest_contents, 										"				<action android:name=\"android.intent.action.MAIN\"/>\n");
+	dyn_str_append(_manifest_contents, 										"				<category android:name=\"android.intent.category.LAUNCHER\"/>\n");
+	dyn_str_append(_manifest_contents, 										"			</intent-filter>\n");
+	dyn_str_append(_manifest_contents, 										"		</activity>\n");
+	build_android_project_manifest_add_optional_v("config", "APPLICATION_ID","		<meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"%s\"/>\n");
+	dyn_str_append(_manifest_contents, 										"	</application>\n");
+	dyn_str_append(_manifest_contents, 										"</manifest>\n");
+
+	write_to_file_if_exists(dyn_str_get(_android_manifest_path), dyn_str_get(_manifest_contents));
+	
+	for(unsigned int _i = 0; _i < stbds_shlen(_groups); _i++) {
+		stbds_shfree(_groups[_i].value);
+	}
+
+	stbds_shfree(_groups);
+}
+
 bool build_android_project() {
 	errno = 0;
-	
+
 	if(strlen(android_rde_android) == 0) {
 		rde_log_level(RDE_LOG_LEVEL_ERROR, "Android project build selected, but --rde_android was not set");
 		exit(-1);
@@ -2590,48 +2803,16 @@ bool build_android_project() {
 		exit(-1);
 	}
 
-	// Android is built via CMakeLists.txt. In the project, there is a template which it is going to be filled
-	// now and saved as a temporary valid CMakeLists.txt which will be deleted upon finishing the build.
 	dyn_str* _cmake_lists = dyn_str_new(android_rde_android);
-	dyn_str* _cmake_lists_template = dyn_str_new(android_rde_android);
-	dyn_str_append(_cmake_lists, "CMakeLists.txt");
-	dyn_str_append(_cmake_lists_template, "CMakeLists.txt.template");
-	remove_file_if_exists(dyn_str_get(_cmake_lists));
-	char* _template_code = read_full_file_if_exists(dyn_str_get(_cmake_lists_template));
-
-	size_t _final_cmake_size = 1024 * 1024;
-	char* _final_cmake_code = (char*)malloc(sizeof(char) * _final_cmake_size);
-	memset(_final_cmake_code, 0, _final_cmake_size);
-
-	dyn_str* _app_source_code = dyn_str_new(working_dir);
-	for(size_t _i = 0; _i < arrlenu(project_compile_files); _i++) {
-		dyn_str_append(_app_source_code, dyn_str_get(project_compile_files[_i]));
-		dyn_str_append(_app_source_code, " ");
-	}
-
-	snprintf(_final_cmake_code, _final_cmake_size, _template_code, 
-	         build_type, 
-	         builder_exe_full_path_dir, 
-	         dyn_str_get(_app_source_code)
-	);
-
-	create_file_if_not_exists(dyn_str_get(_cmake_lists));
-	write_to_file_if_exists(dyn_str_get(_cmake_lists), _final_cmake_code);
+	build_android_project_configure_cmake(_cmake_lists);
 
 
 	if(android_clean) {
-		rde_command _clean_command = NULL;
-#if _WIN32
-		arrput(_clean_command, "cmd");
-		arrput(_clean_command, "/c");
-#endif
-		arrput(_clean_command, "gradle");
-		arrput(_clean_command, "clean");
-
-		if(!run_command(_clean_command)) {
-			exit(-1);
-		}
+		build_android_project_clean();
 	}
+
+	dyn_str* _android_manifest_path = dyn_str_new(android_rde_android);
+	build_android_project_assamble_android_manifest(_android_manifest_path);
 
 	rde_command _build_command = NULL;
 
@@ -2718,11 +2899,15 @@ bool build_android_project() {
 	#endif
 
 			dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
-			dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
+			dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/");
+			dyn_str_append(_apk_unsigned_path, strcmp(build_type, DEBUG_STR) == 0 ? "debug/" : "release/");
+			dyn_str_append(_apk_unsigned_path, "app-");
 			dyn_str_append(_apk_unsigned_path, _abis[_i]);
 			dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
 			dyn_str* _apk_unsigned_aligned_path = dyn_str_new(android_rde_android);
-			dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/release/app-");
+			dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/");
+			dyn_str_append(_apk_unsigned_aligned_path, strcmp(build_type, DEBUG_STR) == 0 ? "debug/" : "release/");
+			dyn_str_append(_apk_unsigned_aligned_path, "app-");
 			dyn_str_append(_apk_unsigned_aligned_path, _abis[_i]);
 			dyn_str_append(_apk_unsigned_aligned_path, "-release-unsigned-aligned.apk");
 
@@ -2768,9 +2953,11 @@ bool build_android_project() {
 
 			arrput(_build_command, "--out");
 			dyn_str* _apk_path = dyn_str_new(android_rde_android);
-			dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-");
+			dyn_str_append(_apk_path, "app/build/outputs/apk/");
+			dyn_str_append(_apk_path, strcmp(build_type, DEBUG_STR) == 0 ? "debug/" : "release/");
+			dyn_str_append(_apk_path, "app-");
 			dyn_str_append(_apk_path, _abis[_i]);
-			dyn_str_append(_apk_path, "-release.apk");
+			dyn_str_append(_apk_path, strcmp(build_type, DEBUG_STR) == 0 ? "-debug.apk" : "-release.apk");
 			arrput(_build_command, dyn_str_get(_apk_path));
 			arrput(_build_command, dyn_str_get(_apk_unsigned_aligned_path));
 
@@ -2789,68 +2976,24 @@ bool build_android_project() {
 				exit(-1);
 			}
 		}
-
-		// if(!run_command(_build_command)) {
-		// 	exit(-1);
-		// }
-
-		// dyn_str* _apk_path = dyn_str_new(android_rde_android);
-		// if(strcmp(build_type, DEBUG_STR) == 0) {
-		// 	dyn_str_append(_apk_path, "app/build/outputs/apk/debug/app-");
-		// 	dyn_str_append(_apk_path, _abis[_i]);
-		// 	dyn_str_append(_apk_path, "-debug.apk");
-  //
-		// 	// if(strlen(project_name) > 0) {
-		// 	// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
-		// 	// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
-		// 	// 	dyn_str_append(_apk_default_path, "build/android/debug/app-");
-		// 	// 	dyn_str_append(_apk_default_path, _abis[_i]);
-		// 	// 	dyn_str_append(_apk_default_path, "-debug.apk");
-		// 	// 	dyn_str_append(_apk_custom_name_path, "build/android/debug/");
-		// 	// 	dyn_str_append(_apk_custom_name_path, project_name);
-		// 	// 	dyn_str_append(_apk_custom_name_path, ".apk");
-		// 	// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
-		// 	// }
-  //
-		// } else {
-		// 	dyn_str_append(_apk_path, "app/build/outputs/apk/release/app-");
-		// 	dyn_str_append(_apk_path, _abis[_i]);
-		// 	dyn_str_append(_apk_path, "-release.apk");
-		// 	if(strlen(android_sign) == 0) {
-		// 		dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
-		// 		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
-		// 		dyn_str_append(_apk_unsigned_path, _abis[_i]);
-		// 		dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
-		// 		rename_file_if_exists(dyn_str_get(_apk_unsigned_path), dyn_str_get(_apk_path));
-		// 	}
-  //
-		// 	// if(strlen(project_name) > 0) {
-		// 	// 	dyn_str* _apk_default_path = dyn_str_new(working_dir);
-		// 	// 	dyn_str* _apk_custom_name_path = dyn_str_new(working_dir);
-		// 	// 	dyn_str_append(_apk_default_path, "build/android/release/app-");
-		// 	// 	dyn_str_append(_apk_default_path, _abis[_i]);
-		// 	// 	dyn_str_append(_apk_default_path, "-release.apk");
-		// 	// 	dyn_str_append(_apk_custom_name_path, "build/android/release/");
-		// 	// 	dyn_str_append(_apk_custom_name_path, project_name);
-		// 	// 	dyn_str_append(_apk_custom_name_path, ".apk");
-		// 	// 	rename_file_if_exists(dyn_str_get(_apk_default_path), dyn_str_get(_apk_custom_name_path));
-		// 	// }
-		// }
-		// dyn_str_free(_apk_path);
 	}
 
 	for(size_t _i = 0; _i < ABIS_SIZE; _i++) {
 		dyn_str* _apk_unsigned_path = dyn_str_new(android_rde_android);
-		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/release/app-");
+		dyn_str_append(_apk_unsigned_path, "app/build/outputs/apk/");
+		dyn_str_append(_apk_unsigned_path, strcmp(build_type, DEBUG_STR) == 0 ? "debug/" : "release/");
+		dyn_str_append(_apk_unsigned_path, "app-");
 		dyn_str_append(_apk_unsigned_path, _abis[_i]);
-		dyn_str_append(_apk_unsigned_path, "-release-unsigned.apk");
+		dyn_str_append(_apk_unsigned_path, strcmp(build_type, DEBUG_STR) == 0 ? "-debug-unsigned.apk/" : "-release-unsigned.apk/");
 		remove_file_if_exists(dyn_str_get(_apk_unsigned_path));
 		dyn_str_free(_apk_unsigned_path);
 
 		dyn_str* _apk_unsigned_aligned_path = dyn_str_new(android_rde_android);
-		dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/release/app-");
+		dyn_str_append(_apk_unsigned_aligned_path, "app/build/outputs/apk/");
+		dyn_str_append(_apk_unsigned_aligned_path, strcmp(build_type, DEBUG_STR) == 0 ? "debug/" : "release/");
+		dyn_str_append(_apk_unsigned_aligned_path, "app-");
 		dyn_str_append(_apk_unsigned_aligned_path, _abis[_i]);
-		dyn_str_append(_apk_unsigned_aligned_path, "-release-unsigned-aligned.apk");
+		dyn_str_append(_apk_unsigned_aligned_path, strcmp(build_type, DEBUG_STR) == 0 ? "-debug-unsigned-aligned.apk" : "-release-unsigned-aligned.apk");
 		remove_file_if_exists(dyn_str_get(_apk_unsigned_aligned_path));
 		dyn_str_free(_apk_unsigned_aligned_path);
 	}
@@ -3509,4 +3652,5 @@ int main(int _argc, char** _argv) {
 	return 0;
 }
 
+#pragma clang diagnostic pop
 #pragma clang diagnostic pop
