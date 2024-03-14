@@ -10599,8 +10599,8 @@ typedef struct {
 	if(_code != CURLE_OK) goto cleanup_tag
 
 #define rde_curl_perform()				\
-	_code = curl_easy_perform(_curl);	\
-	if(_code != CURLE_OK) goto cleanup_tag
+	_code = curl_easy_perform(_curl); 	\
+	if (_code != CURLE_OK) goto cleanup_tag
 
 #define rde_curl_getinfo(_opt, _val)				\
 	_code = curl_easy_getinfo(_curl, _opt, _val);	\
@@ -10658,6 +10658,9 @@ long rde_network_http_get(rde_network_request* _request, rde_network_response* _
 	CURL* _curl = rde_curl_init();
 	CURLcode _code = CURLE_OK;
 
+	char _err_buf[CURL_ERROR_SIZE] = {0};
+	curl_easy_setopt(_curl, CURLOPT_ERRORBUFFER, _err_buf);
+
 	if(_request->verbose) {
 		rde_curl_setopt(CURLOPT_VERBOSE, 1L);
 	}
@@ -10689,6 +10692,9 @@ long rde_network_http_get(rde_network_request* _request, rde_network_response* _
 
 cleanup_tag:
 	rde_curl_check_for_automatic_dealloc();
+	if(strlen(_err_buf) > 0) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Curl Error: %s", _err_buf);
+	}
 	curl_easy_cleanup(_curl);
 	return (long)_code;
 }
@@ -10710,6 +10716,9 @@ long rde_network_http_post(rde_network_request* _request, rde_network_response* 
 	
 	CURL* _curl = rde_curl_init();
 	CURLcode _code = CURLE_OK;
+
+	char _err_buf[CURL_ERROR_SIZE] = {0};
+	curl_easy_setopt(_curl, CURLOPT_ERRORBUFFER, _err_buf);
 
 	if(_request->verbose) {
 		rde_curl_setopt(CURLOPT_VERBOSE, 1L);
@@ -10768,6 +10777,9 @@ long rde_network_http_post(rde_network_request* _request, rde_network_response* 
 cleanup_tag:
 	rde_str_free(&_parameters);
 	rde_curl_check_for_automatic_dealloc();
+	if(strlen(_err_buf) > 0) {
+		rde_log_level(RDE_LOG_LEVEL_ERROR, "Curl Error: %s", _err_buf);
+	}
 	curl_easy_cleanup(_curl);
 	return (long)_code;
 }
