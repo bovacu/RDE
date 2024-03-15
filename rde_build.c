@@ -1981,7 +1981,11 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 
 	dyn_str* _imgui_whole_flag = NULL;
 	if(strcmp(lib_type, SHARED_STR) == 0) {
-		LINK_PATH(_external_lib_path, "external/libs/osx/");
+		#ifdef __arm64__
+		    LINK_PATH(_external_lib_path, "external/libs/osx-silicon/");
+		#else
+		    LINK_PATH(_external_lib_path, "external/libs/osx/");
+		#endif
 
 		arrput(_build_command, "-ldl");
 		arrput(_build_command, "-Wno-deprecated-declarations");
@@ -1997,11 +2001,25 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
 			ADD_FLAG("-Wl,-all_load");
 			_imgui_whole_flag = dyn_str_new(builder_exe_full_path_dir);
-			dyn_str_append(_imgui_whole_flag, "external/libs/osx/librde_imgui.dylib");
+			#ifdef __arm64__
+			    dyn_str_append(_imgui_whole_flag, "external/libs/osx-silicon/librde_imgui.dylib");
+			#else
+			    dyn_str_append(_imgui_whole_flag, "external/libs/osx/librde_imgui.dylib");
+			#endif
+
 			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
 		}
+
 		if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
 			ADD_FLAG("-ljolt");
+		}
+
+		if((modules & RDE_MODULES_NETWORK) == RDE_MODULES_NETWORK) {
+			#ifdef __arm64__
+			    ADD_FLAG("external/libs/osx-silicon/libcurl.dylib");
+			#else
+			    ADD_FLAG("external/libs/osx/libcurl.dylib");
+			#endif
 		}
 	}
 
@@ -2026,9 +2044,9 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		dyn_str* _output_lib = dyn_str_new(builder_exe_full_path_dir);
 
 		if(strcmp(build_type, DEBUG_STR) == 0) {
-			dyn_str_append(_output_lib, "build/linux/debug/engine/libRDE.a");
+			dyn_str_append(_output_lib, "build/osx/debug/engine/libRDE.a");
 		} else {
-			dyn_str_append(_output_lib, "build/linux/release/engine/libRDE.a");
+			dyn_str_append(_output_lib, "build/osx/release/engine/libRDE.a");
 		}
 
 		arrput(_build_static_lib_command, dyn_str_get(_output_lib));
@@ -2051,15 +2069,19 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 }
 
 bool compile_osx_rde() {
-		dyn_str* _path = dyn_str_new("");
+	dyn_str* _path = dyn_str_new("");
 	dyn_str_append(_path, builder_exe_full_path_dir);
 	dyn_str_append(_path, "build/");
-	
+
 	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
 	}
-	
+
+	#ifdef __arm64__
+	dyn_str_append(_path, "osx-silicon/");
+	#else
 	dyn_str_append(_path, "osx/");
+	#endif
 	if(!make_dir_if_not_exists(dyn_str_get(_path))) {
 		exit(-1);
 	}
@@ -2116,7 +2138,11 @@ bool compile_osx_rde() {
 	if(strcmp(build, "examples") == 0 || strcmp(build, "all") == 0) {
 		printf("\n");
 		printf("--- BUILDING EXAMPLES --- \n");
+		#ifdef __arm64__
+		COMPILE_EXAMPLE("osx-silicon", "",
+		#else
 		COMPILE_EXAMPLE("osx", "",
+		#endif
 		{
 		    ADD_FLAG("-lrde_imgui");
 			ADD_FLAG("-ljolt");
@@ -2133,23 +2159,48 @@ bool compile_osx_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
-					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/debug/examples/librde_imgui.dylib")
-					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/debug/examples/libjolt.dylib")
+					#ifdef __arm64__
+					    COPY_FILE("external/libs/osx-silicon/libSDL3.dylib", "build/osx-silicon/debug/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx-silicon/librde_imgui.dylib", "build/osx-silicon/debug/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libjolt.dylib", "build/osx-silicon/debug/examples/libjolt.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libcurl.dylib", "build/osx-silicon/debug/examples/libcurl.dylib")
+					#else
+					    COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/debug/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/debug/examples/libjolt.dylib")
+					    COPY_FILE("external/libs/osx/libcurl.dylib", "build/osx/debug/examples/libcurl.dylib")
+					#endif
 				}
 
+				#ifdef __arm64__
+				COPY_FOLDER("examples/hub_assets", "build/osx-silicon/debug/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx-silicon/debug/examples/")
+				#else
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/")
+				#endif
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
-					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/release/examples/librde_imgui.dylib")
-					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/release/examples/libjolt.dylib")
+					#ifdef __arm64__
+					    COPY_FILE("external/libs/osx-silicon/libSDL3.dylib", "build/osx-silicon/release/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx-silicon/librde_imgui.dylib", "build/osx-silicon/release/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libjolt.dylib", "build/osx-silicon/release/examples/libjolt.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libcurl.dylib", "build/osx-silicon/release/examples/libcurl.dylib")
+					#else
+					    COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/release/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx/libcurl.dylib", "build/osx/release/examples/libcurl.dylib")
+					#endif
 				}
 
+				#ifdef __arm64__
+				COPY_FOLDER("examples/hub_assets", "build/osx-silicon/release/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx-silicon/release/examples/")
+				#else
 				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/osx/release/examples/")
+				#endif
 			}
 		})
 	}
@@ -2174,23 +2225,49 @@ bool compile_osx_rde() {
 			if (strcmp(build_type, DEBUG_STR) == 0) {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/debug/engine/libRDE.dylib", "build/osx/debug/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
-					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/debug/examples/librde_imgui.dylib")
-					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/debug/examples/libjolt.dylib")
+					#ifdef __arm64__
+					    COPY_FILE("external/libs/osx-silicon/libSDL3.dylib", "build/osx-silicon/debug/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx-silicon/librde_imgui.dylib", "build/osx-silicon/debug/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libjolt.dylib", "build/osx-silicon/debug/examples/libjolt.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libcurl.dylib", "build/osx-silicon/debug/examples/libcurl.dylib")
+					#else
+					    COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/debug/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/debug/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/debug/examples/libjolt.dylib")
+					    COPY_FILE("external/libs/osx/libcurl.dylib", "build/osx/debug/examples/libcurl.dylib")
+					#endif
 				}
 
+				#ifdef __arm64__
+				COPY_FOLDER("examples/hub_assets", "build/osx-silicon/debug/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx-silicon/debug/examples/")
+				#else
 				COPY_FOLDER("examples/hub_assets", "build/osx/debug/examples/")
 				COPY_FOLDER("engine/shaders", "build/osx/debug/examples/")
+				#endif
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/osx/release/engine/libRDE.dylib", "build/osx/release/examples/libRDE.dylib")
-					COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
-					COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/release/examples/librde_imgui.dylib")
-					COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/release/examples/libjolt.dylib")
+					#ifdef __arm64__
+					    COPY_FILE("external/libs/osx-silicon/libSDL3.dylib", "build/osx-silicon/release/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx-silicon/librde_imgui.dylib", "build/osx-silicon/release/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libjolt.dylib", "build/osx-silicon/release/examples/libjolt.dylib")
+					    COPY_FILE("external/libs/osx-silicon/libcurl.dylib", "build/osx-silicon/release/examples/libcurl.dylib")
+					#else
+					    COPY_FILE("external/libs/osx/libSDL3.dylib", "build/osx/release/examples/libSDL3.dylib")
+					    COPY_FILE("external/libs/osx/librde_imgui.dylib", "build/osx/release/examples/librde_imgui.dylib")
+					    COPY_FILE("external/libs/osx/libjolt.dylib", "build/osx/release/examples/libjolt.dylib")
+						COPY_FILE("external/libs/osx/libcurl.dylib", "build/osx/release/examples/libcurl.dylib")
+					#endif
 				}
 
+				#ifdef __arm64__
+				COPY_FOLDER("examples/hub_assets", "build/osx-silicon/release/examples/")
+				COPY_FOLDER("engine/shaders", "build/osx-silicon/release/examples/")
+				#else
 				COPY_FOLDER("examples/hub_assets", "build/osx/release/examples/")
 				COPY_FOLDER("engine/shaders", "build/osx/release/examples/")
+				#endif
 			}
 		})
 	}

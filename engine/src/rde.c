@@ -930,22 +930,22 @@ struct rde_engine {
 #endif
 
 	RDE_SCL(RDE_SHADERS_AMOUNT)
-	rde_shader* line_shader;			RDE_CL
-	rde_shader* color_shader_2d;		RDE_CL
-	rde_shader* texture_shader_2d;		RDE_CL
-	rde_shader* nine_patch_shader_2d;	RDE_CL
-	rde_shader* text_shader_2d;			RDE_CL
-	rde_shader* framebuffer_shader;		RDE_CL
-	rde_shader* mesh_shader;			RDE_CL
-	rde_shader* mesh_shadows_shader;	RDE_CL
-	rde_shader* render_texture_shader;	RDE_CL
-	rde_shader* skybox_shader;			RDE_CL
-	rde_shader* shadows_shader;			RDE_CL
-	rde_shader* shaders;				RDE_CL
+	rde_shader* line_shader;
+	rde_shader* color_shader_2d;
+	rde_shader* texture_shader_2d;
+	rde_shader* nine_patch_shader_2d;
+	rde_shader* text_shader_2d;
+	rde_shader* framebuffer_shader;
+	rde_shader* mesh_shader;
+	rde_shader* mesh_shadows_shader;
+	rde_shader* render_texture_shader;
+	rde_shader* skybox_shader;
+	rde_shader* shadows_shader;
+	rde_shader* shaders;
 	RDE_ECL(RDE_SHADERS_AMOUNT)
-	
+
 	size_t total_amount_of_textures;
-	
+
 	rde_texture* textures;
 	rde_atlas* atlases;
 	rde_font* fonts;
