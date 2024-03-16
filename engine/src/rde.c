@@ -10764,7 +10764,7 @@ long rde_network_http_post(rde_network_request* _request, rde_network_response* 
 	rde_curl_setopt(CURLOPT_POSTFIELDS, rde_str_to_char_ptr(&_parameters));
 	rde_curl_setopt(CURLOPT_SSL_VERIFYPEER, 0L);
 	rde_curl_setopt(CURLOPT_SSL_VERIFYHOST, 0L);
-	rde_curl_setopt(CURLOPT_CA_CACHE_TIMEOUT, 604800L);
+	// rde_curl_setopt(CURLOPT_CA_CACHE_TIMEOUT, 604800L);
 	rde_curl_setopt(CURLOPT_USERAGENT, _request->user_agent != NULL ? _request->user_agent : "libcurl-agent/1.0");
 
 	rde_curl_perform();
