@@ -1736,7 +1736,6 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 	INCLUDE_PATH(_rde_include_path, "engine/include/");
 	INCLUDE_PATH(_rde_src_include_path, "engine/src/");
 	INCLUDE_PATH(_external_include_path, "external/include/");
-	INCLUDE_PATH(_external_curl_include_path, "external/include/curl/include");
 
 	dyn_str* _external_imgui_include_path = NULL;
 	if((modules & RDE_MODULES_IMGUI) == RDE_MODULES_IMGUI) {
@@ -1756,7 +1755,11 @@ void compile_windows_engine(dyn_str* _path, rde_command _build_command) {
 		ADD_FLAG("-ljolt");
 	}
 
-	ADD_FLAG("-llibcurl");
+	if((modules & RDE_MODULES_NETWORK) == RDE_MODULES_NETWORK) {
+		ADD_FLAG("-llibcurl");
+		INCLUDE_PATH(_external_curl_include_path, "external/include/curl/include");
+	}
+
 	ADD_FLAG("-ldbghelp")
 	ADD_FLAG("-lshlwapi")
 	ADD_FLAG("-lAdvapi32")
@@ -2015,6 +2018,7 @@ void compile_osx_engine(dyn_str* _path, rde_command _build_command) {
 		}
 
 		if((modules & RDE_MODULES_NETWORK) == RDE_MODULES_NETWORK) {
+			INCLUDE_PATH(_external_curl_include_path, "external/include/curl/include");
 			#ifdef __arm64__
 			    ADD_FLAG("external/libs/osx-silicon/libcurl.dylib");
 			#else
@@ -2334,6 +2338,7 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 
 		ADD_FLAG("-ldl");
 		ADD_FLAG("-lm");
+		ADD_FLAG("-lz");
 		ADD_FLAG("-lpthread");
 		ADD_FLAG("-lSDL3");
 		ADD_FLAG("-lcglm");
@@ -2345,8 +2350,14 @@ void compile_linux_engine(dyn_str* _path, rde_command _build_command) {
 			ADD_FLAG(dyn_str_get(_imgui_whole_flag));
 			ADD_FLAG("-Wl,--no-whole-archive");
 		}
+		
 		if((modules & RDE_MODULES_PHYSICS) == RDE_MODULES_PHYSICS) {
 			ADD_FLAG("-ljolt");
+		}
+
+		if((modules & RDE_MODULES_NETWORK) == RDE_MODULES_NETWORK) {
+			INCLUDE_PATH(_external_curl_include_path, "external/include/curl/include");
+			ADD_FLAG("-lcurl");
 		}
 	}
 
@@ -2464,27 +2475,34 @@ bool compile_linux_rde() {
         printf("--- BUILDING EXAMPLES --- \n");
 		COMPILE_EXAMPLE("linux", "",
 		{
+			ADD_FLAG("-lSDL3");
 		    ADD_FLAG("-lrde_imgui");
 			ADD_FLAG("-ljolt");
-			ADD_FLAG("-lm");
+			ADD_FLAG("-lcurl");
 		},
 		{
 			if (strcmp(build_type, DEBUG_STR) == 0) {
-				if(strcmp(build_type, SHARED_STR) == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/debug/examples/libSDL3.so")
+					COPY_FILE("external/libs/linux/libjolt.so", "build/linux/debug/examples/libjolt.so")
+					COPY_FILE("external/libs/linux/librde_imgui.so", "build/linux/debug/examples/librde_imgui.so")
+					COPY_FILE("external/libs/linux/libcurl.so", "build/linux/debug/examples/libcurl.so")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/")
+				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/")
 			} else {
-				if(strcmp(build_type, SHARED_STR) == 0) {
+				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/release/examples/libSDL3.so")
+					COPY_FILE("external/libs/linux/libjolt.so", "build/linux/release/examples/libjolt.so")
+					COPY_FILE("external/libs/linux/librde_imgui.so", "build/linux/release/examples/librde_imgui.so")
+					COPY_FILE("external/libs/linux/libcurl.so", "build/linux/release/examples/libcurl.so")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/linux/release/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/")
+				COPY_FOLDER("engine/shaders", "build/linux/release/examples/")
 			}
 		})
     }
@@ -2503,18 +2521,24 @@ bool compile_linux_rde() {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/debug/engine/libRDE.so", "build/linux/debug/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/debug/examples/libSDL3.so")
+					COPY_FILE("external/libs/linux/libjolt.so", "build/linux/debug/examples/libjolt.so")
+					COPY_FILE("external/libs/linux/librde_imgui.so", "build/linux/debug/examples/librde_imgui.so")
+					COPY_FILE("external/libs/linux/libcurl.so", "build/linux/debug/examples/libcurl.so")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/linux/debug/examples/")
+				COPY_FOLDER("engine/shaders", "build/linux/debug/examples/")
 			} else {
 				if(strcmp(lib_type, SHARED_STR) == 0) {
 					COPY_FILE("build/linux/release/engine/libRDE.so", "build/linux/release/examples/libRDE.so")
 					COPY_FILE("external/libs/linux/libSDL3.so", "build/linux/release/examples/libSDL3.so")
+					COPY_FILE("external/libs/linux/libjolt.so", "build/linux/release/examples/libjolt.so")
+					COPY_FILE("external/libs/linux/librde_imgui.so", "build/linux/release/examples/librde_imgui.so")
+					COPY_FILE("external/libs/linux/libcurl.so", "build/linux/release/examples/libcurl.so")
 				}
 
-				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/hub_assets/")
-				COPY_FOLDER("engine/shaders", "build/linux/release/examples/shaders/")
+				COPY_FOLDER("examples/hub_assets", "build/linux/release/examples/")
+				COPY_FOLDER("engine/shaders", "build/linux/release/examples/")
 			}
 		})
 	}

@@ -10894,7 +10894,7 @@ void rde_network_http_post_async(rde_network_request* _request, rde_network_resp
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 
-#elif (RDE_IS_MAC() || RDE_IS_LINUX) && !RDE_IS_ANDROID() && !RDE_IS_IOS()
+#elif (RDE_IS_MAC() || RDE_IS_LINUX()) && !RDE_IS_ANDROID() && !RDE_IS_IOS()
 
 	void rde_inner_buf_printf(FILE* _f, const char* _fmt, ...) {
 	    va_list _args;
@@ -11302,6 +11302,8 @@ void rde_inner_set_posix_signal_handler() {
 	rde_log_level(RDE_LOG_LEVEL_INFO, "Stacktrace on Android initiated");
 }
 
+#else
+#error "Not handled OS for error module"
 #endif
 
 
