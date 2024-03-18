@@ -365,9 +365,9 @@ void init_func(int _argc, char** _argv) {
 	rde_transform_set_position(hub_camera.transform, (rde_vec_3F) { -3.0, 8.0f, 14.0f });
 
 #if RDE_IS_MOBILE()
-	duck_texture = rde_rendering_texture_load("assets/duck_yellow.png", NULL);
+	duck_texture = rde_rendering_texture_load("assets/yellow.png", NULL);
 #else
-	duck_texture = rde_rendering_texture_load("hub_assets/duck_yellow.png", NULL);
+	duck_texture = rde_rendering_texture_load("hub_assets/yellow.png", NULL);
 #endif
 	duck_transform = rde_transform_load();
 
